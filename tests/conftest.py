@@ -3,6 +3,7 @@ import os
 os.environ["MOCK_MODE"] = "true"
 os.environ["TOOL_SECRET"] = "test-secret"
 os.environ["READ_API_KEY"] = "test-read"
+os.environ["DASHBOARD_PASSWORD"] = "test-dash"
 os.environ["ELEVENLABS_WEBHOOK_SECRET"] = "whsec-test"
 
 import pytest  # noqa: E402

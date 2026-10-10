@@ -12,7 +12,7 @@ from starlette.concurrency import run_in_threadpool
 from app import db, service
 from app.campaigns import all_campaigns
 from app.config import ROOT, get_settings
-from app.routes import leads, read_api, tools, webhooks
+from app.routes import dashboard, leads, read_api, tools, webhooks
 from app.slots import seed_slots
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -23,6 +23,7 @@ def worker_tick() -> int:
     """Dial queued leads whose calling window opened and no-answer leads due for a retry."""
     webhooks.poll_open_calls()
     with db.session_scope() as s:
+        service.settle_stale_calls(s)
         due = service.due_leads(s)
     for lead_id in due:
         service.dial(lead_id)
@@ -61,6 +62,7 @@ app.include_router(leads.router)
 app.include_router(tools.router)
 app.include_router(webhooks.router)
 app.include_router(read_api.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/health")

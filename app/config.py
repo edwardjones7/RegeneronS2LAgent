@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     # Shared secret ElevenLabs sends on every tool call; API key for the read API.
     tool_secret: str = "dev-tool-secret"
     read_api_key: str = "dev-read-key"
+    # Dashboard login password; falls back to READ_API_KEY when unset.
+    dashboard_password: str = ""
 
     elevenlabs_api_key: str = Field(
         default="", validation_alias=AliasChoices("ELEVENLABS_API_KEY", "ELEVEN_LAB_API_KEY")

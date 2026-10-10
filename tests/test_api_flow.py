@@ -260,3 +260,21 @@ def test_failed_dial_retries_then_closes(client):
         else:
             assert d["status"] == "closed"
     assert len(voice.get_voice().calls) == 3
+
+
+def test_stale_call_goes_to_a_human_not_a_redial(client):
+    from app.main import worker_tick
+
+    lead_id = new_lead(client).json()["lead_id"]
+    with patch("app.service.utcnow", return_value=datetime(2026, 10, 14, 18, 45)):
+        assert worker_tick() == 0
+    d = detail(client, lead_id)
+    assert d["status"] == "needs_human"
+    assert len(voice.get_voice().calls) == 1
+
+
+def test_repeated_escalation_flags_once(client):
+    lead_id = new_lead(client).json()["lead_id"]
+    tool(client, "escalate_to_human", lead_id, reason="requested a person")
+    tool(client, "escalate_to_human", lead_id, reason="requested a person")
+    assert len(detail(client, lead_id)["flags"]) == 1

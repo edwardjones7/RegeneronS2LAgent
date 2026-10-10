@@ -3,12 +3,12 @@
 import hmac
 from statistics import median
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Cookie, Depends, Header, HTTPException, Query
 from fastapi.responses import Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app import service
+from app import auth, service
 from app.campaigns import all_campaigns, get_campaign
 from app.config import get_settings
 from app.db import get_session
@@ -18,7 +18,13 @@ from app.voice import get_voice
 ATTENTION_STATUSES = ("needs_human", "emergency")
 
 
-def require_api_key(x_api_key: str = Header(default=""), key: str = Query(default="")):
+def require_api_key(
+    x_api_key: str = Header(default=""),
+    key: str = Query(default=""),
+    cmm_session: str | None = Cookie(default=None),
+):
+    if auth.valid_session(cmm_session):
+        return
     supplied = x_api_key or key
     if not hmac.compare_digest(supplied, get_settings().read_api_key):
         raise HTTPException(401, "bad API key")

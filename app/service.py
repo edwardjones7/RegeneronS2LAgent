@@ -2,7 +2,7 @@
 
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -62,6 +62,8 @@ def set_status(s: Session, lead: Lead, status: LeadStatus, reason: str = "") -> 
 
 
 def add_flag(lead: Lead, kind: str, detail: str) -> None:
+    if any(f["type"] == kind and f["detail"] == detail for f in lead.flags):
+        return
     lead.flags = [*lead.flags, {"type": kind, "detail": detail, "at": utcnow().isoformat()}]
 
 
@@ -394,6 +396,23 @@ def call_ended(
             add_flag(lead, "incomplete", "call ended before screening finished")
             set_status(s, lead, LeadStatus.NEEDS_HUMAN, "call ended before screening finished")
     call.outcome = lead.status
+
+
+STALE_CALL_MINUTES = 30
+
+
+def settle_stale_calls(s: Session, now: datetime | None = None) -> int:
+    """Calls we never heard back about. Hand them to a person rather than redialing blindly."""
+    cutoff = (now or utcnow()) - timedelta(minutes=STALE_CALL_MINUTES)
+    stale = s.scalars(select(Call).where(Call.ended_at.is_(None), Call.started_at < cutoff)).all()
+    for call in stale:
+        call.ended_at = utcnow()
+        call.outcome = "unknown"
+        log_event(s, call.lead, "call_result_missing", minutes=STALE_CALL_MINUTES)
+        if call.lead.status == LeadStatus.CALLING:
+            add_flag(call.lead, "incomplete", "no call result received")
+            set_status(s, call.lead, LeadStatus.NEEDS_HUMAN, "no call result received")
+    return len(stale)
 
 
 def call_failed(s: Session, call: Call, reason: str) -> None:
