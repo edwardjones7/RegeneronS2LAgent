@@ -11,12 +11,14 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import db, sms, voice
+from app.campaigns import get_campaign
 from app.main import app
 from app.models import Lead, LeadStatus, Suppression
 
 TOOL = {"X-Tool-Secret": "test-secret"}
 READ = {"X-API-Key": "test-read"}
 CID = "olatorepatide-nct07685808"
+COORD = get_campaign(CID).coordinator_phone
 IN_HOURS = datetime(2026, 10, 14, 18, 0)  # 2 PM Eastern
 
 
@@ -99,7 +101,7 @@ def test_happy_path_books_and_texts_both(client):
     booked = tool(client, "book_visit", lead_id, slot_id=slot_id)
     assert booked.startswith("Booked for")
     sent = sms.get_sms().sent
-    assert [m["to"] for m in sent] == ["+15550001111", "+15555550101"]
+    assert [m["to"] for m in sent] == ["+15550001111", COORD]
     assert "you're booked" in sent[0]["body"] and "Reply STOP" in sent[0]["body"]
     assert "New visit booked: Sarah M." in sent[1]["body"] and "8/8 answered" in sent[1]["body"]
     d = detail(client, lead_id)
@@ -142,7 +144,7 @@ def test_emergency_alerts_coordinator_only(client):
     tool(client, "flag_emergency", lead_id, what_they_said="I'm having chest pain right now")
     assert detail(client, lead_id)["status"] == "emergency"
     sent = sms.get_sms().sent
-    assert len(sent) == 1 and sent[0]["to"] == "+15555550101" and "URGENT" in sent[0]["body"]
+    assert len(sent) == 1 and sent[0]["to"] == COORD and "URGENT" in sent[0]["body"]
     # Nothing downgrades an emergency.
     tool(client, "escalate_to_human", lead_id, reason="requested a person")
     assert detail(client, lead_id)["status"] == "emergency"

@@ -12,9 +12,9 @@ sponsor: Regeneron Pharmaceuticals
 clinic_name: Regeneron
 team_name: the Regeneron research team
 clinic_address: "100 Research Way, Tarrytown, NY (demo address)"
-clinic_phone: "+15555550100"   # demo: replace with the coordinator line for a real run
+clinic_phone: "+18568340605"   # number patients call for questions / rescheduling (demo: coordinator)
 coordinator_name: Jordan Patel  # demo coordinator
-coordinator_phone: "+15555550101"  # demo: set to a teammate's verified phone
+coordinator_phone: "+18568340605"  # coordinator (must be Twilio-verified on a trial account)
 timezone: America/New_York
 calling_hours:
   start: "09:00"
