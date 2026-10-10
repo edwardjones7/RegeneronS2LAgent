@@ -1,0 +1,31 @@
+[project]
+name = "call-me-maybe"
+version = "0.1.0"
+description = "Speed-to-lead outbound voice agent for clinical-trial pre-screening (hackathon demo)"
+readme = "README.md"
+authors = [
+    { name = "Edward Jones", email = "119269130+edwardjones7@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.143.0",
+    "httpx>=0.28.1",
+    "pydantic-settings>=2.15.0",
+    "pyyaml>=6.0.3",
+    "sqlalchemy>=2.1.4",
+    "twilio>=9.11.2",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "freezegun>=1.5.5",
+    "pytest>=9.1.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

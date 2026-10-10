@@ -1,0 +1,502 @@
+{
+  "protocolSection": {
+    "identificationModule": {
+      "nctId": "NCT07685808",
+      "orgStudyIdInfo": {
+        "id": "HS-20094-OB-25106"
+      },
+      "organization": {
+        "fullName": "Regeneron Pharmaceuticals",
+        "class": "INDUSTRY"
+      },
+      "briefTitle": "Study of Olatorepatide in Adult Participants Living With Overweight or Obesity Without Diabetes",
+      "officialTitle": "A Phase 2, Randomized, Placebo-Controlled Study to Assess the Safety, Tolerability, Pharmacokinetics, and Efficacy of Olatorepatide, a GLP-1/GIP Receptor Agonist, With Different Doses and Drug-Titration Algorithms in Participants Living With Overweight or Obesity"
+    },
+    "statusModule": {
+      "statusVerifiedDate": "2026-09",
+      "overallStatus": "RECRUITING",
+      "expandedAccessInfo": {
+        "hasExpandedAccess": false
+      },
+      "startDateStruct": {
+        "date": "2026-07-28",
+        "type": "ACTUAL"
+      },
+      "primaryCompletionDateStruct": {
+        "date": "2028-01-21",
+        "type": "ESTIMATED"
+      },
+      "completionDateStruct": {
+        "date": "2028-01-21",
+        "type": "ESTIMATED"
+      },
+      "studyFirstSubmitDate": "2026-06-29",
+      "studyFirstSubmitQcDate": "2026-06-29",
+      "studyFirstPostDateStruct": {
+        "date": "2026-07-06",
+        "type": "ACTUAL"
+      },
+      "lastUpdateSubmitDate": "2026-09-28",
+      "lastUpdatePostDateStruct": {
+        "date": "2026-09-29",
+        "type": "ACTUAL"
+      }
+    },
+    "sponsorCollaboratorsModule": {
+      "responsibleParty": {
+        "type": "SPONSOR"
+      },
+      "leadSponsor": {
+        "name": "Regeneron Pharmaceuticals",
+        "class": "INDUSTRY"
+      }
+    },
+    "oversightModule": {
+      "oversightHasDmc": false,
+      "isFdaRegulatedDrug": true,
+      "isFdaRegulatedDevice": false
+    },
+    "descriptionModule": {
+      "briefSummary": "This study will test an experimental drug called olatorepatide (\"study drug\") to determine how safe and effective this drug is compared to placebo and how easily the body can accept this drug at different doses and dosing schedules without causing side effects, as well as how the drug is processed in the body by participants with overweight or obesity but do not have diabetes.\n\nThe study is looking at:\n\n* What side effects the study drug might cause\n* How much study drug is in the blood at different times\n* How well the study drug works\n* What effects the study drug may have on the body at different dosing schedules\n* If the body makes antibodies to the study drug as this may cause the study drug to not work as well"
+    },
+    "conditionsModule": {
+      "conditions": [
+        "Overweight or Obesity"
+      ],
+      "keywords": [
+        "Body weight",
+        "Glucagon-Like Peptide-1 (GLP-1)/Gastric inhibitory polypeptide (GIP) receptor agonist",
+        "Dose-finding",
+        "Control appetite"
+      ]
+    },
+    "designModule": {
+      "studyType": "INTERVENTIONAL",
+      "phases": [
+        "PHASE2"
+      ],
+      "designInfo": {
+        "allocation": "RANDOMIZED",
+        "interventionModel": "PARALLEL",
+        "primaryPurpose": "TREATMENT",
+        "maskingInfo": {
+          "masking": "QUADRUPLE",
+          "whoMasked": [
+            "PARTICIPANT",
+            "CARE_PROVIDER",
+            "INVESTIGATOR",
+            "OUTCOMES_ASSESSOR"
+          ]
+        }
+      },
+      "enrollmentInfo": {
+        "count": 360,
+        "type": "ESTIMATED"
+      }
+    },
+    "armsInterventionsModule": {
+      "armGroups": [
+        {
+          "label": "Olatorepatide arm 1",
+          "type": "EXPERIMENTAL",
+          "interventionNames": [
+            "Drug: Olatorepatide"
+          ]
+        },
+        {
+          "label": "Olatorepatide arm 2",
+          "type": "EXPERIMENTAL",
+          "interventionNames": [
+            "Drug: Olatorepatide"
+          ]
+        },
+        {
+          "label": "Olatorepatide arm 3",
+          "type": "EXPERIMENTAL",
+          "interventionNames": [
+            "Drug: Olatorepatide"
+          ]
+        },
+        {
+          "label": "Olatorepatide arm 4",
+          "type": "EXPERIMENTAL",
+          "interventionNames": [
+            "Drug: Olatorepatide"
+          ]
+        },
+        {
+          "label": "Olatorepatide arm 5",
+          "type": "EXPERIMENTAL",
+          "interventionNames": [
+            "Drug: Olatorepatide"
+          ]
+        },
+        {
+          "label": "Matching Placebo arm 6",
+          "type": "ACTIVE_COMPARATOR",
+          "interventionNames": [
+            "Drug: Placebo"
+          ]
+        }
+      ],
+      "interventions": [
+        {
+          "type": "DRUG",
+          "name": "Olatorepatide",
+          "description": "Administered per the protocol",
+          "armGroupLabels": [
+            "Olatorepatide arm 1",
+            "Olatorepatide arm 2",
+            "Olatorepatide arm 3",
+            "Olatorepatide arm 4",
+            "Olatorepatide arm 5"
+          ],
+          "otherNames": [
+            "HS-20094"
+          ]
+        },
+        {
+          "type": "DRUG",
+          "name": "Placebo",
+          "description": "Administered per the protocol",
+          "armGroupLabels": [
+            "Matching Placebo arm 6"
+          ]
+        }
+      ]
+    },
+    "outcomesModule": {
+      "primaryOutcomes": [
+        {
+          "measure": "Occurrence of Treatment-Emergent Adverse Events (TEAEs)",
+          "timeFrame": "Up to approximately 60 weeks"
+        },
+        {
+          "measure": "Severity of TEAEs",
+          "timeFrame": "Up to approximately 60 weeks"
+        },
+        {
+          "measure": "Percent change in body weight",
+          "timeFrame": "From baseline to week 52"
+        }
+      ],
+      "secondaryOutcomes": [
+        {
+          "measure": "Olatorepatide concentrations",
+          "timeFrame": "Up to approximately 60 weeks"
+        },
+        {
+          "measure": "Occurrence of Anti-Drug Antibody (ADA) to olatorepatide",
+          "timeFrame": "Up to approximately 52 weeks"
+        },
+        {
+          "measure": "Magnitude of ADA to olatorepatide",
+          "timeFrame": "Up to approximately 52 weeks"
+        }
+      ]
+    },
+    "eligibilityModule": {
+      "eligibilityCriteria": "Key Inclusion Criteria:\n\n1. Body Mass Index (BMI) \u226530.0 kg/m\\^2 to \\<45.0 kg/m\\^2 at screening OR\n2. BMI \u226527.0 kg/m\\^2 at screening with at least 1 of the following weight-related co-morbidities: Hypertension, Dyslipidemia, Prediabetes, established Obstructive Sleep Apnea (OSA), established Coronary Artery Disease (CAD), Heart failure, established cerebrovascular disease as described in the protocol\n\nKey Exclusion Criteria:\n\n1. Previous or current diagnosis of Type 1 or Type 2 diabetes at screening\n2. Change in body weight \\>5 kg within approximately 3 months before screening as described in the protocol\n3. Bariatric surgery, including any procedures to revise, reverse, or remove any previous bariatric surgery interventions as described in the protocol\n4. History of acute or chronic pancreatitis, cholecystitis, or symptomatic gallbladder stones\n5. History or family history of medullary thyroid carcinoma or multiple endocrine neoplasia type 2\n\nNote: Other Protocol Defined Inclusion/ Exclusion Criteria Apply",
+      "healthyVolunteers": false,
+      "sex": "ALL",
+      "minimumAge": "18 Years",
+      "stdAges": [
+        "ADULT",
+        "OLDER_ADULT"
+      ]
+    },
+    "contactsLocationsModule": {
+      "centralContacts": [
+        {
+          "name": "Clinical Trials Administrator",
+          "role": "CONTACT",
+          "phone": "844-734-6643",
+          "email": "clinicaltrials@regeneron.com"
+        }
+      ],
+      "overallOfficials": [
+        {
+          "name": "Clinical Trial Management",
+          "affiliation": "Regeneron Pharmaceuticals",
+          "role": "STUDY_DIRECTOR"
+        }
+      ],
+      "locations": [
+        {
+          "facility": "AMR Clinical - Mobile",
+          "status": "RECRUITING",
+          "city": "Mobile",
+          "state": "Alabama",
+          "zip": "36608",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 30.69436,
+            "lon": -88.04305
+          }
+        },
+        {
+          "facility": "Diablo Clinical Research - Flourish Research",
+          "status": "RECRUITING",
+          "city": "Walnut Creek",
+          "state": "California",
+          "zip": "94598",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 37.90631,
+            "lon": -122.06496
+          }
+        },
+        {
+          "facility": "AMR Clinical - Miami",
+          "status": "RECRUITING",
+          "city": "Doral",
+          "state": "Florida",
+          "zip": "33172",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 25.81954,
+            "lon": -80.35533
+          }
+        },
+        {
+          "facility": "AMR Clinical - Fort Myers",
+          "status": "RECRUITING",
+          "city": "Fort Myers",
+          "state": "Florida",
+          "zip": "33912",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 26.62168,
+            "lon": -81.84059
+          }
+        },
+        {
+          "facility": "AGA Clinical Trials",
+          "status": "RECRUITING",
+          "city": "Hialeah",
+          "state": "Florida",
+          "zip": "33012",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 25.8576,
+            "lon": -80.27811
+          }
+        },
+        {
+          "facility": "Flourish Research, Nature Coast Clinical Research",
+          "status": "RECRUITING",
+          "city": "Inverness",
+          "state": "Florida",
+          "zip": "34452",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 28.83582,
+            "lon": -82.33037
+          }
+        },
+        {
+          "facility": "Flourish Research, Jacksonville Center for Clinical Research",
+          "status": "RECRUITING",
+          "city": "Jacksonville",
+          "state": "Florida",
+          "zip": "32216",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 30.33218,
+            "lon": -81.65565
+          }
+        },
+        {
+          "facility": "K2 Medical Research Maitland LLC, Main Office",
+          "status": "RECRUITING",
+          "city": "Maitland",
+          "state": "Florida",
+          "zip": "32751",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 28.62778,
+            "lon": -81.36312
+          }
+        },
+        {
+          "facility": "IMA Clinical Research St. Petersburg",
+          "status": "RECRUITING",
+          "city": "St. Petersburg",
+          "state": "Florida",
+          "zip": "33704",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 27.77086,
+            "lon": -82.67927
+          }
+        },
+        {
+          "facility": "Charter Research LLC - The Villages",
+          "status": "RECRUITING",
+          "city": "The Villages",
+          "state": "Florida",
+          "zip": "32162",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 28.93408,
+            "lon": -81.95994
+          }
+        },
+        {
+          "facility": "Clinical Site Partners, LLC DBA Flourish Research",
+          "status": "RECRUITING",
+          "city": "Winter Park",
+          "state": "Florida",
+          "zip": "32789",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 28.6,
+            "lon": -81.33924
+          }
+        },
+        {
+          "facility": "Charter Research LLC - Chicago",
+          "status": "RECRUITING",
+          "city": "Chicago",
+          "state": "Illinois",
+          "zip": "60618",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 41.85003,
+            "lon": -87.65005
+          }
+        },
+        {
+          "facility": "Flourish Research - Chicago",
+          "status": "RECRUITING",
+          "city": "Chicago",
+          "state": "Illinois",
+          "zip": "60625",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 41.85003,
+            "lon": -87.65005
+          }
+        },
+        {
+          "facility": "AMR Clinical - Chicago Oak Brook",
+          "status": "RECRUITING",
+          "city": "Oak Brook",
+          "state": "Illinois",
+          "zip": "60523",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 41.83281,
+            "lon": -87.92895
+          }
+        },
+        {
+          "facility": "AMR Clinical - Wichita",
+          "status": "RECRUITING",
+          "city": "Wichita",
+          "state": "Kansas",
+          "zip": "67207",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 37.69224,
+            "lon": -97.33754
+          }
+        },
+        {
+          "facility": "AMR Clinical - Lexington",
+          "status": "RECRUITING",
+          "city": "Lexington",
+          "state": "Kentucky",
+          "zip": "40509",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 37.98869,
+            "lon": -84.47772
+          }
+        },
+        {
+          "facility": "Rochester Clinical Research",
+          "status": "RECRUITING",
+          "city": "Rochester",
+          "state": "New York",
+          "zip": "14609",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 43.15478,
+            "lon": -77.61556
+          }
+        },
+        {
+          "facility": "Tribe Clinical Research",
+          "status": "RECRUITING",
+          "city": "Greenville",
+          "state": "South Carolina",
+          "zip": "29607",
+          "country": "United States",
+          "geoPoint": {
+            "lat": 34.85262,
+            "lon": -82.39401
+          }
+        }
+      ]
+    },
+    "ipdSharingStatementModule": {
+      "ipdSharing": "YES",
+      "description": "All Individual Patient Data (IPD) that underlie publicly available results will be considered for sharing",
+      "infoTypes": [
+        "STUDY_PROTOCOL",
+        "SAP",
+        "ICF",
+        "CSR",
+        "ANALYTIC_CODE"
+      ],
+      "timeFrame": "When Regeneron has:\n\n* received marketing authorization from major health authorities (e.g., FDA, European Medicines Agency (EMA), Pharmaceuticals and Medical Devices Agency (PMDA), etc.) for the product and indication or has globally discontinued development of the product for all indications on or after April 2020 and has no plans for future development\n* made the study results publicly available (e.g., scientific publication, scientific conference, clinical trial registry)\n* the legal authority to share the data, and\n* ensured the ability to protect participant privacy",
+      "accessCriteria": "Qualified researchers can submit a proposal for access to individual patient or aggregate level data from a Regeneron-sponsored clinical trial through Vivli. Regeneron's Independent Research Request Evaluation Criteria can be found at: https://www.regeneron.com/sites/default/files/Regeneron-External-Data-Sharing-Policy-and-Independent-Research-Request-Evaluation-Criteria.pdf",
+      "url": "https://vivli.org/"
+    }
+  },
+  "derivedSection": {
+    "miscInfoModule": {
+      "versionHolder": "2026-10-09"
+    },
+    "conditionBrowseModule": {
+      "meshes": [
+        {
+          "id": "D050177",
+          "term": "Overweight"
+        },
+        {
+          "id": "D009765",
+          "term": "Obesity"
+        },
+        {
+          "id": "D001835",
+          "term": "Body Weight"
+        }
+      ],
+      "ancestors": [
+        {
+          "id": "D044343",
+          "term": "Overnutrition"
+        },
+        {
+          "id": "D009748",
+          "term": "Nutrition Disorders"
+        },
+        {
+          "id": "D009750",
+          "term": "Nutritional and Metabolic Diseases"
+        },
+        {
+          "id": "D012816",
+          "term": "Signs and Symptoms"
+        },
+        {
+          "id": "D013568",
+          "term": "Pathological Conditions, Signs and Symptoms"
+        }
+      ]
+    }
+  },
+  "hasResults": false
+}
