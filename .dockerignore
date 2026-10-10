@@ -1,0 +1,10 @@
+.git
+.venv
+.env
+*.db
+web/node_modules
+web/.next
+web/out
+.superpowers
+.elevenlabs.json
+__pycache__

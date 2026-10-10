@@ -1,0 +1,10 @@
+# docker compose up --build  ->  http://localhost:8000/demo and /dashboard
+# Without keys in .env, MOCK_MODE=true keeps everything local (no calls or texts).
+services:
+  app:
+    build: .
+    ports: ["8000:8000"]
+    env_file: [.env]
+    volumes: [data:/data]
+volumes:
+  data:
