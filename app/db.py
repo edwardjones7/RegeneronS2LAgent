@@ -17,11 +17,24 @@ _engine = None
 _SessionLocal: sessionmaker | None = None
 
 
+def normalize_url(url: str) -> str:
+    """Marketplace Postgres URLs say postgres://; SQLAlchemy wants the psycopg driver named."""
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://") :]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://") :]
+    return url
+
+
 def init_engine(url: str | None = None):
     """Create (or replace) the engine. Tests call this with an in-memory URL."""
     global _engine, _SessionLocal
-    url = url or get_settings().database_url
-    kwargs = {"connect_args": {"check_same_thread": False}} if url.startswith("sqlite") else {}
+    url = normalize_url(url or get_settings().database_url)
+    kwargs = {"connect_args": {"check_same_thread": False}} if url.startswith("sqlite") else {"pool_pre_ping": True}
+    if get_settings().vercel and not url.startswith("sqlite"):
+        from sqlalchemy.pool import NullPool
+
+        kwargs["poolclass"] = NullPool  # serverless: let the provider's pooler (e.g. Neon) pool connections
     if url == "sqlite://":
         from sqlalchemy.pool import StaticPool
 

@@ -70,7 +70,12 @@ def call_again(lead_id: int, background: BackgroundTasks, s: Session = Depends(g
     lead.next_attempt_at = None
     service.log_event(s, lead, "callback_requested_by_coordinator")
     s.commit()
-    background.add_task(service.dial, lead.id)
+    from app.config import get_settings
+
+    if get_settings().vercel:
+        service.dial(lead.id)
+    else:
+        background.add_task(service.dial, lead.id)
     return {"ok": True}
 
 
@@ -206,12 +211,27 @@ def run_persona(persona_id: str):
 
     if persona_id not in PERSONAS:
         raise HTTPException(404, "unknown persona")
+    from app.config import get_settings
+
+    if get_settings().vercel:
+        # Serverless: no background threads, so hold the request open for the conversation (~1-3 min).
+        import asyncio
+
+        from app.simulate import converse, make_lead
+
+        lead_id = make_lead(PERSONAS[persona_id])
+        asyncio.run(converse(persona_id, lead_id))
+        return {"lead_id": lead_id}
     return {"lead_id": start_scenario(persona_id)}
 
 
 @router.post("/scorecard/run")
 def scorecard_run():
+    from app.config import get_settings
     from app.simulate import run_scorecard
+
+    if get_settings().vercel:
+        raise HTTPException(400, "The full scorecard takes ~15 minutes; run it locally with `make text-test`.")
 
     return run_scorecard()
 

@@ -17,6 +17,8 @@ NO_STORE = {"Cache-Control": "no-store"}
 IMMUTABLE = {"Cache-Control": "public, max-age=31536000, immutable"}
 
 router = APIRouter(prefix="/dashboard", include_in_schema=False)
+# Sign-in/out also live outside /dashboard so they work when the dashboard is served by Vercel.
+auth_router = APIRouter(include_in_schema=False)
 
 
 def _file(name: str) -> Path:
@@ -47,6 +49,7 @@ def login_page():
 
 
 @router.post("/login")
+@auth_router.post("/auth/login")
 def login(request: Request, password: str = Form(...), next: str = Form("/dashboard")):
     if not auth.check_password(password):
         return RedirectResponse(f"/dashboard/login?error=1&next={quote(next)}", status_code=303)
@@ -64,6 +67,7 @@ def login(request: Request, password: str = Form(...), next: str = Form("/dashbo
 
 
 @router.post("/logout")
+@auth_router.post("/auth/logout")
 def logout():
     resp = RedirectResponse("/dashboard/login", status_code=303)
     resp.delete_cookie(auth.COOKIE)

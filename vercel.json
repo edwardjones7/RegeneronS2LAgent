@@ -1,0 +1,29 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "web": {
+      "root": "web",
+      "framework": "nextjs",
+      "rewrites": [{ "source": "/demo", "destination": "/dashboard/opt-in" }]
+    },
+    "api": {
+      "root": ".",
+      "entrypoint": "app.main:app",
+      "functions": {
+        "app/main.py": {
+          "maxDuration": 300,
+          "excludeFiles": "{web/**,tests/**,docs/**,images/**,.superpowers/**,.venv/**,*.db}"
+        }
+      }
+    }
+  },
+  "redirects": [{ "source": "/", "destination": "/demo", "permanent": false }],
+  "rewrites": [
+    { "source": "/dashboard/leads/(.*)", "destination": { "service": "api" } },
+    { "source": "/dashboard", "destination": { "service": "web" } },
+    { "source": "/dashboard/(.*)", "destination": { "service": "web" } },
+    { "source": "/demo", "destination": { "service": "web" } },
+    { "source": "/(.*)", "destination": { "service": "api" } }
+  ],
+  "crons": [{ "path": "/cron/tick", "schedule": "*/5 * * * *" }]
+}

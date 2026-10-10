@@ -25,7 +25,7 @@ export default function LoginPage() {
             <CardDescription>See every lead, call and booking in real time.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form method="post" action="/dashboard/login" className="space-y-4">
+            <form method="post" action="/auth/login" className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" name="password" type="password" autoComplete="current-password" required autoFocus />

@@ -150,7 +150,7 @@ export function AppShell({ children, actions }: { children: React.ReactNode; act
                       Opt-in form <ExternalLink aria-hidden />
                     </a>
                   </Button>
-                  <form method="post" action="/dashboard/logout">
+                  <form method="post" action="/auth/logout">
                     <Button type="submit" variant="ghost" size="sm" aria-label="Sign out">
                       <LogOut aria-hidden />
                     </Button>

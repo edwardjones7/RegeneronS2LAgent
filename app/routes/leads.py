@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app import service
+from app.config import get_settings
 from app.db import get_session
 
 router = APIRouter()
@@ -29,6 +30,9 @@ def create_lead(body: LeadIn, background: BackgroundTasks, s: Session = Depends(
         raise HTTPException(400, str(exc)) from exc
     s.commit()
     if dial_now:
-        # Runs right after the response is sent, so the form submit never waits on the phone.
-        background.add_task(service.dial, lead.id)
+        if get_settings().vercel:
+            service.dial(lead.id)  # serverless: work after the response isn't guaranteed
+        else:
+            # Runs right after the response is sent, so the form submit never waits on the phone.
+            background.add_task(service.dial, lead.id)
     return {"lead_id": lead.id, "status": "calling" if dial_now else lead.status, "reason": lead.status_reason}

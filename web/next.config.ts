@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
   experimental: { optimizePackageImports: ["lucide-react", "motion"] },
   ...(isDev && {
     async rewrites() {
-      return ["/campaigns/:path*", "/campaigns", "/leads/:path*", "/demo", "/dashboard/logout"].map(
+      return ["/campaigns/:path*", "/campaigns", "/leads/:path*", "/calls/:path*", "/simulate/:path*", "/scorecard/:path*", "/visits/:path*", "/auth/:path*", "/demo"].map(
         (source) => ({ source, destination: `${backend}${source}`, basePath: false as const })
       )
     },

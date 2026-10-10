@@ -5,7 +5,7 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 from starlette.concurrency import run_in_threadpool
@@ -54,10 +54,12 @@ async def lifespan(app: FastAPI):
     interval = s.worker_interval_secs
     if not s.elevenlabs_webhook_secret and not s.mock_mode:
         interval = min(interval, 15)  # no webhook: we poll ElevenLabs for call results, so check often
-    log.info("mock_mode=%s public_base_url=%s", s.mock_mode, s.public_base_url)
-    task = asyncio.create_task(_worker_loop(interval))
+    log.info("mock_mode=%s vercel=%s public_base_url=%s", s.mock_mode, s.vercel, s.public_base_url)
+    # On Vercel there is no long-running process: Vercel Cron calls /cron/tick instead.
+    task = None if s.vercel else asyncio.create_task(_worker_loop(interval))
     yield
-    task.cancel()
+    if task:
+        task.cancel()
 
 
 app = FastAPI(title="Call Me Maybe: speed-to-lead voice agent", lifespan=lifespan)
@@ -68,6 +70,16 @@ app.include_router(webhooks.router)
 app.include_router(read_api.router)
 app.include_router(coordinator.router)
 app.include_router(dashboard.router)
+app.include_router(dashboard.auth_router)
+
+
+@app.get("/cron/tick", include_in_schema=False)
+def cron_tick(request: Request):
+    """Retries, queued leads, reminders and stale calls. Called by Vercel Cron (or any scheduler)."""
+    secret = get_settings().cron_secret
+    if not secret or request.headers.get("authorization") != f"Bearer {secret}":
+        raise HTTPException(401, "unauthorized")
+    return {"dialed": worker_tick()}
 
 
 @app.get("/health")

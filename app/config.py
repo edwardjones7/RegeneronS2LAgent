@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     )
     twilio_from_number: str = ""
 
+    # Set by Vercel at runtime. Serverless: no background loop, dial inline, cron drives retries.
+    vercel: bool = False
+    # Vercel Cron sends "Authorization: Bearer $CRON_SECRET" to /cron/tick.
+    cron_secret: str = ""
+
     # Max dial attempts per lead (first call + retries).
     max_attempts: int = 3
     worker_interval_secs: int = 30

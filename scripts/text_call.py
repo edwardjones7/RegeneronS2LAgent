@@ -26,7 +26,7 @@ async def main():
     ids = list(PERSONAS) if args.persona == "all" else [args.persona]
     passed = 0
     for pid in ids:
-        r = await converse(pid)
+        r = await converse(pid, source="scorecard" if args.persona == "all" else "simulation")
         print(f"\n\033[1m=== {PERSONAS[pid].label} (lead {r['lead_id']}) ===\033[0m")
         for t in r["transcript"]:
             if t.get("message"):
