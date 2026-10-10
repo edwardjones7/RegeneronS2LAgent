@@ -72,6 +72,10 @@ class Call(Base):
     provider_call_sid: Mapped[str | None] = mapped_column(String(100))
     started_at: Mapped[datetime] = mapped_column(default=utcnow)
     connected_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    # Observed from Twilio while the call is live: when the phone started ringing / was answered.
+    ringing_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    answered_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    telephony_status: Mapped[str | None] = mapped_column(String(20), nullable=True)
     ended_at: Mapped[datetime | None] = mapped_column(nullable=True)
     duration_secs: Mapped[int | None] = mapped_column(nullable=True)
     outcome: Mapped[str | None] = mapped_column(String(40), nullable=True)
@@ -115,6 +119,29 @@ class Event(Base):
     detail: Mapped[dict] = mapped_column(JSON, default=dict)
 
     lead: Mapped[Lead] = relationship(back_populates="events")
+
+
+class ScorecardRun(Base):
+    """One run of the persona suite against the live agent, with graded results."""
+
+    __tablename__ = "scorecard_run"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    started_at: Mapped[datetime] = mapped_column(default=utcnow)
+    finished_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="running")
+    results: Mapped[list] = mapped_column(JSON, default=list)
+
+
+class Note(Base):
+    """Coordinator note on a lead."""
+
+    __tablename__ = "note"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    lead_id: Mapped[int] = mapped_column(ForeignKey("lead.id"), index=True)
+    at: Mapped[datetime] = mapped_column(default=utcnow)
+    text: Mapped[str] = mapped_column(Text)
 
 
 class Suppression(Base):

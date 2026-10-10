@@ -12,7 +12,7 @@ from app import auth, service
 from app.campaigns import all_campaigns, get_campaign
 from app.config import get_settings
 from app.db import get_session
-from app.models import Call, Lead
+from app.models import Call, Lead, Note
 from app.voice import get_voice
 
 ATTENTION_STATUSES = ("needs_human", "emergency")
@@ -50,6 +50,11 @@ def lead_summary(lead: Lead) -> dict:
         "attempts": lead.attempts,
         "created_at": _iso(lead.created_at),
         "seconds_to_first_call": service.seconds_to_first_call(lead),
+        "seconds_to_ring": (
+            round((lead.calls[0].ringing_at - lead.created_at).total_seconds(), 1)
+            if lead.calls and lead.calls[0].ringing_at
+            else None
+        ),
         "next_attempt_at": _iso(lead.next_attempt_at),
     }
 
@@ -69,6 +74,12 @@ def campaign_overview(campaign_id: str, s: Session = Depends(get_session)):
     )
     leads = s.scalars(select(Lead).where(Lead.campaign_id == campaign_id)).all()
     speeds = [x for x in (service.seconds_to_first_call(l) for l in leads) if x is not None]
+    ring = [
+        (c.ringing_at - l.created_at).total_seconds()
+        for l in leads
+        for c in l.calls[:1]
+        if c.ringing_at
+    ]
     reached = sum(1 for l in leads if any(call.connected_at for call in l.calls))
     return {
         "campaign": {
@@ -85,9 +96,17 @@ def campaign_overview(campaign_id: str, s: Session = Depends(get_session)):
         "total_leads": len(leads),
         "by_status": counts,
         "median_seconds_to_first_call": median(speeds) if speeds else None,
+        "median_seconds_to_ring": round(median(ring), 1) if ring else None,
         "reached": reached,
         "needs_attention": [lead_summary(l) for l in leads if l.status in ATTENTION_STATUSES],
     }
+
+
+@router.get("/calls/live")
+def calls_live(campaign_id: str | None = None, s: Session = Depends(get_session)):
+    from app.live import live_calls
+
+    return live_calls(s, campaign_id)
 
 
 @router.get("/campaigns/{campaign_id}/leads")
@@ -145,6 +164,10 @@ def lead_detail(lead_id: int, s: Session = Depends(get_session)):
             for c in lead.calls
         ],
         "events": [{"at": _iso(e.at), "type": e.type, "detail": e.detail} for e in lead.events],
+        "notes": [
+            {"at": _iso(n.at), "text": n.text}
+            for n in s.scalars(select(Note).where(Note.lead_id == lead.id).order_by(Note.id))
+        ],
     }
 
 

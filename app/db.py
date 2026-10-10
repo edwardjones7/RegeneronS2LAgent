@@ -38,7 +38,24 @@ def init_engine(url: str | None = None):
     from app import models  # noqa: F401  register tables
 
     Base.metadata.create_all(_engine)
+    _add_missing_columns(_engine)
     return _engine
+
+
+def _add_missing_columns(engine) -> None:
+    """Tiny forward-only migration: add new nullable columns to existing tables."""
+    from sqlalchemy import inspect, text
+
+    insp = inspect(engine)
+    with engine.begin() as conn:
+        for table in Base.metadata.sorted_tables:
+            if not insp.has_table(table.name):
+                continue
+            have = {c["name"] for c in insp.get_columns(table.name)}
+            for col in table.columns:
+                if col.name not in have:
+                    ddl = col.type.compile(dialect=engine.dialect)
+                    conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{col.name}" {ddl}'))
 
 
 def get_engine():

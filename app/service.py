@@ -346,6 +346,18 @@ def tool_flag_emergency(s: Session, lead: Lead, what_they_said: str) -> str:
     return "Flagged. Make sure you've told them to hang up and call 911 now, then end the call."
 
 
+def send_sms_logged(s: Session, lead: Lead, to: str, body: str, kind: str) -> bool:
+    """Send a text and record it on the lead's timeline either way."""
+    try:
+        sid = sms.get_sms().send(to, body)
+        log_event(s, lead, "sms_sent", to=kind, sid=sid, body=body)
+        return True
+    except Exception as exc:  # noqa: BLE001
+        log.exception("sms to %s failed", kind)
+        log_event(s, lead, "sms_failed", to=kind, error=str(exc)[:300])
+        return False
+
+
 def _alert_coordinator(s: Session, lead: Lead, kind: str, detail: str) -> None:
     campaign = campaign_for(lead)
     body = sms.coordinator_alert(kind, lead.first_name, lead.last_name, lead.phone, detail, record_link(lead))

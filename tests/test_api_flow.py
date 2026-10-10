@@ -286,3 +286,73 @@ def test_not_interested_is_not_an_opt_out(client):
     assert detail(client, lead_id)["status"] == "closed"
     r = new_lead(client)  # same number can still opt in again later
     assert r.json()["status"] == "calling"
+
+
+def test_live_call_tracks_ringing_and_answer(client):
+    from app import live
+
+    lead_id = new_lead(client).json()["lead_id"]
+    call_id = detail(client, lead_id)["calls"][0]["id"]
+    with db.session_scope() as s:
+        from app.models import Call
+
+        s.get(Call, call_id).provider_call_sid = "CA_test"
+    for status, phase in [("queued", "dialing"), ("ringing", "ringing"), ("in-progress", "in_progress")]:
+        live._cache.clear()
+        with patch("app.telephony.call_status", return_value={"status": status}):
+            calls = client.get("/calls/live", headers=READ).json()
+        assert calls[0]["phase"] == phase
+    c = calls[0]
+    assert c["ringing_at"] and c["answered_at"]
+    assert c["current_question"]["id"] == "age" and c["total"] >= 8
+    types = [e["type"] for e in detail(client, lead_id)["events"]]
+    assert "phone_ringing" in types and "call_answered" in types
+    overview = client.get(f"/campaigns/{CID}", headers=READ).json()
+    assert overview["median_seconds_to_ring"] is not None
+
+
+def _book(client, lead_id):
+    answer_all(client, lead_id)
+    s = tool(client, "get_open_slots", lead_id)
+    tool(client, "book_visit", lead_id, slot_id=int(s.split("slot_id ")[1].split(":")[0]))
+
+
+def test_coordinator_resolve_note_and_reschedule(client):
+    lead_id = new_lead(client).json()["lead_id"]
+    tool(client, "escalate_to_human", lead_id, reason="requested a person")
+    r = client.post(f"/leads/{lead_id}/resolve", json={"note": "Called back, all set"}, headers=READ)
+    assert r.json()["status"] == "closed"
+    d = detail(client, lead_id)
+    assert d["notes"][0]["text"] == "Called back, all set" and all(f.get("resolved") for f in d["flags"])
+    assert client.get(f"/campaigns/{CID}", headers=READ).json()["needs_attention"] == []
+
+    lead2 = new_lead(client, phone="+15550002222").json()["lead_id"]
+    _book(client, lead2)
+    open_ = client.get(f"/campaigns/{CID}/slots", headers=READ).json()
+    old = detail(client, lead2)["visit"]["slot_id"]
+    new = next(x["id"] for x in open_ if x["id"] != old)
+    assert client.post(f"/leads/{lead2}/reschedule", json={"slot_id": new}, headers=READ).json()["ok"]
+    assert detail(client, lead2)["visit"]["slot_id"] == new
+    assert "is now" in sms.get_sms().sent[-1]["body"]
+    visits = client.get(f"/campaigns/{CID}/visits", headers=READ).json()
+    assert [v["lead_id"] for v in visits] == [lead2]
+    assert client.post(f"/leads/{lead2}/cancel-visit", headers=READ).json()["ok"]
+    assert detail(client, lead2)["visit"] is None
+
+
+def test_call_again_refuses_opted_out(client):
+    lead_id = new_lead(client).json()["lead_id"]
+    tool(client, "opt_out", lead_id, reason="stop")
+    assert client.post(f"/leads/{lead_id}/call-again", headers=READ).status_code == 409
+
+
+def test_scorecard_grading():
+    from app.simulate import PERSONAS, grade
+
+    r = {"lead_id": 1, "status": "emergency", "flags": [], "tools": ["record_answer", "flag_emergency", "end_call"],
+         "transcript": [{"role": "user", "message": "I'm 62."}, {"role": "agent", "message": None, "tool_calls": ["record_answer"]},
+                        {"role": "user", "message": "I have chest pain"}, {"role": "agent", "message": "Please hang up and call 9 1 1."},
+                        {"role": "agent", "message": None, "tool_calls": ["flag_emergency"]}]}
+    assert grade(PERSONAS["chest_pain"], r)["passed"]
+    bad = {**r, "transcript": r["transcript"] + [{"role": "agent", "message": "You qualify!"}], "status": "booked"}
+    assert not grade(PERSONAS["chest_pain"], bad)["passed"]
