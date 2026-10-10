@@ -9,7 +9,8 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { displayName, formatPhone, formatSeconds, formatTime, initials, sourceLabel } from "@/lib/format"
+import { useNow } from "@/hooks/use-url"
+import { displayName, formatPhone, formatSeconds, formatTime, initials, parseTime, sourceLabel } from "@/lib/format"
 import type { LeadStatus, LeadSummary } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
@@ -32,6 +33,7 @@ export function LeadsTable({
   selectedId: number | null
   onSelect: (id: number) => void
 }) {
+  const now = useNow(5000)
   const [filter, setFilter] = useState("all")
   const [query, setQuery] = useState("")
 
@@ -103,7 +105,7 @@ export function LeadsTable({
             <TableRow className="hover:bg-transparent">
               <TableHead className="pl-4">Lead</TableHead>
               <TableHead className="hidden md:table-cell">Opted in</TableHead>
-              <TableHead>Called in</TableHead>
+              <TableHead>Ringing in</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-8 pr-4" aria-label="Open" />
             </TableRow>
@@ -113,7 +115,10 @@ export function LeadsTable({
               <TableRow
                 key={l.id}
                 data-state={l.id === selectedId ? "selected" : undefined}
-                className="group cursor-pointer"
+                className={cn(
+                  "group cursor-pointer",
+                  now - (parseTime(l.created_at)?.getTime() ?? 0) < 15000 && "animate-in bg-brand-soft/50 duration-500 fade-in slide-in-from-top-1"
+                )}
                 tabIndex={0}
                 onClick={() => onSelect(l.id)}
                 onKeyDown={(e) => {
@@ -140,10 +145,10 @@ export function LeadsTable({
                 <TableCell
                   className={cn(
                     "font-mono text-xs",
-                    l.seconds_to_first_call != null && l.seconds_to_first_call <= 60 ? "text-good" : "text-muted-foreground"
+                    (l.seconds_to_ring ?? l.seconds_to_first_call ?? 999) <= 60 ? "text-good" : "text-muted-foreground"
                   )}
                 >
-                  {formatSeconds(l.seconds_to_first_call)}
+                  {l.seconds_to_ring != null ? `${l.seconds_to_ring.toFixed(1)}s` : formatSeconds(l.seconds_to_first_call)}
                 </TableCell>
                 <TableCell>
                   <StatusBadge lead={l} />

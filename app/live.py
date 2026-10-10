@@ -67,7 +67,7 @@ def live_calls(s: Session, campaign_id: str | None = None) -> list[dict]:
     q = (
         select(Call)
         .join(Lead, Lead.id == Call.lead_id)
-        .where(Call.started_at > now - LIVE_WINDOW)
+        .where(Call.started_at > now - LIVE_WINDOW, Lead.source != "scorecard")
         .where((Call.ended_at.is_(None)) | (Call.ended_at > now - RECENTLY_ENDED))
         .order_by(Call.started_at.desc())
     )

@@ -117,3 +117,15 @@
     animation: none;
   }
 }
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.35) }
+  50% { transform: scaleY(1) }
+}
+@keyframes sweep {
+  0% { transform: translateX(-100%) }
+  100% { transform: translateX(300%) }
+}
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[wave"], [class*="animate-[sweep"] { animation: none !important }
+}

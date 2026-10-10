@@ -25,6 +25,7 @@ import {
 import type { CallRecord, LeadDetail } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
+import { LeadActions, NotesSection } from "./lead-actions"
 import { StatusBadge } from "./status-badge"
 
 const SCREENING_STATE = {
@@ -64,6 +65,28 @@ function eventText(e: LeadDetail["events"][number]): string {
       return `Call ended${d.duration_secs ? ` after ${formatDuration(Number(d.duration_secs))}` : ""}${d.voicemail ? " (voicemail left)" : ""}`
     case "call_not_connected":
       return `Call didn't connect (${d.reason})`
+    case "phone_ringing":
+      return `Phone ringing (${Number(d.seconds_from_opt_in).toFixed(1)}s after opt-in)`
+    case "call_answered":
+      return `Answered (${Number(d.seconds_from_opt_in).toFixed(1)}s after opt-in)`
+    case "note_added":
+      return `Note: “${d.text}”`
+    case "resolved":
+      return "Resolved by coordinator"
+    case "callback_requested_by_coordinator":
+      return "Coordinator asked Ava to call again"
+    case "visit_confirmed":
+      return "Patient confirmed the visit by text"
+    case "visit_rescheduled":
+      return `Visit moved to ${formatVisit(String(d.starts_at))}${d.via === "sms" ? " (by text)" : ""}`
+    case "visit_cancelled":
+      return `Visit cancelled${d.via === "sms" ? " by text" : ""}`
+    case "reschedule_offered":
+      return "Sent new times to choose from"
+    case "sms_received":
+      return `Text from patient: “${d.body}”`
+    case "reminder_sent":
+      return "Day-before reminder sent"
     case "call_result_missing":
       return "No call result received, handed to the team"
     case "retry_scheduled":
@@ -124,6 +147,8 @@ function Transcript({ call, name }: { call: CallRecord; name: string }) {
 export default function LeadSheet({ leadId, onClose }: { leadId: number | null; onClose: () => void }) {
   const [lead, setLead] = useState<LeadDetail | null>(null)
   const [callId, setCallId] = useState<number | null>(null)
+  const [rev, setRev] = useState(0)
+  const refresh = () => setRev((r) => r + 1)
 
   useEffect(() => {
     if (leadId == null) return
@@ -149,7 +174,7 @@ export default function LeadSheet({ leadId, onClose }: { leadId: number | null; 
       clearInterval(timer)
       ctrl.abort()
     }
-  }, [leadId])
+  }, [leadId, rev])
 
   const calls = lead ? [...lead.calls].reverse() : []
   const call = calls.find((c) => c.id === callId) ?? calls.find((c) => c.transcript?.length) ?? calls[0]
@@ -193,12 +218,16 @@ export default function LeadSheet({ leadId, onClose }: { leadId: number | null; 
                     <CalendarCheck aria-hidden /> {formatVisit(lead.visit.starts_at_local)}
                   </Badge>
                 )}
-                {lead.seconds_to_first_call != null && (
+                {(lead.seconds_to_ring != null || lead.seconds_to_first_call != null) && (
                   <Badge variant="outline" className="h-6 gap-1.5 rounded-full px-2.5 font-normal text-muted-foreground">
-                    <Phone aria-hidden /> Called in {formatSeconds(lead.seconds_to_first_call)}
+                    <Phone aria-hidden />
+                    {lead.seconds_to_ring != null
+                      ? `Phone rang ${lead.seconds_to_ring.toFixed(1)}s after opt-in`
+                      : `Called in ${formatSeconds(lead.seconds_to_first_call)}`}
                   </Badge>
                 )}
               </div>
+              <LeadActions lead={lead} onChanged={refresh} />
             </SheetHeader>
 
             <Tabs defaultValue="overview" className="min-h-0 flex-1 gap-0">
@@ -224,11 +253,12 @@ export default function LeadSheet({ leadId, onClose }: { leadId: number | null; 
                             key={i}
                             className={cn(
                               "flex gap-2.5 rounded-xl px-3.5 py-3 text-sm",
-                              f.type === "emergency" ? "bg-critical-soft text-critical" : "bg-warning-soft text-warning"
+                              f.resolved ? "bg-muted text-muted-foreground" : f.type === "emergency" ? "bg-critical-soft text-critical" : "bg-warning-soft text-warning"
                             )}
                           >
                             {f.type === "emergency" ? <Siren className="mt-0.5 size-4 shrink-0" /> : <CircleAlert className="mt-0.5 size-4 shrink-0" />}
-                            <span className="text-foreground/85">{f.detail}</span>
+                            <span className={cn("text-foreground/85", f.resolved && "line-through decoration-muted-foreground/50")}>{f.detail}</span>
+                            {f.resolved && <span className="ml-auto shrink-0 text-xs">Resolved</span>}
                           </li>
                         ))}
                       </ul>
@@ -251,7 +281,10 @@ export default function LeadSheet({ leadId, onClose }: { leadId: number | null; 
                           const v = VERDICT[a.verdict]
                           return (
                             <div key={a.question_id} className={cn("flex items-start justify-between gap-4 px-4 py-3 text-sm", i && "border-t")}>
-                              <span className="text-muted-foreground">{a.question || a.question_id}</span>
+                              <span className="text-muted-foreground">
+                                {a.question || a.question_id}
+                                {a.criterion && <span className="mt-0.5 block text-xs text-muted-foreground/70">Criterion: {a.criterion}</span>}
+                              </span>
                               <span className="flex shrink-0 items-center gap-2 font-medium">
                                 {a.answer}
                                 {v && <span className={cn("rounded-md px-1.5 py-0.5 text-[11px] font-semibold", v.cls)}>{v.label}</span>}
@@ -263,6 +296,10 @@ export default function LeadSheet({ leadId, onClose }: { leadId: number | null; 
                     ) : (
                       <p className="text-sm text-muted-foreground">No answers yet.</p>
                     )}
+                  </Section>
+
+                  <Section title="Team notes">
+                    <NotesSection lead={lead} onChanged={refresh} />
                   </Section>
 
                   <Section title="Consent">

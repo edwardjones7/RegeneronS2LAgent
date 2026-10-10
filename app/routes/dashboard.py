@@ -71,8 +71,14 @@ def logout():
 
 
 @router.get("/{asset:path}")
-def asset(asset: str):
-    """Build output: hashed JS/CSS/fonts under _next/ (cached forever) plus favicon etc."""
+def asset(asset: str, request: Request, cmm_session: str | None = Cookie(default=None)):
+    """Build output: other dashboard pages (behind login), hashed JS/CSS/fonts under _next/
+    (cached forever), favicon etc."""
+    page = (OUT_DIR / f"{asset.rstrip('/')}.html").resolve()
+    if page.is_relative_to(OUT_DIR) and page.is_file() and asset not in ("login", "opt-in"):
+        if not auth.valid_session(cmm_session):
+            return RedirectResponse(f"/dashboard/login?next={quote(request.url.path)}", status_code=303)
+        return FileResponse(page, headers=NO_STORE)
     path = (OUT_DIR / asset).resolve()
     if not path.is_relative_to(OUT_DIR) or not path.is_file() or path.suffix == ".html":
         raise HTTPException(404)

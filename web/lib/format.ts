@@ -46,7 +46,7 @@ export const initials = (l: Pick<LeadSummary, "first_name" | "last_name">) =>
   `${l.first_name?.[0] ?? ""}${l.last_name?.[0] ?? ""}`.toUpperCase() || "?"
 
 export const sourceLabel = (s: string) =>
-  ({ demo_form: "Ad opt-in form", web_form: "Web form", mock: "Mock call", text_test: "Text test", browser_test: "Browser test" })[s] ??
+  ({ demo_form: "Ad opt-in form", web_form: "Web form", mock: "Mock call", text_test: "Text test", browser_test: "Browser test", simulation: "Text simulation", scorecard: "Scorecard" })[s] ??
   s
 
 export function formatVisit(local: string) {

@@ -69,10 +69,10 @@ def campaign_overview(campaign_id: str, s: Session = Depends(get_session)):
     c = get_campaign(campaign_id)
     if c is None:
         raise HTTPException(404, "unknown campaign")
-    counts = dict(
-        s.execute(select(Lead.status, func.count()).where(Lead.campaign_id == campaign_id).group_by(Lead.status)).all()
-    )
-    leads = s.scalars(select(Lead).where(Lead.campaign_id == campaign_id)).all()
+    real = (Lead.campaign_id == campaign_id) & (Lead.source != "scorecard")
+    counts = dict(s.execute(select(Lead.status, func.count()).where(real).group_by(Lead.status)).all())
+    leads = s.scalars(select(Lead).where(real)).all()
+    decisions = {l.id: service.current_decision(l) for l in leads}
     speeds = [x for x in (service.seconds_to_first_call(l) for l in leads) if x is not None]
     ring = [
         (c.ringing_at - l.created_at).total_seconds()
@@ -98,6 +98,13 @@ def campaign_overview(campaign_id: str, s: Session = Depends(get_session)):
         "median_seconds_to_first_call": median(speeds) if speeds else None,
         "median_seconds_to_ring": round(median(ring), 1) if ring else None,
         "reached": reached,
+        "funnel": {
+            "opted_in": len(leads),
+            "reached": reached,
+            "screened": sum(1 for l in leads if decisions[l.id].state in ("fit", "not_a_fit", "needs_review")),
+            "looked_like_fit": sum(1 for l in leads if decisions[l.id].state == "fit"),
+            "booked": sum(1 for l in leads if l.status == "booked"),
+        },
         "needs_attention": [lead_summary(l) for l in leads if l.status in ATTENTION_STATUSES],
     }
 
@@ -111,7 +118,7 @@ def calls_live(campaign_id: str | None = None, s: Session = Depends(get_session)
 
 @router.get("/campaigns/{campaign_id}/leads")
 def campaign_leads(campaign_id: str, status: str | None = None, s: Session = Depends(get_session)):
-    q = select(Lead).where(Lead.campaign_id == campaign_id).order_by(Lead.created_at.desc())
+    q = select(Lead).where(Lead.campaign_id == campaign_id, Lead.source != "scorecard").order_by(Lead.created_at.desc())
     if status:
         q = q.where(Lead.status == status)
     return [lead_summary(l) for l in s.scalars(q)]

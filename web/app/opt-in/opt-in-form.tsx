@@ -8,6 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
+
+import { PhoneMockup } from "./phone-mockup"
 
 const CAMPAIGN_ID = "olatorepatide-nct07685808"
 const CONSENT =
@@ -78,11 +81,12 @@ export function OptInForm() {
       <Card className="shadow-[0_8px_32px_-12px_rgba(16,24,40,0.14)]" aria-live="polite">
         <CardContent className="animate-in py-4 duration-300 fade-in zoom-in-95">
           <div className="flex flex-col items-center text-center">
-            <span className="relative grid size-14 place-items-center rounded-full bg-good-soft text-good">
+            {calling && <PhoneMockup />}
+            <span className={cn("relative grid size-14 place-items-center rounded-full bg-good-soft text-good", calling && "hidden")}>
               {calling && <span className="absolute inset-0 animate-ping rounded-full bg-good/20 motion-reduce:hidden" aria-hidden />}
               {calling ? <PhoneCall className="size-6" aria-hidden /> : queued ? <Clock className="size-6" aria-hidden /> : <CheckCircle2 className="size-6" aria-hidden />}
             </span>
-            <h2 className="mt-4 text-xl font-semibold tracking-tight">
+            <h2 className="mt-6 text-xl font-semibold tracking-tight">
               {calling ? "Your phone will ring in a few seconds" : queued ? "We'll call you soon" : "Thanks, we've got your request"}
             </h2>
             <p className="mt-1.5 text-sm text-muted-foreground">

@@ -3,10 +3,12 @@
 
 export class AuthError extends Error {}
 
-export async function api<T>(path: string, signal?: AbortSignal): Promise<T> {
+export async function api<T>(path: string, signal?: AbortSignal, init?: { method?: string; body?: unknown }): Promise<T> {
   const res = await fetch(path, {
+    method: init?.method ?? "GET",
     credentials: "same-origin",
-    headers: { Accept: "application/json" },
+    headers: { Accept: "application/json", ...(init?.body !== undefined ? { "Content-Type": "application/json" } : {}) },
+    body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
     cache: "no-store",
     signal,
   })
@@ -16,6 +18,16 @@ export async function api<T>(path: string, signal?: AbortSignal): Promise<T> {
     window.location.href = `/dashboard/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`
     throw new AuthError("signed out")
   }
-  if (!res.ok) throw new Error(`${path}: ${res.status}`)
+  if (!res.ok) {
+    let detail = `${res.status}`
+    try {
+      const j = await res.json()
+      detail = typeof j.detail === "string" ? j.detail : detail
+    } catch {}
+    throw new Error(detail)
+  }
   return res.json() as Promise<T>
 }
+
+/** POST JSON to the backend (coordinator actions). */
+export const post = <T,>(path: string, body: unknown = {}) => api<T>(path, undefined, { method: "POST", body })

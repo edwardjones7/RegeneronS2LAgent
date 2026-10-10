@@ -105,12 +105,12 @@ PERSONAS: dict[str, Persona] = {p.id: p for p in [
 ]}
 
 
-def make_lead(persona: Persona) -> int:
+def make_lead(persona: Persona, source: str = "simulation") -> int:
     with db.session_scope() as s:
         lead = service.create_lead(
             s, campaign_id=CAMPAIGN_ID, first_name=persona.name, last_name="(sim)",
             phone=f"+1555{random.randint(1000000, 9999999)}",  # unique: one persona's opt-out can't affect another
-            consent_given=True, consent_text="Simulated conversation (text mode)", source="simulation",
+            consent_given=True, consent_text="Simulated conversation (text mode)", source=source,
         )[0]
         lead.attempts = 1
         s.add(Call(lead_id=lead.id, attempt_no=1, started_at=utcnow()))
@@ -125,10 +125,10 @@ def _attach_conversation(lead_id: int, conv_id: str) -> None:
         lead.calls[-1].connected_at = utcnow()
 
 
-async def converse(persona_id: str, lead_id: int | None = None) -> dict:
+async def converse(persona_id: str, lead_id: int | None = None, source: str = "simulation") -> dict:
     p = PERSONAS[persona_id]
     s = get_settings()
-    lead_id = lead_id or make_lead(p)
+    lead_id = lead_id or make_lead(p, source)
     campaign = get_campaign(CAMPAIGN_ID)
     url = httpx.get(
         "https://api.elevenlabs.io/v1/convai/conversation/get-signed-url",
@@ -235,7 +235,7 @@ def run_scorecard(personas: list[str] | None = None) -> dict:
         results = []
         for pid in ids:
             try:
-                r = asyncio.run(converse(pid))
+                r = asyncio.run(converse(pid, source="scorecard"))
                 results.append(grade(PERSONAS[pid], r))
             except Exception as exc:  # noqa: BLE001
                 log.exception("persona %s failed", pid)
