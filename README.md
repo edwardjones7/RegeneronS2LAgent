@@ -4,6 +4,20 @@ When someone opts in to a clinical-trial ad, **Ava** calls them within seconds. 
 
 > **Hackathon demo. Not IRB-approved.** The study wording is drawn from the public ClinicalTrials.gov record **[NCT07685808](https://clinicaltrials.gov/study/NCT07685808)** (Regeneron, olatorepatide, Phase 2, adults with overweight/obesity without diabetes). Clinic details, slots, and phone numbers are demo data. Only call teammates' phones.
 
+## What's in it
+
+- **Live call view:** a stopwatch from opt-in to the phone ringing and being answered (from Twilio call status), a live transcript, and a question tracker.
+- **Safety scorecard:** every persona from the brief (interested, not a fit, confused, hard of hearing, Spanish, angry, chest pain, wants a human, medical and off-script questions) is run against the live agent and graded deterministically.
+- **New campaign from any NCT ID:**
+  - ClinicalTrials.gov plus Gemini (free tier) draft the script.
+  - Every fact must quote the record, or it's dropped.
+  - A coordinator edits and approves it before go-live.
+  - One agent serves every study through per-call script overrides.
+- **Coordinator actions:** resolve flags, add notes, have Ava call again, and reschedule or cancel visits. A calendar view shows booked visits.
+- **Two-way texting:** patients reply C to confirm, R to reschedule (then pick 1, 2 or 3), or CANCEL; anything else is forwarded to the coordinator. Day-before reminders and `.ics` calendar links are included.
+- **Spanish:** Ava uses pre-written Spanish wording only (labeled as a demo translation, not validated). Other languages get a human callback.
+- **"Not interested" is not a do-not-call:** only an explicit request stops future calls.
+
 ## How it works
 
 ```
@@ -26,7 +40,7 @@ When someone opts in to a clinical-trial ad, **Ava** calls them within seconds. 
 ```bash
 uv sync
 uv run python scripts/mock_call.py --persona all   # 7 scripted calls through the real backend
-uv run pytest                                       # 63 tests
+uv run pytest                                       # 82 tests
 ```
 
 ## Run it for real
@@ -60,6 +74,17 @@ Performance:
 - The lead panel is code-split and loads on demand.
 - Polling pauses while the tab is hidden.
 - Gzip on, hashed assets cached as immutable.
+
+## Deploy on Vercel
+
+`vercel.json` defines two **Services** in one project: `web` (the Next.js dashboard and opt-in page) and `api` (FastAPI). There is no long-running process on Vercel, so **Vercel Cron** calls `/cron/tick` for retries, queued leads, reminders and stale calls, and calls are dialed inline.
+
+1. Log in and link the project: `vercel login`, then `vercel link`.
+2. Add Postgres (Neon) from the Marketplace: `vercel integration add neon`. This sets `DATABASE_URL`.
+3. Add the env vars from `.env.example`, plus `CRON_SECRET`, `DASHBOARD_PASSWORD` and `GEMINI_API_KEY`: `vercel env add …`.
+4. Run `vercel --prod`. Then set `PUBLIC_BASE_URL` to the production URL and run `make elevenlabs` so ElevenLabs and Twilio point at it.
+
+Hobby plans only allow daily crons. On Hobby, change the schedule in `vercel.json`; retries then run when the cron fires.
 
 ## Read API (dashboard source of truth)
 
