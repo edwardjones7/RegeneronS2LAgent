@@ -11,6 +11,7 @@ The "patient" side is a fixed script of lines sent one per agent turn.
 import argparse
 import asyncio
 import json
+import random
 import sys
 from pathlib import Path
 
@@ -46,7 +47,9 @@ def make_lead(name: str) -> int:
     with db.session_scope() as s:
         lead = service.create_lead(
             s, campaign_id="olatorepatide-nct07685808", first_name=name, last_name="Text",
-            phone="+15550000002", consent_given=True, consent_text="text-mode test", source="text_test",
+            # Unique number, so one persona's opt-out can't affect the next.
+            phone=f"+1555{random.randint(1000000, 9999999)}",
+            consent_given=True, consent_text="text-mode test", source="text_test",
         )[0]
         lead.attempts = 1
         s.add(Call(lead_id=lead.id, attempt_no=1))
