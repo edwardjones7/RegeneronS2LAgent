@@ -146,7 +146,7 @@ def score_answer(question: Question, raw: str) -> AnswerRecord:
         n = parse_age(raw)
         if n is None:
             return AnswerRecord(question.id, raw, "", "unsure")
-        ok = question.min is None or n >= question.min
+        ok = (question.min is None or n >= question.min) and (question.max is None or n <= question.max)
         return AnswerRecord(question.id, raw, f"{n:g}", "fit" if ok else "disqualify")
     if question.kind == "height":
         n = parse_height_inches(raw)
@@ -159,6 +159,8 @@ def score_answer(question: Question, raw: str) -> AnswerRecord:
         return AnswerRecord(question.id, raw, yn, "unsure")
     if question.role == "disqualify_if_yes":
         return AnswerRecord(question.id, raw, yn, "disqualify" if yn == "yes" else "fit")
+    if question.role == "require_yes":
+        return AnswerRecord(question.id, raw, yn, "fit" if yn == "yes" else "disqualify")
     if question.role == "comorbidity":
         return AnswerRecord(question.id, raw, yn, "fit" if yn == "yes" else "info")
     return AnswerRecord(question.id, raw, yn, "info")

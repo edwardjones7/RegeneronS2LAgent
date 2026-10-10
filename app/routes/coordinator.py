@@ -135,6 +135,61 @@ def visits(campaign_id: str, s: Session = Depends(get_session)):
     ]
 
 
+# ---------------------------------------------------------------- campaigns from ClinicalTrials.gov
+
+
+class DraftIn(BaseModel):
+    nct_id: str
+
+
+class CampaignIn(BaseModel):
+    campaign: dict
+    note: str = ""
+
+
+@router.post("/campaigns/draft")
+def draft(body: DraftIn):
+    from app.drafter import DraftError, draft_campaign
+
+    try:
+        return draft_campaign(body.nct_id)
+    except DraftError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+@router.post("/campaigns")
+def approve_campaign(body: CampaignIn, s: Session = Depends(get_session)):
+    """A coordinator approved a (possibly edited) draft: it goes live for new leads."""
+    from app.campaigns import Campaign, file_campaigns, invalidate_campaign_cache
+    from app.models import CampaignRecord
+
+    try:
+        c = Campaign.model_validate(body.campaign)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)[:500]) from exc
+    if c.id in file_campaigns():
+        raise HTTPException(409, "That id belongs to a built-in campaign.")
+    rec = s.get(CampaignRecord, c.id)
+    if rec:
+        rec.data = c.model_dump()
+    else:
+        s.add(CampaignRecord(id=c.id, data=c.model_dump(), approved_by_note=body.note))
+    s.flush()
+    invalidate_campaign_cache()
+    slots.seed_slots(s, c)
+    return {"id": c.id}
+
+
+@router.get("/campaigns/{campaign_id}/config")
+def campaign_config(campaign_id: str):
+    c = get_campaign(campaign_id)
+    if c is None:
+        raise HTTPException(404, "unknown campaign")
+    from app.prompt import system_prompt
+
+    return {"campaign": c.model_dump(), "prompt": system_prompt(c)}
+
+
 # ---------------------------------------------------------------- demo scenarios + scorecard
 
 

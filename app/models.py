@@ -121,6 +121,17 @@ class Event(Base):
     lead: Mapped[Lead] = relationship(back_populates="events")
 
 
+class CampaignRecord(Base):
+    """A campaign drafted from ClinicalTrials.gov and approved in the dashboard."""
+
+    __tablename__ = "campaign"
+
+    id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    data: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(default=utcnow)
+    approved_by_note: Mapped[str] = mapped_column(Text, default="")
+
+
 class ScorecardRun(Base):
     """One run of the persona suite against the live agent, with graded results."""
 

@@ -243,7 +243,12 @@ def main():
             "conversation": {"max_duration_seconds": 900},
         },
         # text_only lets scripts/text_call.py test the real agent + tools without a phone.
-        "platform_settings": {"overrides": {"conversation_config_override": {"conversation": {"text_only": True}}}},
+        # Per-call overrides: each campaign's prompt/first message ride on the call (one agent, many
+        # studies); text_only lets scripts/text_call.py test the real agent + tools without a phone.
+        "platform_settings": {"overrides": {"conversation_config_override": {
+            "agent": {"first_message": True, "prompt": {"prompt": True}},
+            "conversation": {"text_only": True},
+        }}},
     }
     if state.get("webhook_id"):
         agent_body["platform_settings"] |= {

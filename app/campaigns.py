@@ -18,14 +18,16 @@ class CallingHours(BaseModel):
 class Fact(BaseModel):
     fact: str
     source: Literal["ctgov", "demo"]
+    evidence: str | None = None  # exact phrase from the public record backing this fact
 
 
 class Question(BaseModel):
     id: str
     kind: Literal["number", "height", "weight", "yes_no"]
     ask: str
-    role: Literal["disqualify_if_yes", "comorbidity", "info"] = "info"
+    role: Literal["disqualify_if_yes", "require_yes", "comorbidity", "info"] = "info"
     min: float | None = None
+    max: float | None = None
     only_if: Literal["bmi_27_to_30"] | None = None
     unsure_flags: bool = False
     criterion: str | None = None  # the protocol criterion this question checks
@@ -77,12 +79,47 @@ def load_campaign_file(path: Path) -> Campaign:
 
 
 @lru_cache
-def all_campaigns() -> dict[str, Campaign]:
+def file_campaigns() -> dict[str, Campaign]:
     out = {}
     for path in sorted(Path(get_settings().campaigns_dir).glob("*.yaml")):
         c = load_campaign_file(path)
         out[c.id] = c
     return out
+
+
+_db_cache: tuple[float, dict[str, Campaign]] | None = None
+
+
+def db_campaigns() -> dict[str, Campaign]:
+    """Campaigns approved in the dashboard (stored in the database), cached for a few seconds."""
+    global _db_cache
+    import time
+
+    if _db_cache and time.monotonic() - _db_cache[0] < 5:
+        return _db_cache[1]
+    from sqlalchemy import select
+
+    from app.db import session_scope
+    from app.models import CampaignRecord
+
+    out: dict[str, Campaign] = {}
+    try:
+        with session_scope() as s:
+            for rec in s.scalars(select(CampaignRecord).order_by(CampaignRecord.created_at)):
+                out[rec.id] = Campaign.model_validate(rec.data)
+    except Exception:  # noqa: BLE001 - e.g. table not created yet
+        return {}
+    _db_cache = (time.monotonic(), out)
+    return out
+
+
+def invalidate_campaign_cache() -> None:
+    global _db_cache
+    _db_cache = None
+
+
+def all_campaigns() -> dict[str, Campaign]:
+    return {**file_campaigns(), **db_campaigns()}
 
 
 def get_campaign(campaign_id: str) -> Campaign | None:

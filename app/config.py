@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     elevenlabs_llm: str = ""
     elevenlabs_voice_id: str = ""
 
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-flash-latest"
+
     twilio_account_sid: str = ""
     twilio_auth_token: str = Field(
         default="", validation_alias=AliasChoices("TWILIO_AUTH_TOKEN", "TWILIO_API_KEY")

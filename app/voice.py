@@ -19,6 +19,12 @@ class VoiceError(RuntimeError):
     pass
 
 
+def campaign_override(campaign: Campaign) -> dict:
+    from app.prompt import first_message, system_prompt
+
+    return {"agent": {"first_message": first_message(campaign), "prompt": {"prompt": system_prompt(campaign)}}}
+
+
 class MockVoice:
     """Pretends to dial. `scripts/mock_call.py` then plays the conversation through the tool endpoints."""
 
@@ -49,6 +55,8 @@ class ElevenLabsVoice:
             "conversation_initiation_client_data": {
                 "dynamic_variables": {"first_name": first_name, "lead_id": str(lead_id)},
                 "user_id": f"lead-{lead_id}",
+                # One agent serves every study: each call carries its campaign's script.
+                "conversation_config_override": campaign_override(campaign),
             },
             "telephony_call_config": {"ringing_timeout_secs": 30},
         }

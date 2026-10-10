@@ -18,7 +18,9 @@ import httpx
 import websockets
 
 from app import db, service
+from app.campaigns import get_campaign
 from app.config import get_settings
+from app.voice import campaign_override
 from app.models import Call, Lead, LeadStatus, utcnow
 
 log = logging.getLogger("simulate")
@@ -125,6 +127,7 @@ async def converse(persona_id: str, lead_id: int | None = None) -> dict:
     p = PERSONAS[persona_id]
     s = get_settings()
     lead_id = lead_id or make_lead(p)
+    campaign = get_campaign(CAMPAIGN_ID)
     url = httpx.get(
         "https://api.elevenlabs.io/v1/convai/conversation/get-signed-url",
         params={"agent_id": s.elevenlabs_agent_id}, headers={"xi-api-key": s.elevenlabs_api_key}, timeout=20,
@@ -133,7 +136,7 @@ async def converse(persona_id: str, lead_id: int | None = None) -> dict:
     async with websockets.connect(url, max_size=2**22) as ws:
         await ws.send(json.dumps({
             "type": "conversation_initiation_client_data",
-            "conversation_config_override": {"conversation": {"text_only": True}},
+            "conversation_config_override": {"conversation": {"text_only": True}, **campaign_override(campaign)},
             "dynamic_variables": {"first_name": p.name, "lead_id": str(lead_id)},
         }))
         loop = asyncio.get_running_loop()
