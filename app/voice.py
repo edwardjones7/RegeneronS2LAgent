@@ -60,6 +60,11 @@ class ElevenLabsVoice:
             raise VoiceError(f"outbound-call refused: {data.get('message')}")
         return {"conversation_id": data.get("conversation_id"), "call_sid": data.get("callSid")}
 
+    def fetch_conversation(self, conversation_id: str) -> dict:
+        r = self.http.get(f"/v1/convai/conversations/{conversation_id}")
+        r.raise_for_status()
+        return r.json()
+
     def fetch_audio(self, conversation_id: str) -> bytes:
         r = self.http.get(f"/v1/convai/conversations/{conversation_id}/audio")
         r.raise_for_status()

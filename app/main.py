@@ -21,6 +21,7 @@ log = logging.getLogger("app")
 
 def worker_tick() -> int:
     """Dial queued leads whose calling window opened and no-answer leads due for a retry."""
+    webhooks.poll_open_calls()
     with db.session_scope() as s:
         due = service.due_leads(s)
     for lead_id in due:
@@ -46,8 +47,11 @@ async def lifespan(app: FastAPI):
         for c in all_campaigns().values():
             seed_slots(s, c)
     s = get_settings()
+    interval = s.worker_interval_secs
+    if not s.elevenlabs_webhook_secret and not s.mock_mode:
+        interval = min(interval, 15)  # no webhook: we poll ElevenLabs for call results, so check often
     log.info("mock_mode=%s public_base_url=%s", s.mock_mode, s.public_base_url)
-    task = asyncio.create_task(_worker_loop(s.worker_interval_secs))
+    task = asyncio.create_task(_worker_loop(interval))
     yield
     task.cancel()
 

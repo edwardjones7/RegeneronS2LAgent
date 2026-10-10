@@ -300,7 +300,8 @@ def tool_book_visit(s: Session, lead: Lead, slot_id: int) -> str:
             campaign.coordinator_phone,
             sms.coordinator_booked(
                 lead.first_name, lead.last_name, when, campaign, d.answered, d.total,
-                d.flags, seconds_to_first_call(lead), record_link(lead),
+                d.flags + [f["detail"] for f in lead.flags if f["type"] == "escalation"],
+                seconds_to_first_call(lead), record_link(lead),
             ),
             "coordinator",
         ),
@@ -327,7 +328,7 @@ def tool_opt_out(s: Session, lead: Lead, reason: str = "") -> str:
 def tool_escalate(s: Session, lead: Lead, reason: str) -> str:
     add_flag(lead, "escalation", reason)
     set_status(s, lead, LeadStatus.NEEDS_HUMAN, reason)
-    _alert_coordinator(s, lead, "needs_human", f"Reason: {reason}.")
+    _alert_coordinator(s, lead, "needs_human", f"Reason: {reason.rstrip('.?! ')}.")
     return "Noted: the research team has been alerted. Follow the safety rule that applies."
 
 

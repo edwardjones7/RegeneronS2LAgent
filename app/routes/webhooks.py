@@ -5,12 +5,16 @@ import hmac
 import json
 import logging
 import time
+from datetime import timedelta
 
 from fastapi import APIRouter, HTTPException, Request
+from sqlalchemy import select
 
 from app import service
 from app.config import get_settings
 from app.db import session_scope
+from app.models import Call, utcnow
+from app.voice import VoiceError, get_voice
 
 router = APIRouter(prefix="/webhooks")
 log = logging.getLogger("webhooks")
@@ -50,6 +54,44 @@ async def elevenlabs(request: Request):
     payload = json.loads(raw)
     handle_event(payload)
     return {"ok": True}
+
+
+NOT_CONNECTED = {"busy", "no_answer", "failed"}
+
+
+def poll_open_calls(min_age_secs: int = 45) -> int:
+    """Fallback when the post-call webhook isn't set up: ask ElevenLabs about calls we never heard back on."""
+    try:
+        voice = get_voice()
+    except VoiceError:
+        return 0  # real calls not set up yet
+    if not hasattr(voice, "fetch_conversation"):
+        return 0
+    cutoff = utcnow() - timedelta(seconds=min_age_secs)
+    with session_scope() as s:
+        open_ids = list(
+            s.scalars(
+                select(Call.provider_conversation_id).where(
+                    Call.ended_at.is_(None), Call.provider_conversation_id.is_not(None), Call.started_at < cutoff
+                )
+            )
+        )
+    settled = 0
+    for conv_id in open_ids:
+        try:
+            conv = voice.fetch_conversation(conv_id)
+        except Exception:  # noqa: BLE001
+            log.exception("couldn't fetch conversation %s", conv_id)
+            continue
+        if conv.get("status") not in ("done", "failed"):
+            continue
+        result = ((conv.get("metadata") or {}).get("phone_call") or {}).get("call_result")
+        if result in NOT_CONNECTED:
+            handle_event({"type": "call_initiation_failure", "data": {"conversation_id": conv_id, "failure_reason": result}})
+        else:
+            handle_event({"type": "post_call_transcription", "data": conv})
+        settled += 1
+    return settled
 
 
 def handle_event(payload: dict) -> str:
