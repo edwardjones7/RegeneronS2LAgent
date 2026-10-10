@@ -213,6 +213,12 @@ def main():
                     "tool_ids": list(tool_ids.values()),
                     "built_in_tools": {
                         "end_call": {"type": "system", "name": "end_call", "description": "", "params": {"system_tool_type": "end_call"}},
+                        "language_detection": {
+                            "type": "system",
+                            "name": "language_detection",
+                            "description": "",
+                            "params": {"system_tool_type": "language_detection"},
+                        },
                         "voicemail_detection": {
                             "type": "system",
                             "name": "voicemail_detection",
@@ -239,6 +245,12 @@ def main():
                 },
             },
             "tts": {"voice_id": settings.elevenlabs_voice_id or DEFAULT_VOICE, "model_id": "eleven_flash_v2"},
+            # Spanish switches to the multilingual voice model; wording comes from the campaign file.
+            **(
+                {"language_presets": {lang: {"overrides": {"agent": {"first_message": t.first_message}}}
+                                      for lang, t in campaign.translations.items()}}
+                if campaign.translations else {}
+            ),
             "turn": {"turn_timeout": 7, "turn_eagerness": "normal"},
             "conversation": {"max_duration_seconds": 900},
         },
@@ -292,6 +304,19 @@ def main():
             save_state(state)
             print(f"✓ Twilio number {settings.twilio_from_number} imported")
         set_env("ELEVENLABS_PHONE_NUMBER_ID", state["phone_number_id"])
+        # Text replies (C / R / CANCEL / questions) come back to this server.
+        nums = httpx.get(
+            f"https://api.twilio.com/2010-04-01/Accounts/{settings.twilio_account_sid}/IncomingPhoneNumbers.json",
+            params={"PhoneNumber": settings.twilio_from_number},
+            auth=(settings.twilio_account_sid, settings.twilio_auth_token), timeout=20,
+        ).json().get("incoming_phone_numbers", [])
+        if nums:
+            r = httpx.post(
+                f"https://api.twilio.com/2010-04-01/Accounts/{settings.twilio_account_sid}/IncomingPhoneNumbers/{nums[0]['sid']}.json",
+                data={"SmsUrl": f"{base}/webhooks/twilio/sms", "SmsMethod": "POST"},
+                auth=(settings.twilio_account_sid, settings.twilio_auth_token), timeout=20,
+            )
+            print(f"{'✓' if r.status_code < 300 else '!'} Twilio texts -> {base}/webhooks/twilio/sms")
     else:
         print("! TWILIO_FROM_NUMBER not set: buy a Twilio number, add it to .env, and re-run to enable real calls.")
 

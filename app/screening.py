@@ -109,9 +109,10 @@ def parse_age(text: str) -> float | None:
     return n if n is not None and 0 < n < 120 else None
 
 
-_UNSURE = r"\b(not sure|don'?t know|do not know|unsure|maybe|no idea|can'?t remember|cannot remember|i think|not certain|possibly|might have)\b"
-_NO = r"\b(no|nope|nah|never|not|don'?t|haven'?t|hasn'?t|didn'?t|negative)\b"
-_YES = r"\b(yes|yeah|yep|yup|correct|i do|i have|i did|sure|uh huh|affirmative|right)\b"
+_UNSURE = (r"\b(not sure|don'?t know|do not know|unsure|maybe|no idea|can'?t remember|cannot remember|i think|not certain"
+           r"|possibly|might have|no s[eé]|no estoy segur[oa]|tal vez|quiz[aá]s?|no recuerdo|creo que)\b")
+_NO = r"\b(no|nope|nah|never|not|don'?t|haven'?t|hasn'?t|didn'?t|negative|nunca|jam[aá]s)\b"
+_YES = r"(\b(yes|yeah|yep|yup|correct|i do|i have|i did|sure|uh huh|affirmative|right|si|claro|correcto|as[ií] es)\b|\bs[ií]\b|sí)"
 
 
 def parse_yes_no(text: str) -> str:

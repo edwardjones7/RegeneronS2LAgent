@@ -33,6 +33,17 @@ class Question(BaseModel):
     criterion: str | None = None  # the protocol criterion this question checks
 
 
+class Translation(BaseModel):
+    """Pre-written wording in another language. Ava uses only this; she never translates on the fly."""
+
+    validated: bool = False  # True only once a certified translator / IRB has approved it
+    first_message: str
+    one_liner: str
+    facts: list[str]
+    questions: dict[str, str]  # question id -> wording
+    voicemail: str = ""
+
+
 class BmiRules(BaseModel):
     fit_min: float = 30.0
     fit_max_exclusive: float = 45.0
@@ -60,6 +71,7 @@ class Campaign(BaseModel):
     approved_facts: list[Fact]
     prescreen_questions: list[Question]
     bmi_rules: BmiRules = BmiRules()
+    translations: dict[str, Translation] = {}
 
     @model_validator(mode="after")
     def _check(self):

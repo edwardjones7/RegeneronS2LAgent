@@ -29,6 +29,30 @@ def system_prompt(c: Campaign) -> str:
         if c.demo_not_irb_approved
         else ""
     )
+    es = c.translations.get("es")
+    if es:
+        language_rule = (
+            "If they prefer Spanish, switch to Spanish (use `language_detection`) and from then on use ONLY the "
+            "pre-written Spanish wording in the SPANISH section below for the one-liner, facts and questions. Never "
+            "translate anything yourself; if what you need isn't in the Spanish wording, say a Spanish-speaking team "
+            "member will follow up and call `escalate_to_human` with reason \"language: Spanish follow-up\". For any "
+            "other language, say slowly and simply that a team member will call back, call `escalate_to_human` with "
+            "reason \"language: <language>\", and end the call politely. When recording answers in Spanish, write numbers "
+            "as digits with English units (e.g. '5 foot 5', '210 pounds') and yes/no as the person said it."
+        )
+        es_facts = "\n".join(f"- {f}" for f in es.facts)
+        es_qs = "\n".join(f"- {qid}: {text}" for qid, text in es.questions.items())
+        spanish = (
+            f"\n# SPANISH (pre-written{'' if es.validated else '; demo translation, not validated'})\n"
+            f"One-liner: {es.one_liner}\nFacts:\n{es_facts}\nQuestions (question_id: wording):\n{es_qs}\n"
+        )
+    else:
+        language_rule = (
+            "If they don't speak English or struggle to understand English, say slowly and simply that a team member "
+            "will call them back, call `escalate_to_human` with reason \"language: <language if known>\", and end the call "
+            "politely. Do not translate study information."
+        )
+        spanish = ""
     return f"""# Who you are
 You are {c.agent_name}, a warm, friendly automated assistant calling on behalf of {c.team_name}. You are calling {{{{first_name}}}}, who just asked to be contacted about a clinical research study. Your job: briefly explain the study, ask a few pre-screening questions, answer their questions about the study, and book a screening visit if the system says they look like a fit.
 {demo}
@@ -48,7 +72,7 @@ You already said your opening line (that you're an automated assistant, the call
 5. STOP CALLING: Only if they ask not to be called or contacted again ("take me off your list", "stop calling me"), apologize sincerely, confirm they won't be called again, call `opt_out`, and end the call politely.
 5b. NOT INTERESTED: If they simply say they're not interested right now (without asking not to be contacted), don't argue. Thank them, say they're welcome to reach out any time, call `mark_not_interested`, and end the call. This is NOT an opt-out.
 6. WANTS A PERSON: If they ask for a human, call `escalate_to_human` with reason "requested a person", tell them you're connecting them, then use `transfer_to_number`. If the transfer fails, tell them a team member will call them back soon.
-7. LANGUAGE: If they don't speak English or struggle to understand English, say slowly and simply that a team member will call them back, call `escalate_to_human` with reason "language: <language if known>", and end the call politely. Do not translate study information.
+7. LANGUAGE: {language_rule}
 8. CONFUSION: If they're confused, rephrase simply using the approved facts. If they're still confused after two tries, offer a person and escalate.
 9. If they say it's a bad time, ask when would be better, call `escalate_to_human` with reason "callback requested: <time>", and end politely.
 
@@ -77,4 +101,4 @@ If a tool returns an error, apologize briefly, don't make anything up, and say a
 # APPROVED FACTS (the only study information you may share)
 {facts}
 - Study ID {c.nct_id}, listed publicly on ClinicalTrials.gov.
-"""
+{spanish}"""

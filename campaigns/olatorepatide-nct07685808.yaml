@@ -113,3 +113,35 @@ bmi_rules:
   fit_min: 30.0
   fit_max_exclusive: 45.0
   comorbidity_min: 27.0
+
+# Pre-written Spanish wording. Ava switches to Spanish only with this text and never
+# translates study information on the fly. DEMO TRANSLATION: not validated by a certified
+# translator or an IRB; a real deployment needs approved wording before `validated: true`.
+translations:
+  es:
+    validated: false
+    first_message: "Hola {{first_name}}, soy Ava, una asistente automatizada del equipo de investigación de Regeneron. Le informo que esta llamada se graba. Usted pidió información sobre nuestro estudio de control de peso. ¿Tiene un minuto?"
+    one_liner: "Es un estudio de investigación que prueba un medicamento experimental para el control del peso en adultos con sobrepeso u obesidad que no tienen diabetes."
+    voicemail: "Hola, soy Ava, una asistente automatizada del equipo de investigación de Regeneron, devolviendo su solicitud. Intentaremos llamarle más tarde. Que tenga un buen día."
+    facts:
+      - "El estudio prueba un medicamento experimental llamado olatorepatide."
+      - "Olatorepatide pertenece a la familia de medicamentos GLP-1 y GIP."
+      - "El estudio es para adultos de 18 años o más con sobrepeso u obesidad que no tienen diabetes."
+      - "Es un estudio de Fase 2: todavía se está evaluando la seguridad del medicamento y qué tan bien funciona."
+      - "Algunas personas recibirán un placebo, es decir, una sustancia inactiva de apariencia similar, asignado al azar."
+      - "Durante el estudio, ni los participantes ni el equipo sabrán quién recibe el medicamento o el placebo."
+      - "La participación dura unas 60 semanas, un poco más de un año."
+      - "El estudio planea incluir a unas 360 personas en centros de Estados Unidos."
+      - "El patrocinador es Regeneron Pharmaceuticals."
+      - "La primera visita es una visita de evaluación de aproximadamente una hora, y es gratuita. (dato de demostración)"
+      - "La participación es voluntaria y puede dejarla en cualquier momento. (dato de demostración)"
+    questions:
+      age: "Primero, ¿cuántos años tiene?"
+      height: "¿Cuánto mide?"
+      weight: "¿Y cuánto pesa aproximadamente en este momento?"
+      comorbidity: "¿Algún médico le ha dicho que tiene alguna de estas condiciones: presión alta, colesterol alto, prediabetes, apnea del sueño, enfermedad del corazón o insuficiencia cardíaca, o un derrame cerebral u otra enfermedad de los vasos sanguíneos del cerebro?"
+      diabetes: "¿Alguna vez le han diagnosticado diabetes tipo 1 o tipo 2?"
+      weight_change: "En los últimos tres meses, más o menos, ¿su peso ha subido o bajado más de once libras, es decir, cinco kilos?"
+      bariatric_surgery: "¿Alguna vez ha tenido una cirugía para bajar de peso, como un bypass gástrico, una manga o una banda, incluida una cirugía para revisarla o quitarla?"
+      pancreas_gallbladder: "¿Alguna vez ha tenido pancreatitis, inflamación de la vesícula biliar o cálculos en la vesícula que le causaron síntomas?"
+      thyroid_cancer_history: "Última pregunta. ¿Usted o alguien de su familia ha tenido un tipo raro de cáncer de tiroides llamado cáncer medular de tiroides, o una condición llamada MEN 2?"
