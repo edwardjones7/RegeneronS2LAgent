@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weight Management Study</title>
+<style>
+  :root { --brand:#0B6E6E; --text:#0F1B2D; --muted:#4A5568; --bg:#F5F7FA; --card:#fff; --border:#E3E8EF; --warn-bg:#FDF1DE; --warn:#8A4B00; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --brand:#3CC2B8; --text:#E8EDF5; --muted:#B4BFD0; --bg:#0B1220; --card:#111A2B; --border:#22304A; --warn-bg:#33240C; --warn:#F2B04C; }
+  }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; }
+  main { max-width:460px; margin:0 auto; padding:32px 16px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:24px; }
+  h1 { font-size:24px; margin:0 0 6px }
+  p.lead { color:var(--muted); margin:0 0 20px }
+  label { display:block; font-weight:600; font-size:14px; margin:14px 0 6px }
+  input[type=text], input[type=tel] { width:100%; height:44px; border:1px solid var(--border); border-radius:9px; padding:0 12px; font:inherit; background:transparent; color:inherit }
+  .consent { display:flex; gap:10px; align-items:flex-start; font-size:13px; color:var(--muted); margin:18px 0; font-weight:400 }
+  .consent input { margin-top:3px; width:18px; height:18px; flex:none }
+  button { width:100%; height:48px; border:0; border-radius:10px; background:var(--brand); color:#fff; font:600 16px system-ui; cursor:pointer }
+  button:disabled { opacity:.6 }
+  .demo { background:var(--warn-bg); color:var(--warn); border-radius:10px; padding:10px 12px; font-size:13px; margin-bottom:16px }
+  #msg { margin-top:14px; font-size:14px; min-height:20px }
+</style>
+</head>
+<body>
+<main>
+  <div class="demo"><b>Hackathon demo.</b> Not IRB-approved. Only enter a teammate's phone number.</div>
+  <div class="card">
+    <h1>Weight management research study</h1>
+    <p class="lead">Adults living with overweight or obesity, without diabetes, may be able to take part in a research study of an experimental medication (NCT07685808).</p>
+    <form id="f">
+      <label for="first">First name</label>
+      <input id="first" type="text" autocomplete="given-name" required>
+      <label for="last">Last name</label>
+      <input id="last" type="text" autocomplete="family-name">
+      <label for="phone">Mobile phone</label>
+      <input id="phone" type="tel" autocomplete="tel" placeholder="(555) 555-0123" required>
+      <label class="consent"><input id="consent" type="checkbox" required>
+        <span id="consentText">I agree to be called and texted at this number, including by an automated assistant, about this research study. Calls may be recorded. Consent is not a condition of participation. Reply STOP to opt out of texts.</span></label>
+      <button id="go" type="submit">Contact me</button>
+      <div id="msg" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</main>
+<script>
+  const f = document.getElementById('f'), msg = document.getElementById('msg'), go = document.getElementById('go');
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    go.disabled = true; msg.textContent = 'Sending...';
+    try {
+      const r = await fetch('/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        campaign_id: 'olatorepatide-nct07685808',
+        first_name: document.getElementById('first').value,
+        last_name: document.getElementById('last').value,
+        phone: document.getElementById('phone').value,
+        consent_given: document.getElementById('consent').checked,
+        consent_text: document.getElementById('consentText').textContent.trim(),
+        source: 'demo_form',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      })});
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.detail || 'Something went wrong');
+      msg.textContent = data.status === 'calling' ? "Thanks! Your phone will ring in a few seconds." :
+        data.status === 'queued' ? "Thanks! We'll call you during calling hours." : "Thanks, we've got your request.";
+    } catch (err) { msg.textContent = err.message; go.disabled = false; }
+  });
+</script>
+</body>
+</html>
