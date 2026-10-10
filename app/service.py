@@ -252,7 +252,7 @@ def tool_record_answer(s: Session, lead: Lead, question_id: str, answer: str) ->
     add_flag(lead, "needs_review", d.reason)
     set_status(s, lead, LeadStatus.NEEDS_HUMAN, d.reason)
     log_event(s, lead, "screening_complete", result="needs_review", reason=d.reason)
-    _alert_coordinator(s, lead, "needs_human", f"Screening needs review: {d.reason}.")
+    alert_coordinator(s, lead, "needs_human", f"Screening needs review: {d.reason}.")
     return "Screening complete: NEEDS REVIEW. Thank them and say someone from the research team will call back to go over a couple of things, then end the call."
 
 
@@ -297,7 +297,7 @@ def tool_book_visit(s: Session, lead: Lead, slot_id: int) -> str:
     when = slots.short(slot.starts_at)
     client = sms.get_sms()
     for to, body, kind in (
-        (lead.phone, sms.patient_confirmation(lead.first_name, when, campaign), "patient"),
+        (lead.phone, sms.patient_confirmation(lead.first_name, when, campaign, calendar_link(lead.id)), "patient"),
         (
             campaign.coordinator_phone,
             sms.coordinator_booked(
@@ -335,14 +335,14 @@ def tool_not_interested(s: Session, lead: Lead, reason: str = "") -> str:
 def tool_escalate(s: Session, lead: Lead, reason: str) -> str:
     add_flag(lead, "escalation", reason)
     set_status(s, lead, LeadStatus.NEEDS_HUMAN, reason)
-    _alert_coordinator(s, lead, "needs_human", f"Reason: {reason.rstrip('.?! ')}.")
+    alert_coordinator(s, lead, "needs_human", f"Reason: {reason.rstrip('.?! ')}.")
     return "Noted: the research team has been alerted. Follow the safety rule that applies."
 
 
 def tool_flag_emergency(s: Session, lead: Lead, what_they_said: str) -> str:
     add_flag(lead, "emergency", what_they_said)
     set_status(s, lead, LeadStatus.EMERGENCY, what_they_said)
-    _alert_coordinator(s, lead, "emergency", f'They said: "{what_they_said}". Agent told them to call 911.')
+    alert_coordinator(s, lead, "emergency", f'They said: "{what_they_said}". Agent told them to call 911.')
     return "Flagged. Make sure you've told them to hang up and call 911 now, then end the call."
 
 
@@ -358,7 +358,13 @@ def send_sms_logged(s: Session, lead: Lead, to: str, body: str, kind: str) -> bo
         return False
 
 
-def _alert_coordinator(s: Session, lead: Lead, kind: str, detail: str) -> None:
+def calendar_link(lead_id: int) -> str:
+    from app.messaging import calendar_link as link
+
+    return link(lead_id)
+
+
+def alert_coordinator(s: Session, lead: Lead, kind: str, detail: str) -> None:
     campaign = campaign_for(lead)
     body = sms.coordinator_alert(kind, lead.first_name, lead.last_name, lead.phone, detail, record_link(lead))
     try:

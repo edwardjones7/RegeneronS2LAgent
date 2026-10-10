@@ -8,11 +8,11 @@ from app.config import get_settings
 log = logging.getLogger("sms")
 
 
-def patient_confirmation(first_name: str, when_short: str, campaign: Campaign) -> str:
+def patient_confirmation(first_name: str, when_short: str, campaign: Campaign, calendar_url: str = "") -> str:
+    cal = f" Add to calendar: {calendar_url}" if calendar_url else ""
     return (
-        f"Hi {first_name}, you're booked with {campaign.team_name} on {when_short}, "
-        f"{campaign.clinic_address}. Questions or need to reschedule? Call {campaign.clinic_phone}. "
-        "Reply STOP to opt out."
+        f"Hi {first_name}, you're booked with {campaign.team_name} on {when_short}, {campaign.clinic_address}. "
+        f"Reply C to confirm or R to reschedule. Questions? Call {campaign.clinic_phone}.{cal} Reply STOP to opt out."
     )
 
 

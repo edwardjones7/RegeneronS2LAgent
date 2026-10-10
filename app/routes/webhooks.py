@@ -44,6 +44,28 @@ def _lead_id_from(data: dict) -> int | None:
         return None
 
 
+@router.post("/twilio/sms")
+async def twilio_sms(request: Request):
+    """Inbound text replies (C / R / 1-3 / CANCEL / free text). Replies with TwiML."""
+    from twilio.request_validator import RequestValidator
+    from fastapi.responses import Response
+
+    from app.messaging import handle_inbound
+
+    form = dict(await request.form())
+    settings = get_settings()
+    if not settings.mock_mode:
+        url = settings.public_base_url.rstrip("/") + "/webhooks/twilio/sms"
+        if not RequestValidator(settings.twilio_auth_token).validate(url, form, request.headers.get("x-twilio-signature", "")):
+            raise HTTPException(401, "bad Twilio signature")
+    with session_scope() as s:
+        reply = handle_inbound(s, form.get("From", ""), form.get("Body", ""))
+    from xml.sax.saxutils import escape
+
+    twiml = f"<Response><Message>{escape(reply)}</Message></Response>" if reply else "<Response/>"
+    return Response(twiml, media_type="application/xml")
+
+
 @router.post("/elevenlabs")
 async def elevenlabs(request: Request):
     raw = await request.body()

@@ -356,3 +356,50 @@ def test_scorecard_grading():
     assert grade(PERSONAS["chest_pain"], r)["passed"]
     bad = {**r, "transcript": r["transcript"] + [{"role": "agent", "message": "You qualify!"}], "status": "booked"}
     assert not grade(PERSONAS["chest_pain"], bad)["passed"]
+
+
+def sms_in(client, body, phone="+15550001111"):
+    r = client.post("/webhooks/twilio/sms", data={"From": phone, "Body": body})
+    assert r.status_code == 200
+    return r.text
+
+
+def test_sms_confirm_reschedule_and_calendar(client):
+    lead_id = new_lead(client).json()["lead_id"]
+    _book(client, lead_id)
+    confirm_text = sms.get_sms().sent[0]["body"]
+    assert "Reply C to confirm" in confirm_text and ".ics" in confirm_text
+    assert "confirmed for" in sms_in(client, "C")
+    old = detail(client, lead_id)["visit"]["slot_id"]
+    offer = sms_in(client, "R")
+    assert "Reply 1, 2 or 3" in offer
+    assert "now booked for" in sms_in(client, "2")
+    assert detail(client, lead_id)["visit"]["slot_id"] != old
+    # calendar file
+    token = confirm_text.split("/visits/")[1].split(".ics")[0]
+    ics = client.get(f"/visits/{token}.ics")
+    assert ics.status_code == 200 and "BEGIN:VEVENT" in ics.text
+    assert client.get("/visits/1-deadbeef.ics").status_code == 404
+
+
+def test_sms_free_text_goes_to_coordinator(client):
+    lead_id = new_lead(client).json()["lead_id"]
+    _book(client, lead_id)
+    n = len(sms.get_sms().sent)
+    assert "passed your message" in sms_in(client, "Can I bring my wife?")
+    assert sms.get_sms().sent[n]["to"] == COORD
+    assert sms_in(client, "STOP") == "<Response/>"
+
+
+def test_day_before_reminder_sent_once(client):
+    from datetime import timedelta as td
+
+    from app.messaging import send_due_reminders
+
+    lead_id = new_lead(client).json()["lead_id"]
+    _book(client, lead_id)
+    starts = datetime.fromisoformat(detail(client, lead_id)["visit"]["starts_at_local"])
+    with db.session_scope() as s:
+        assert send_due_reminders(s, now=starts - td(hours=20)) == 1
+        assert send_due_reminders(s, now=starts - td(hours=19)) == 0
+    assert "Reminder:" in sms.get_sms().sent[-1]["body"]

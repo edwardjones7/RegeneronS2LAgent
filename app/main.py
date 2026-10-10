@@ -10,10 +10,11 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 from starlette.concurrency import run_in_threadpool
 
-from app import db, service
+from app import db, messaging, service
 from app.campaigns import all_campaigns
 from app.config import ROOT, get_settings
 from app.routes import coordinator, dashboard, leads, read_api, tools, webhooks
+from app.models import Lead
 from app.slots import seed_slots
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -25,6 +26,7 @@ def worker_tick() -> int:
     webhooks.poll_open_calls()
     with db.session_scope() as s:
         service.settle_stale_calls(s)
+        messaging.send_due_reminders(s)
         due = service.due_leads(s)
     for lead_id in due:
         service.dial(lead_id)
@@ -71,6 +73,22 @@ app.include_router(dashboard.router)
 @app.get("/health")
 def health():
     return {"ok": True, "mock_mode": get_settings().mock_mode}
+
+
+@app.get("/visits/{token}.ics", include_in_schema=False)
+def visit_ics(token: str):
+    """Calendar file for a booked visit; the unguessable token comes from the patient's text."""
+    from fastapi import HTTPException
+    from fastapi.responses import Response
+
+    lead_id = messaging.lead_id_from_token(token)
+    with db.session_scope() as s:
+        lead = s.get(Lead, lead_id) if lead_id else None
+        slot = service.booked_slot(s, lead) if lead else None
+        if slot is None:
+            raise HTTPException(404, "No upcoming visit")
+        body = messaging.ics(lead, slot)
+    return Response(body, media_type="text/calendar", headers={"Content-Disposition": 'attachment; filename="screening-visit.ics"'})
 
 
 @app.get("/demo", include_in_schema=False)
