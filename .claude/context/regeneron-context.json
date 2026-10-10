@@ -1,0 +1,213 @@
+
+{
+  "account": {
+    "company_name": "Regeneron Pharmaceuticals, Inc.",
+    "website": "https://www.regeneron.com/",
+    "account_type": "enterprise_named_account",
+    "industry": [
+      "Biotechnology",
+      "Pharmaceuticals",
+      "Life Sciences"
+    ],
+    "headquarters": {
+      "city": "Tarrytown",
+      "state": "New York",
+      "country": "United States"
+    },
+    "company_scale": {
+      "employee_range": "15000+",
+      "revenue_fy2025_usd": 14300000000,
+      "classification": "large_enterprise"
+    }
+  },
+  "icp": {
+    "ideal_departments": [
+      "Digital & Technology",
+      "Enterprise Architecture",
+      "Industrial Operations & Product Supply",
+      "Employee Technology & Digital Workplace",
+      "Procurement Transformation"
+    ],
+    "ideal_job_titles": [
+      "Executive Director of Enterprise Architecture",
+      "Director of Digital Transformation",
+      "Director of IT Automation",
+      "Associate Director of Digital Lab Orchestration",
+      "Executive Director of Employee Technology & Digital Workplace",
+      "IT Operations Leader",
+      "Procurement Transformation Leader"
+    ],
+    "decision_maker_seniority": [
+      "Director",
+      "Senior Director",
+      "Associate Director",
+      "Executive Director",
+      "VP"
+    ],
+    "ideal_buyer_characteristics": [
+      "Owns a measurable operational problem",
+      "Has influence over technology decisions",
+      "Can sponsor a pilot or proof of concept",
+      "Has an identified business outcome",
+      "Can engage IT, security, and procurement stakeholders"
+    ]
+  },
+  "business_context": {
+    "business_model": [
+      "Drug discovery and development",
+      "Clinical development",
+      "Pharmaceutical manufacturing",
+      "Product commercialization",
+      "Strategic research partnerships"
+    ],
+    "technology_environment": [
+      "Enterprise business systems",
+      "Scientific and laboratory data systems",
+      "Clinical operations technologies",
+      "Manufacturing and quality systems",
+      "Internal employee technology platforms",
+      "Enterprise integration infrastructure"
+    ],
+    "strategic_themes": [
+      "Scientific innovation",
+      "Digital transformation",
+      "Operational efficiency",
+      "Workflow automation",
+      "Enterprise system integration",
+      "Manufacturing expansion"
+    ]
+  },
+  "pain_hypotheses": [
+    {
+      "pain": "Manual internal workflows",
+      "potential_solution": "Workflow automation and task orchestration",
+      "business_outcome": "Reduce repetitive administrative work"
+    },
+    {
+      "pain": "Fragmented enterprise systems",
+      "potential_solution": "API integrations and cross-system automation",
+      "business_outcome": "Reduce duplicate data entry and process friction"
+    },
+    {
+      "pain": "High employee support request volume",
+      "potential_solution": "Internal AI assistants and automated service routing",
+      "business_outcome": "Improve employee self-service and response times"
+    },
+    {
+      "pain": "Time-consuming operational reporting",
+      "potential_solution": "Automated dashboards and reporting workflows",
+      "business_outcome": "Improve visibility and reduce manual reporting effort"
+    },
+    {
+      "pain": "Complex supplier administration",
+      "potential_solution": "Document processing and approval workflow automation",
+      "business_outcome": "Improve administrative efficiency and process tracking"
+    }
+  ],
+  "elenos_ai_positioning": {
+    "company": "Elenos AI",
+    "tagline": "Software Systems That Compound Revenue",
+    "capabilities": [
+      "AI workflow automation",
+      "Business process automation",
+      "API integrations",
+      "Internal AI assistants",
+      "Operational dashboards",
+      "Systems integration"
+    ],
+    "recommended_entry_offer": {
+      "type": "scoped_workflow_automation_pilot",
+      "description": "Identify one non-critical, repetitive business workflow and evaluate a secure, measurable automation opportunity.",
+      "success_metrics": [
+        "Hours of manual work saved",
+        "Reduction in processing time",
+        "Reduction in manual errors",
+        "Adoption rate",
+        "Cost per completed workflow"
+      ]
+    },
+    "positioning_guidelines": [
+      "Lead with a specific business problem rather than generic AI capabilities",
+      "Prioritize measurable operational outcomes",
+      "Integrate with existing systems where feasible",
+      "Avoid proposing replacement of regulated core platforms as an initial engagement",
+      "Do not claim pharmaceutical compliance or security certifications unless verified"
+    ]
+  },
+  "buying_signals": [
+    "New AI or automation leadership roles",
+    "Enterprise architecture hiring",
+    "Published workflow modernization initiatives",
+    "Digital laboratory orchestration initiatives",
+    "Employee technology modernization",
+    "New manufacturing or operational capacity",
+    "Publicly identified integration challenges"
+  ],
+  "qualification_criteria": {
+    "required": [
+      "Documented business problem",
+      "Identified internal champion",
+      "Measurable potential business outcome",
+      "Technical feasibility",
+      "Security and compliance fit",
+      "Viable procurement path"
+    ],
+    "disqualifiers": [
+      "No relevant business use case",
+      "Unable to meet required security controls",
+      "No internal sponsor",
+      "Unrealistic implementation requirements",
+      "No viable vendor approval path"
+    ]
+  },
+  "sales_strategy": {
+    "account_priority": "strategic_enterprise_prospect",
+    "recommended_approach": "account_based_outreach",
+    "initial_objective": "Validate a specific operational pain point",
+    "sales_sequence": [
+      "Research a relevant department and current initiative",
+      "Identify a verified decision-maker",
+      "Find public evidence supporting a relevant pain hypothesis",
+      "Send personalized, evidence-based outreach",
+      "Conduct discovery and quantify the problem",
+      "Assess security, integration, and procurement requirements",
+      "Propose a narrowly scoped pilot if qualified"
+    ],
+    "messaging_angle": "AI-enabled workflow efficiency and enterprise integration",
+    "avoid": [
+      "Generic mass outreach",
+      "Unsupported claims about internal problems",
+      "Unverified claims about purchasing intent",
+      "Leading with a generic website redesign",
+      "Promising regulatory compliance without substantiation"
+    ]
+  },
+  "lead_research": {
+    "sources": [
+      "https://www.regeneron.com/",
+      "https://careers.regeneron.com/",
+      "https://investor.regeneron.com/financials/overview"
+    ],
+    "fields_to_enrich": [
+      "Contact name",
+      "Current job title",
+      "Department",
+      "Professional profile URL",
+      "Relevant public initiative",
+      "Evidence of workflow pain",
+      "Potential business impact",
+      "Existing technology ecosystem",
+      "Procurement requirements",
+      "Outreach status"
+    ]
+  },
+  "data_quality": {
+    "company_profile": "Based on public company information",
+    "pain_points": "Hypotheses requiring validation",
+    "decision_makers": "Target roles; individual contacts not verified",
+    "buying_intent": "Unknown",
+    "budget": "Unknown",
+    "vendor_eligibility": "Unverified",
+    "revenue_year": 2025
+  }
+}
