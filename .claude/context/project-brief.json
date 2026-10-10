@@ -1,0 +1,274 @@
+{
+  "project": {
+    "name": "Call Me Maybe",
+    "category": "Hackathon project",
+    "summary": "Build a kind, safe outbound voice agent that contacts consenting clinical-trial prospects, explains a study using approved wording, asks pre-screening questions, schedules a research-team visit, and escalates to a human when needed.",
+    "problem_statement": {
+      "summary": "Clinical-trial coordinators often cannot promptly contact interested patients because outreach competes with clinic duties. Calls may be delayed, voicemails go unanswered, screening answers are not consistently structured, and interested patients may disengage.",
+      "reported_statistics": {
+        "sites_with_zero_enrollment_percent": 11,
+        "sites_that_under_enroll_percent": 37,
+        "source": "https://www.fiercebiotech.com/biotech/new-research-from-tufts-center-for-study-of-drug-development-characterizes-effectiveness"
+      }
+    },
+    "mission": {
+      "goal": "Create an outbound voice agent for clinical-trial outreach and pre-screening.",
+      "inputs": [
+        "Call list from a pre-screen packet or ad responses",
+        "Approved study script",
+        "Pre-screen questions",
+        "Research coordinator calendars"
+      ],
+      "outputs": [
+        "Completed call records",
+        "Structured pre-screen answers",
+        "Booked visits",
+        "Call transcripts and summaries",
+        "Human escalations"
+      ],
+      "primary_user": "Clinical-trial site research coordinator"
+    }
+  },
+  "clinical_trial_context": {
+    "operating_model": "The agent supports a hospital or clinic research team, not the drug company, and may work alongside existing hospital systems such as the EHR.",
+    "script_policy": "All study-related wording presented to patients must be IRB-approved in a real deployment. Demo scripts based on public data must be clearly labeled as not IRB-approved.",
+    "screening_policy": "The agent may collect basic pre-screen answers, but final eligibility decisions belong to the research team.",
+    "key_terms": {
+      "outreach_or_pre_screen_call": "First contact to gauge interest and basic fit.",
+      "IRB_approved_script": "Wording approved by the relevant ethics review board.",
+      "escalation": "Handing a call to a human.",
+      "TCPA": "U.S. law governing automated and artificial-voice calls.",
+      "opt_out": "A patient's request not to be contacted again.",
+      "turn_taking": "How the voice agent determines when to speak or listen."
+    }
+  },
+  "workflow_today": {
+    "users": [
+      "Research coordinators",
+      "Recruitment specialists",
+      "Hospital access-center staff"
+    ],
+    "steps": [
+      "Manually work through a call list",
+      "Leave voicemails",
+      "Ask screening questions from a paper script",
+      "Book visits manually"
+    ],
+    "known_failure_points": [
+      "Outreach happens days late",
+      "Scripts may be improvised",
+      "Answers are not captured in a structured format",
+      "Opt-outs may be lost",
+      "Interested patients may not be contacted at convenient times"
+    ]
+  },
+  "proposed_solution": {
+    "core_capabilities": [
+      "Outbound voice calls to consenting people only",
+      "Automated-voice disclosure at the beginning of each call",
+      "Plain-language delivery of approved study wording",
+      "Pre-screen question flow",
+      "Structured answer capture",
+      "Visit booking against coordinator availability",
+      "Human handoff at any point",
+      "Call transcript and summary generation"
+    ],
+    "safety_requirements": [
+      "Confirm valid consent to be called before outreach",
+      "Disclose that the caller is automated at the start of every call",
+      "Offer access to a human at any point",
+      "Honor opt-outs and suppress future calls",
+      "Respect permitted calling hours",
+      "Never provide medical advice",
+      "Route emergencies to 911 immediately",
+      "Do not make final clinical-trial eligibility decisions",
+      "Use only public or synthetic data for the hackathon",
+      "In the demo, call only teammates' phones",
+      "Cite all external sources"
+    ],
+    "emergency_example": {
+      "trigger": "Patient mentions chest pain or another possible emergency.",
+      "required_behavior": "Stop the screening flow and direct the person to call 911 immediately."
+    },
+    "human_escalation_triggers": [
+      "Patient requests a human",
+      "Patient is confused or repeatedly gives unclear answers",
+      "Patient asks for medical advice",
+      "Agent cannot safely continue",
+      "A situation requires research-team judgment"
+    ]
+  },
+  "implementation_tiers": {
+    "good": {
+      "name": "Scripted Caller",
+      "features": [
+        "Browser-based or phone-based voice agent",
+        "Automated-caller disclosure",
+        "Approved or clearly demo-labeled script",
+        "Pre-screen questions",
+        "Structured answer capture",
+        "Appointment booking"
+      ],
+      "target": "A demonstrable prototype by approximately hour 10."
+    },
+    "better": {
+      "name": "Safe Caller",
+      "inherits": "good",
+      "additional_features": [
+        "Interruption handling",
+        "Clarification for unclear answers",
+        "Opt-out handling",
+        "Voicemail handling",
+        "Live transfer to a human",
+        "Emergency detection and 911 instructions",
+        "Graceful refusal to provide medical advice",
+        "Persona-based testing and results"
+      ]
+    },
+    "best": {
+      "name": "Recruitment Desk Agent",
+      "inherits": "better",
+      "additional_features": [
+        "Supervised call-list campaign",
+        "Retries only at permitted times and where allowed",
+        "Write summaries to a mock EHR or CTMS",
+        "Coordinator dashboard",
+        "Statuses for interested, booked, opted out, and escalated",
+        "Support for a second language"
+      ]
+    }
+  },
+  "suggested_technology_and_data": {
+    "voice_agent_frameworks": [
+      {
+        "name": "Pipecat",
+        "url": "https://github.com/pipecat-ai/pipecat",
+        "role": "Open-source voice-agent framework"
+      },
+      {
+        "name": "LiveKit Agents",
+        "url": "https://livekit.com/blog/best-open-source-voice-and-video-ai-agent-frameworks",
+        "role": "Voice-agent framework"
+      }
+    ],
+    "telephony": [
+      {
+        "name": "Twilio Voice",
+        "role": "Programmable telephony API",
+        "demo_constraint": "Use trial accounts and call only teammates' phones."
+      }
+    ],
+    "public_data_sources": [
+      {
+        "name": "ClinicalTrials.gov API",
+        "url": "https://clinicaltrials.gov/data-api/about-api",
+        "use": "Study descriptions and eligibility criteria; any generated demo script must be labeled not IRB-approved."
+      },
+      {
+        "name": "Synthea",
+        "url": "https://github.com/synthetichealth/synthea",
+        "use": "Synthetic patient data for a demo call list."
+      },
+      {
+        "name": "FCC AI voice/TCPA explainer",
+        "url": "https://cooley.com/news/insight/2024/2024-02-15-fcc-ai-generated-robocalls-illegal-under-the-tcpa",
+        "use": "Reference for automated/artificial voice call compliance considerations."
+      }
+    ],
+    "example_industry_vendors": [
+      "Hippocratic AI",
+      "Hyro",
+      "Notable"
+    ],
+    "vendor_note": "Names are examples, not endorsements."
+  },
+  "demo_test_plan": {
+    "patient_personas": [
+      {
+        "persona": "Interested",
+        "expected_outcome": "Complete pre-screening and offer/book a visit if appropriate."
+      },
+      {
+        "persona": "Confused",
+        "expected_outcome": "Clarify using approved wording; escalate if confusion persists."
+      },
+      {
+        "persona": "Hard of hearing",
+        "expected_outcome": "Speak clearly, repeat or slow down, and offer a human."
+      },
+      {
+        "persona": "Spanish-speaking",
+        "expected_outcome": "Use a validated supported-language flow or escalate; do not improvise translations of approved study wording."
+      },
+      {
+        "persona": "Angry",
+        "expected_outcome": "Remain respectful and honor a request to stop contact."
+      },
+      {
+        "persona": "Mentions chest pain",
+        "expected_outcome": "Stop the call flow and direct the person to call 911 immediately."
+      },
+      {
+        "persona": "Requests a human",
+        "expected_outcome": "Offer or initiate a human handoff."
+      },
+      {
+        "persona": "Asks for medical advice",
+        "expected_outcome": "Do not give medical advice; refer to the research team or appropriate clinical support."
+      }
+    ],
+    "supporting_test_artifacts": [
+      "One real public clinical-trial record",
+      "Short plain-language demo script marked not IRB-approved",
+      "Five to eight pre-screen questions",
+      "Mock coordinator calendar API",
+      "Expected outcome or answer key for every persona"
+    ]
+  },
+  "evaluation_criteria": [
+    {
+      "criterion": "Solves the problem",
+      "judging_focus": "Could more interested patients receive timely, respectful first contact safely?"
+    },
+    {
+      "criterion": "It works",
+      "judging_focus": "End-to-end demo runs from a clean clone by following the README."
+    },
+    {
+      "criterion": "Smart use of data",
+      "judging_focus": "Use real public data where available and believable, documented synthetic data elsewhere."
+    },
+    {
+      "criterion": "Explains itself",
+      "judging_focus": "Outputs include evidence and reasoning."
+    },
+    {
+      "criterion": "Craft and demo",
+      "judging_focus": "Clean code, clear narrative, and useful UI."
+    }
+  ],
+  "reference_links": {
+    "clinical_trial_education": [
+      "https://www.nih.gov/health-information/nih-clinical-research-trials-you",
+      "https://niams.nih.gov/labs/clinical-trials/what-is-clinical-trial"
+    ],
+    "problem_research": [
+      "https://www.fiercebiotech.com/biotech/new-research-from-tufts-center-for-study-of-drug-development-characterizes-effectiveness",
+      "https://fiercehealthcare.com/health-tech/epic-expands-ai-ambitions-agent-platform-cosmos-powered-predictions-and-deeper-workflow"
+    ],
+    "voice_frameworks_and_compliance": [
+      "https://github.com/pipecat-ai/pipecat",
+      "https://livekit.com/blog/best-open-source-voice-and-video-ai-agent-frameworks",
+      "https://cooley.com/news/insight/2024/2024-02-15-fcc-ai-generated-robocalls-illegal-under-the-tcpa"
+    ],
+    "data_sources": [
+      "https://clinicaltrials.gov/data-api/about-api",
+      "https://github.com/synthetichealth/synthea"
+    ]
+  },
+  "source_metadata": {
+    "source_document_title": "CALL ME MAYBE",
+    "source_identifier": "sage_recruitment_outbound_voice_(patient_flow_agents)",
+    "transformation_note": "Structured from the supplied brief. Requirements and claims reflect the source brief; links and statistics have not been independently verified in this transformation."
+  }
+}
