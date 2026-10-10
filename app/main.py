@@ -74,4 +74,7 @@ def health():
 
 @app.get("/demo", include_in_schema=False)
 def demo_form():
-    return FileResponse(Path(ROOT) / "demo" / "form.html")
+    """Public ad opt-in page. Uses the built web app when present, else the plain HTML fallback."""
+    built = Path(ROOT) / "web" / "out" / "opt-in.html"
+    page = built if built.exists() else Path(ROOT) / "demo" / "form.html"
+    return FileResponse(page, headers={"Cache-Control": "no-store"})
