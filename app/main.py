@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 from starlette.concurrency import run_in_threadpool
 
@@ -58,6 +59,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Call Me Maybe: speed-to-lead voice agent", lifespan=lifespan)
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 app.include_router(leads.router)
 app.include_router(tools.router)
 app.include_router(webhooks.router)

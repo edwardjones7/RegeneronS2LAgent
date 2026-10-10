@@ -42,6 +42,25 @@ uv run pytest                                       # 63 tests
 
 **Without a phone:** `uv run python scripts/text_call.py --persona all` holds real text conversations with the live agent, so the real LLM and real tool calls are exercised. `scripts/browser_test.py` sets up a lead so you can talk to Ava from the ElevenLabs dashboard.
 
+## Coordinator dashboard
+
+`web/` is a Next.js + shadcn/ui app, statically exported and served by FastAPI at **`/dashboard`**. It runs on the same origin, so there's no second server. Sign in with `DASHBOARD_PASSWORD` (falls back to `READ_API_KEY`).
+
+```bash
+cd web && npm ci && npm run build      # outputs web/out, picked up by the server
+npm run dev                            # optional: hot reload at :3000/dashboard, proxied to :8000 (sign in on :8000 first)
+```
+
+It shows live KPIs (median opt-in-to-call time, reached, booked, needs a human), an outcome breakdown, a filterable lead table, an attention queue, and a lead panel with the summary, flags, pre-screen answers, consent, recording, transcript and activity. Coordinator texts deep-link to `/dashboard/leads/{id}`.
+
+Performance:
+- Static HTML shell with skeletons, so first paint needs no data.
+- Self-hosted Geist fonts.
+- `LazyMotion` (dom animations only).
+- The lead panel is code-split and loads on demand.
+- Polling pauses while the tab is hidden.
+- Gzip on, hashed assets cached as immutable.
+
 ## Read API (dashboard source of truth)
 
 Send the `X-API-Key: $READ_API_KEY` header.

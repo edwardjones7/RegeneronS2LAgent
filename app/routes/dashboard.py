@@ -1,46 +1,56 @@
-"""Coordinator dashboard pages. Data comes from the read API (same origin, session cookie)."""
+"""Coordinator dashboard: the static Next.js export in web/out, served behind the session login.
+
+Build it with `cd web && npm run build`. Data comes from the read API (same origin, cookie auth).
+"""
 
 from pathlib import Path
 from urllib.parse import quote
 
-from fastapi import APIRouter, Cookie, Form, Request
+from fastapi import APIRouter, Cookie, Form, HTTPException, Request
 from fastapi.responses import FileResponse, RedirectResponse
 
 from app import auth
 from app.config import ROOT
 
-DASHBOARD_DIR = Path(ROOT) / "dashboard"
+OUT_DIR = (Path(ROOT) / "web" / "out").resolve()
+NO_STORE = {"Cache-Control": "no-store"}
+IMMUTABLE = {"Cache-Control": "public, max-age=31536000, immutable"}
 
 router = APIRouter(prefix="/dashboard", include_in_schema=False)
 
 
-def _page(request: Request, session: str | None):
-    if not auth.valid_session(session):
-        return RedirectResponse(f"/dashboard/login?next={quote(request.url.path)}", status_code=303)
-    return FileResponse(DASHBOARD_DIR / "index.html", headers={"Cache-Control": "no-store"})
+def _file(name: str) -> Path:
+    path = OUT_DIR / name
+    if not path.exists():
+        raise HTTPException(503, "Dashboard not built yet: run `cd web && npm ci && npm run build`")
+    return path
 
 
 @router.get("")
 @router.get("/")
 def dashboard(request: Request, cmm_session: str | None = Cookie(default=None)):
-    return _page(request, cmm_session)
+    if not auth.valid_session(cmm_session):
+        target = request.url.path + (f"?{request.url.query}" if request.url.query else "")
+        return RedirectResponse(f"/dashboard/login?next={quote(target)}", status_code=303)
+    return FileResponse(_file("index.html"), headers=NO_STORE)
 
 
 @router.get("/leads/{lead_id}")
-def lead_page(lead_id: int, request: Request, cmm_session: str | None = Cookie(default=None)):
-    return _page(request, cmm_session)
+def lead_page(lead_id: int):
+    """Deep link used in coordinator texts; the dashboard opens the lead from ?lead=."""
+    return RedirectResponse(f"/dashboard?lead={lead_id}", status_code=303)
 
 
 @router.get("/login")
 def login_page():
-    return FileResponse(DASHBOARD_DIR / "login.html")
+    return FileResponse(_file("login.html"), headers=NO_STORE)
 
 
 @router.post("/login")
 def login(request: Request, password: str = Form(...), next: str = Form("/dashboard")):
     if not auth.check_password(password):
         return RedirectResponse(f"/dashboard/login?error=1&next={quote(next)}", status_code=303)
-    target = next if next.startswith("/dashboard") else "/dashboard"
+    target = next if next.startswith("/dashboard") and not next.startswith("/dashboard/login") else "/dashboard"
     resp = RedirectResponse(target, status_code=303)
     resp.set_cookie(
         auth.COOKIE,
@@ -60,9 +70,10 @@ def logout():
     return resp
 
 
-@router.get("/static/{name}")
-def static(name: str):
-    path = (DASHBOARD_DIR / name).resolve()
-    if path.parent != DASHBOARD_DIR.resolve() or path.suffix not in {".css", ".js", ".svg"} or not path.exists():
-        return RedirectResponse("/dashboard")
-    return FileResponse(path)
+@router.get("/{asset:path}")
+def asset(asset: str):
+    """Build output: hashed JS/CSS/fonts under _next/ (cached forever) plus favicon etc."""
+    path = (OUT_DIR / asset).resolve()
+    if not path.is_relative_to(OUT_DIR) or not path.is_file() or path.suffix == ".html":
+        raise HTTPException(404)
+    return FileResponse(path, headers=IMMUTABLE if asset.startswith("_next/static/") else {"Cache-Control": "public, max-age=3600"})

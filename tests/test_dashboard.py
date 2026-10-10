@@ -15,8 +15,13 @@ def client():
 
 
 def test_dashboard_requires_login(client):
+    r = client.get("/dashboard", follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == "/dashboard/login?next=/dashboard"
+
+
+def test_lead_deep_link_redirects_to_query(client):
     r = client.get("/dashboard/leads/3", follow_redirects=False)
-    assert r.status_code == 303 and r.headers["location"] == "/dashboard/login?next=/dashboard/leads/3"
+    assert r.headers["location"] == "/dashboard?lead=3"
 
 
 def test_wrong_password(client):
@@ -25,9 +30,9 @@ def test_wrong_password(client):
 
 
 def test_login_then_dashboard_and_read_api(client):
-    r = client.post("/dashboard/login", data={"password": "test-dash", "next": "/dashboard/leads/3"}, follow_redirects=False)
-    assert r.status_code == 303 and r.headers["location"] == "/dashboard/leads/3"
-    assert client.get("/dashboard").status_code == 200
+    r = client.post("/dashboard/login", data={"password": "test-dash", "next": "/dashboard?lead=3"}, follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == "/dashboard?lead=3"
+    assert client.get("/dashboard").status_code in (200, 503)  # 503 only if the web app isn't built
     assert client.get("/campaigns").status_code == 200  # cookie works for the read API
 
 
@@ -43,7 +48,6 @@ def test_session_expiry_and_tamper():
     assert not auth.valid_session(tok[:-1] + ("0" if tok[-1] != "0" else "1"), now=1001)
 
 
-def test_static_only_serves_dashboard_assets(client):
-    client.post("/dashboard/login", data={"password": "test-dash"})
-    assert client.get("/dashboard/static/app.js").status_code == 200
-    assert client.get("/dashboard/static/..%2F.env", follow_redirects=False).status_code in (303, 404)
+def test_assets_cannot_escape_the_build_dir(client):
+    assert client.get("/dashboard/..%2F..%2F.env").status_code == 404
+    assert client.get("/dashboard/%2E%2E/%2E%2E/.env").status_code == 404

@@ -46,7 +46,7 @@ def lead_summary(lead: Lead) -> dict:
         "source": lead.source,
         "status": lead.status,
         "status_reason": lead.status_reason,
-        "flags": lead.flags,
+        "flags": list({(f["type"], f["detail"]): f for f in lead.flags}.values()),
         "attempts": lead.attempts,
         "created_at": _iso(lead.created_at),
         "seconds_to_first_call": service.seconds_to_first_call(lead),
