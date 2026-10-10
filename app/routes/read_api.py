@@ -120,6 +120,7 @@ def lead_detail(lead_id: int, s: Session = Depends(get_session)):
                 {
                     "question_id": a.question_id,
                     "question": (campaign.question(a.question_id).ask if campaign.question(a.question_id) else ""),
+                    "criterion": (campaign.question(a.question_id).criterion if campaign.question(a.question_id) else None),
                     "answer": a.raw_text,
                     "normalized": a.normalized_value,
                     "verdict": a.verdict,

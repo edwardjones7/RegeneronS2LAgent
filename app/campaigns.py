@@ -28,6 +28,7 @@ class Question(BaseModel):
     min: float | None = None
     only_if: Literal["bmi_27_to_30"] | None = None
     unsure_flags: bool = False
+    criterion: str | None = None  # the protocol criterion this question checks
 
 
 class BmiRules(BaseModel):

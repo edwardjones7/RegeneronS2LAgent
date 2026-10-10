@@ -60,42 +60,54 @@ approved_facts:
 #       comorbidity       -> needed only when BMI is 27 to under 30
 #       unsure_flags      -> "not sure" is flagged instead of blocking
 prescreen_questions:
+  # Each question maps to a key criterion from the public record (`criterion`), so the
+  # dashboard can show why a question was asked. "Other protocol-defined criteria apply":
+  # the research team makes the final eligibility call at the screening visit.
   - id: age
     kind: number
     ask: "First, how old are you?"
     min: 18
+    criterion: "Adults 18 years or older"
   - id: height
     kind: height
     ask: "How tall are you?"
+    criterion: "Inclusion: BMI 30.0 to under 45.0, or BMI 27.0 or more with a weight-related condition"
   - id: weight
     kind: weight
     ask: "And about how much do you weigh right now?"
+    criterion: "Inclusion: BMI 30.0 to under 45.0, or BMI 27.0 or more with a weight-related condition"
   - id: comorbidity
     kind: yes_no
     role: comorbidity
     only_if: bmi_27_to_30
-    ask: "Has a doctor ever told you that you have high blood pressure, high cholesterol, prediabetes, sleep apnea, or heart or blood vessel disease?"
+    ask: "Has a doctor ever told you that you have any of these: high blood pressure, high cholesterol, prediabetes, sleep apnea, heart disease or heart failure, or a stroke or other blood vessel disease in the brain?"
+    criterion: "Inclusion (BMI 27 to under 30): hypertension, dyslipidemia, prediabetes, obstructive sleep apnea, coronary artery disease, heart failure, or cerebrovascular disease"
   - id: diabetes
     kind: yes_no
     role: disqualify_if_yes
     ask: "Have you ever been diagnosed with type 1 or type 2 diabetes?"
+    criterion: "Exclusion: previous or current diagnosis of type 1 or type 2 diabetes"
   - id: weight_change
     kind: yes_no
     role: disqualify_if_yes
-    ask: "In the last three months, has your weight gone up or down by more than about ten pounds?"
+    ask: "In about the last three months, has your weight gone up or down by more than eleven pounds, that's five kilograms?"
+    criterion: "Exclusion: body weight change of more than 5 kg in about 3 months before screening"
   - id: bariatric_surgery
     kind: yes_no
     role: disqualify_if_yes
-    ask: "Have you ever had weight-loss surgery, like a gastric bypass or sleeve?"
+    ask: "Have you ever had weight-loss surgery, like a gastric bypass, sleeve, or band, including any surgery to revise or remove one?"
+    criterion: "Exclusion: bariatric surgery, including revision, reversal or removal procedures"
   - id: pancreas_gallbladder
     kind: yes_no
     role: disqualify_if_yes
-    ask: "Have you ever had pancreatitis, or gallbladder problems like gallstones?"
+    ask: "Have you ever had pancreatitis, an inflamed gallbladder, or gallstones that caused symptoms?"
+    criterion: "Exclusion: history of acute or chronic pancreatitis, cholecystitis, or symptomatic gallbladder stones"
   - id: thyroid_cancer_history
     kind: yes_no
     role: disqualify_if_yes
     unsure_flags: true
-    ask: "Last one. Have you or anyone in your family had a rare type of thyroid cancer called medullary thyroid cancer, or a condition called MEN2?"
+    ask: "Last one. Have you, or has anyone in your family, had a rare thyroid cancer called medullary thyroid cancer, or a condition called MEN 2?"
+    criterion: "Exclusion: personal or family history of medullary thyroid carcinoma or multiple endocrine neoplasia type 2"
 
 bmi_rules:
   fit_min: 30.0
