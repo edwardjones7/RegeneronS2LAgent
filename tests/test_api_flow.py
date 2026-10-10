@@ -278,3 +278,11 @@ def test_repeated_escalation_flags_once(client):
     tool(client, "escalate_to_human", lead_id, reason="requested a person")
     tool(client, "escalate_to_human", lead_id, reason="requested a person")
     assert len(detail(client, lead_id)["flags"]) == 1
+
+
+def test_not_interested_is_not_an_opt_out(client):
+    lead_id = new_lead(client).json()["lead_id"]
+    tool(client, "mark_not_interested", lead_id, reason="not interested right now")
+    assert detail(client, lead_id)["status"] == "closed"
+    r = new_lead(client)  # same number can still opt in again later
+    assert r.json()["status"] == "calling"

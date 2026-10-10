@@ -327,6 +327,11 @@ def tool_opt_out(s: Session, lead: Lead, reason: str = "") -> str:
     return "Done: they won't be called again. Apologize for the bother, confirm that, and end the call politely."
 
 
+def tool_not_interested(s: Session, lead: Lead, reason: str = "") -> str:
+    set_status(s, lead, LeadStatus.CLOSED, f"not interested{': ' + reason if reason else ''}")
+    return "Noted. Thank them for their time, say they can reach out any time, and end the call politely."
+
+
 def tool_escalate(s: Session, lead: Lead, reason: str) -> str:
     add_flag(lead, "escalation", reason)
     set_status(s, lead, LeadStatus.NEEDS_HUMAN, reason)

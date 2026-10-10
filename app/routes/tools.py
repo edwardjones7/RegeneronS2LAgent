@@ -77,6 +77,11 @@ def opt_out(body: Reason, s: Session = Depends(get_session)):
     return {"result": service.tool_opt_out(s, _lead(s, body.lead_id), body.reason)}
 
 
+@router.post("/mark_not_interested", dependencies=deps)
+def not_interested(body: Reason, s: Session = Depends(get_session)):
+    return {"result": service.tool_not_interested(s, _lead(s, body.lead_id), body.reason)}
+
+
 @router.post("/escalate_to_human", dependencies=deps)
 def escalate(body: Reason, s: Session = Depends(get_session)):
     return {"result": service.tool_escalate(s, _lead(s, body.lead_id), body.reason or "requested a person")}

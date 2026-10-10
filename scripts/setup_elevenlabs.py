@@ -110,6 +110,12 @@ def tool_defs(base: str) -> list[dict]:
             [],
         ),
         tool(
+            "mark_not_interested",
+            "The person declined this study but did NOT ask to stop all contact. Closes the lead without adding them to the do-not-call list.",
+            {"reason": s("Short reason in their words, e.g. 'not interested right now'.")},
+            [],
+        ),
+        tool(
             "escalate_to_human",
             "Alert the research team that this person needs a human: requested a person, medical question, language, confusion, callback request, or no open slots.",
             {"reason": s("Why, e.g. 'requested a person', 'medical question: <question>', 'language: Spanish', 'callback requested: after 5pm'.")},
