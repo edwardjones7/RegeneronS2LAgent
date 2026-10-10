@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
-import { Phone } from "lucide-react"
 
+import { RegeneronLogo } from "@/components/brand"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,13 +13,11 @@ export const metadata: Metadata = { title: "Sign in · Call Me Maybe" }
 // Static page; the form posts to the FastAPI backend, which sets the session cookie.
 export default function LoginPage() {
   return (
-    <main className="grid min-h-svh place-items-center bg-[radial-gradient(60%_50%_at_50%_0%,oklch(0.95_0.03_262),transparent)] px-4">
+    <main className="grid min-h-svh place-items-center bg-[radial-gradient(60%_50%_at_50%_0%,oklch(0.95_0.025_250),transparent)] px-4">
       <div className="w-full max-w-sm animate-in duration-500 fade-in slide-in-from-bottom-2">
-        <div className="mb-6 flex items-center justify-center gap-2.5">
-          <span className="grid size-9 place-items-center rounded-xl bg-linear-to-br from-[oklch(0.55_0.2_262)] to-[oklch(0.45_0.18_270)] text-white shadow-sm">
-            <Phone className="size-4" aria-hidden />
-          </span>
-          <span className="text-lg font-semibold tracking-tight">Call Me Maybe</span>
+        <div className="mb-7 flex flex-col items-center gap-3">
+          <RegeneronLogo priority className="h-10" />
+          <span className="text-sm font-medium text-muted-foreground">Call Me Maybe · speed-to-lead</span>
         </div>
         <Card className="shadow-[0_8px_32px_-12px_rgba(16,24,40,0.12)]">
           <CardHeader>

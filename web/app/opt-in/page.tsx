@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
-import { CalendarDays, Check, ExternalLink, FlaskConical, Phone, Shuffle } from "lucide-react"
+import { CalendarDays, Check, ExternalLink, FlaskConical, Shuffle } from "lucide-react"
 
+import { RegeneronLogo } from "@/components/brand"
 import { Badge } from "@/components/ui/badge"
 
 import { OptInForm } from "./opt-in-form"
@@ -19,12 +20,11 @@ const FACTS = [
 
 export default function OptInPage() {
   return (
-    <div className="min-h-svh bg-[radial-gradient(70%_45%_at_50%_0%,oklch(0.95_0.03_262),transparent)]">
-      <header className="mx-auto flex h-16 max-w-6xl items-center gap-2.5 px-4 sm:px-6">
-        <span className="grid size-8 place-items-center rounded-lg bg-linear-to-br from-[oklch(0.55_0.2_262)] to-[oklch(0.45_0.18_270)] text-white shadow-sm">
-          <Phone className="size-4" aria-hidden />
-        </span>
-        <span className="font-semibold tracking-tight">Regeneron research team</span>
+    <div className="min-h-svh bg-[radial-gradient(70%_45%_at_50%_0%,oklch(0.95_0.025_250),transparent)]">
+      <header className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4 sm:px-6">
+        <RegeneronLogo priority />
+        <span className="h-6 w-px bg-border" aria-hidden />
+        <span className="text-sm font-medium text-muted-foreground">Clinical research</span>
         <Badge variant="outline" className="ml-auto h-7 rounded-full bg-background/60 px-3 font-normal text-muted-foreground">
           Demo · not IRB-approved
         </Badge>

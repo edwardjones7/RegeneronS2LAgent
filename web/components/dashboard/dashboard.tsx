@@ -1,10 +1,11 @@
 "use client"
 
-import { ExternalLink, LogOut, Phone } from "lucide-react"
+import { ExternalLink, LogOut } from "lucide-react"
 import { LazyMotion, MotionConfig, domAnimation, m } from "motion/react"
 import dynamic from "next/dynamic"
 import { useCallback } from "react"
 
+import { BrandLockup } from "@/components/brand"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -88,11 +89,7 @@ export function Dashboard() {
         <TooltipProvider delayDuration={150}>
           <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-md">
             <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-3 px-4 sm:px-6">
-              <span className="grid size-8 place-items-center rounded-lg bg-linear-to-br from-[oklch(0.55_0.2_262)] to-[oklch(0.45_0.18_270)] text-white shadow-sm">
-                <Phone className="size-4" aria-hidden />
-              </span>
-              <span className="font-semibold tracking-tight">Call Me Maybe</span>
-              <span className="hidden text-sm text-muted-foreground sm:inline">/ Coordinator</span>
+              <BrandLockup suffix="Coordinator" />
               <div className="ml-auto flex items-center gap-2 sm:gap-3">
                 <LiveIndicator lastUpdated={lastUpdated} error={error} />
                 <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">

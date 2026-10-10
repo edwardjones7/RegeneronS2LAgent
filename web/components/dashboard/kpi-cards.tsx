@@ -67,7 +67,7 @@ export function KpiCards({ overview, leads }: { overview: Overview; leads: LeadS
           <Card
             className={cn(
               "relative h-full gap-0 p-5 shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition-shadow hover:shadow-[0_4px_16px_-4px_rgba(16,24,40,0.08)]",
-              k.hero && "bg-linear-to-br from-[oklch(0.5_0.2_264)] to-[oklch(0.43_0.17_270)] text-white ring-0"
+              k.hero && "bg-linear-to-br from-brand to-brand-strong text-white ring-0"
             )}
           >
             <div className="flex items-center justify-between">

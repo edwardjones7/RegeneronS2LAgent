@@ -157,7 +157,7 @@ export function OptInForm() {
               {error}
             </p>
           )}
-          <Button type="submit" className="group h-11 w-full text-sm" disabled={pending || !first.trim()}>
+          <Button type="submit" className="group h-11 w-full bg-brand text-sm hover:bg-brand-strong" disabled={pending || !first.trim()}>
             {pending ? (
               <>
                 <Loader2 className="animate-spin" aria-hidden /> Connecting…
