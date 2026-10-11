@@ -1,23 +1,20 @@
 import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { AREA_STYLES } from '@/components/trials/areaStyles';
+import { FilterMenu } from '@/components/trials/FilterMenu';
 import { TrialCard } from '@/components/trials/TrialCard';
 import { AppShell } from '@/components/ui';
 import { getPatientStats } from '@/lib/patients';
 import { DEMO_PRACTICE, greeting } from '@/lib/practice';
 import { listOpenTrials, type TrialListItem } from '@/lib/trials';
-import { AREA_LABELS, AREA_ORDER, isTherapeuticArea, type TherapeuticArea } from '@/lib/trials/areas';
+import { AREA_LABELS, AREA_ORDER, type TherapeuticArea } from '@/lib/trials/areas';
+import { filtersHref, matchesMenuFilters, parseFilters, type TrialFilters } from '@/lib/trials/filters';
 import { cn } from '@/lib/utils/cn';
 
-interface Filters {
-  area: TherapeuticArea | null;
-  nj: boolean;
-}
-
 interface TrialsPageProps {
-  filters: Filters;
+  filters: TrialFilters;
   trials: TrialListItem[];
-  /** Trials per area, after the NJ filter. */
+  /** Trials per area, after the menu filters. */
   areaCounts: { area: TherapeuticArea; count: number }[];
   total: number;
   greeting: string;
@@ -25,12 +22,12 @@ interface TrialsPageProps {
 }
 
 export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ query }) => {
-  const filters: Filters = { area: isTherapeuticArea(query.area) ? query.area : null, nj: query.nj === '1' };
+  const filters = parseFilters(query);
   const all = await listOpenTrials();
 
-  const inScope = filters.nj ? all.filter((t) => t.njRecruiting > 0) : all;
+  const inScope = all.filter((t) => matchesMenuFilters(t, filters));
   const areaCounts = AREA_ORDER.map((area) => ({ area, count: inScope.filter((t) => t.area === area).length })).filter(
-    (a) => a.count > 0
+    (a) => a.count > 0 || a.area === filters.area
   );
 
   return {
@@ -44,15 +41,6 @@ export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ 
     },
   };
 };
-
-function href(filters: Filters, changes: Partial<Filters>): string {
-  const next = { ...filters, ...changes };
-  const params = new URLSearchParams();
-  if (next.area) params.set('area', next.area);
-  if (next.nj) params.set('nj', '1');
-  const qs = params.toString();
-  return qs ? `/trials?${qs}` : '/trials';
-}
 
 const pillClass = (active: boolean) =>
   cn(
@@ -96,19 +84,17 @@ export default function TrialsPage({ filters, trials, areaCounts, total, greetin
       </header>
 
       <div className="mt-7 flex items-center gap-2">
-        <Link href={href(filters, { area: null })} scroll={false} className={pillClass(!filters.area)}>
+        <Link href={filtersHref({ ...filters, area: null })} scroll={false} className={pillClass(!filters.area)}>
           All <span className="ml-1.5 tabular-nums opacity-60">{total}</span>
         </Link>
         {areaCounts.map(({ area, count }) => (
-          <AreaPill key={area} area={area} count={count} href={href(filters, { area })} active={filters.area === area} />
+          <AreaPill key={area} area={area} count={count} href={filtersHref({ ...filters, area })} active={filters.area === area} />
         ))}
-        <Link href={href(filters, { nj: !filters.nj, area: null })} scroll={false} className={cn(pillClass(filters.nj), 'ml-auto')}>
-          Recruiting in NJ
-        </Link>
+        <FilterMenu filters={filters} resultCount={trials.length} />
       </div>
 
       {trials.length === 0 ? (
-        <p className="mt-10 text-center text-sm text-ink-3">No trials here.</p>
+        <p className="mt-10 text-center text-sm text-ink-3">No trials match these filters.</p>
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-5 lg:grid-cols-3">
           {trials.map((t) => (
