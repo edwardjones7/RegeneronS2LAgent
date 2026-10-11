@@ -25,13 +25,21 @@ def campaign_override(campaign: Campaign) -> dict:
     return {"agent": {"first_message": first_message(campaign), "prompt": {"prompt": system_prompt(campaign)}}}
 
 
+def practice_override(inbound: bool = False, known_caller: bool = True) -> dict:
+    """Practice outreach: no study or patient details beyond the dynamic variables (see prompt.py)."""
+    from app.prompt import practice_first_message, practice_system_prompt, unknown_caller_system_prompt
+
+    prompt = practice_system_prompt(inbound) if known_caller else unknown_caller_system_prompt()
+    return {"agent": {"first_message": practice_first_message(inbound, known_caller), "prompt": {"prompt": prompt}}}
+
+
 class MockVoice:
     """Pretends to dial. `scripts/mock_call.py` then plays the conversation through the tool endpoints."""
 
     def __init__(self):
         self.calls: list[dict] = []
 
-    def start_call(self, *, lead_id: int, first_name: str, phone: str, campaign: Campaign) -> dict:
+    def start_call(self, *, lead_id: int, first_name: str, phone: str, campaign: Campaign, context: dict | None = None) -> dict:
         n = len(self.calls) + 1
         result = {"conversation_id": f"conv_mock_{lead_id}_{n}", "call_sid": f"CA_mock_{n}"}
         self.calls.append({"lead_id": lead_id, "phone": phone, **result})
@@ -47,16 +55,22 @@ class ElevenLabsVoice:
         self.settings = s
         self.http = httpx.Client(base_url=ELEVENLABS_API, headers={"xi-api-key": s.elevenlabs_api_key}, timeout=20)
 
-    def start_call(self, *, lead_id: int, first_name: str, phone: str, campaign: Campaign) -> dict:
+    def start_call(self, *, lead_id: int, first_name: str, phone: str, campaign: Campaign, context: dict | None = None) -> dict:
+        # Practice outreach passes its own variables (office, doctor, callback number) and the
+        # privacy-first script; the ad opt-in flow carries its campaign's script.
+        variables = context or {
+            "first_name": first_name, "lead_id": str(lead_id),
+            "office_name": campaign.team_name, "doctor_name": "", "callback_number": campaign.clinic_phone,
+        }
         body = {
             "agent_id": self.settings.elevenlabs_agent_id,
             "agent_phone_number_id": self.settings.elevenlabs_phone_number_id,
             "to_number": phone,
             "conversation_initiation_client_data": {
-                "dynamic_variables": {"first_name": first_name, "lead_id": str(lead_id)},
+                "dynamic_variables": variables,
                 "user_id": f"lead-{lead_id}",
-                # One agent serves every study: each call carries its campaign's script.
-                "conversation_config_override": campaign_override(campaign),
+                # One agent serves every study: each call carries its own script.
+                "conversation_config_override": practice_override() if context else campaign_override(campaign),
             },
             "telephony_call_config": {"ringing_timeout_secs": 30},
         }

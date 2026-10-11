@@ -10,8 +10,8 @@ HackRU 2026, Regeneron challenge. Trials come to doctors with the patients alrea
 | `supabase/migrations/` | Database schema, numbered SQL files. Run them in the Supabase SQL editor, in order. |
 | `supabase/seed_patients.py` | Loads the synthetic patients into Supabase, each linked to their practice. |
 | `data/` | Synthetic patients (`synthea-nj.json`, 2,000 from Synthea, grouped by county) and the script that regenerates them. |
-| `protocols/` | Eligibility criteria for four recruiting Regeneron trials, as JSON the matching engine reads. See `protocols/README.md`. |
-| `voice-agent/` | Call Me Maybe: the outbound voice agent (FastAPI + Next.js dashboard). Self-contained, to be migrated into `site/`. See `voice-agent/README.md`. |
+| `protocols/` | Eligibility criteria for four recruiting trials that Regeneron sponsors or collaborates on, as JSON the matching engine reads. See `protocols/README.md`. |
+| `voice-agent/` | Ava, the outbound caller: once a doctor accepts a trial, she calls their pre-screened patients from the doctor's office, handles voicemail, texts, retries and callbacks, and books screening visits. FastAPI + an office dashboard. See `voice-agent/README.md`. |
 | `.claude/context/` | Research notes: trial data, sample patient data, Regeneron context. |
 
 ## Run the site

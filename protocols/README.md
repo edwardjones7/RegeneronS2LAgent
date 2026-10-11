@@ -2,7 +2,7 @@
 
 One JSON file per trial. Each file lists the trial's key eligibility criteria and says how each one gets decided against a patient in `data/synthea-nj.json`.
 
-These are **real, recruiting Regeneron trials from ClinicalTrials.gov, simplified for the demo, not the full protocols.** Each file keeps the key criteria. Full protocols also have consent, pregnancy and run-in rules, which a coordinator handles at screening.
+These are **real, recruiting trials from ClinicalTrials.gov that Regeneron sponsors or collaborates on, simplified for the demo, not the full protocols.** Check each file's `sponsor` and `collaborators`: only NCT07685808 is led by Regeneron. Each file keeps the key criteria. Full protocols also have consent, pregnancy and run-in rules, which a coordinator handles at screening.
 
 | File | Trial | Demo role |
 |---|---|---|

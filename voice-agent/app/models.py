@@ -24,6 +24,10 @@ class LeadStatus(StrEnum):
     OPTED_OUT = "opted_out"
     EMERGENCY = "emergency"
     CLOSED = "closed"
+    # Practice outreach: pre-screened, but a criterion needs a person to check the chart
+    # before anyone calls. Staff clear it (-> queued) or drop it.
+    CHART_REVIEW = "chart_review"
+    DROPPED = "dropped"  # staff decided to stop outreach
 
 
 # Statuses where the agent's work on a lead is finished; nothing may overwrite them
@@ -34,6 +38,7 @@ FINAL_STATUSES = {
     LeadStatus.OPTED_OUT,
     LeadStatus.EMERGENCY,
     LeadStatus.CLOSED,
+    LeadStatus.DROPPED,
 }
 
 
@@ -56,6 +61,21 @@ class Lead(Base):
     attempts: Mapped[int] = mapped_column(default=0)
     next_attempt_at: Mapped[datetime | None] = mapped_column(nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
+
+    # Practice outreach (a doctor accepted a trial; this lead is one of their pre-screened patients).
+    # Empty for leads from the old ad opt-in flow.
+    practice_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    patient_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    acceptance_id: Mapped[int | None] = mapped_column(ForeignKey("trial_acceptance.id"), nullable=True, index=True)
+    # Kept server-side only, to check identity. Never sent to the voice agent or its LLM.
+    birth_date: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    identity_verified: Mapped[bool | None] = mapped_column(default=False, nullable=True)
+    # One pre-written sentence ("you were in to see Dr. X back in March"); shared only after verification.
+    personal_touch: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Demo: no real phone number, so calls and replies are simulated.
+    simulated: Mapped[bool | None] = mapped_column(default=False, nullable=True)
+    # Patient's stated preference, e.g. "after 17:00", "morning", "afternoon", "evening".
+    call_window: Mapped[str | None] = mapped_column(String(40), nullable=True)
 
     calls: Mapped[list["Call"]] = relationship(back_populates="lead", order_by="Call.id")
     answers: Mapped[list["Answer"]] = relationship(back_populates="lead", order_by="Answer.id")
@@ -82,6 +102,7 @@ class Call(Base):
     summary: Mapped[str] = mapped_column(Text, default="")
     transcript: Mapped[list] = mapped_column(JSON, default=list)
     recording_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    direction: Mapped[str | None] = mapped_column(String(10), default="outbound", nullable=True)  # outbound | inbound
 
     lead: Mapped[Lead] = relationship(back_populates="calls")
 
@@ -106,6 +127,7 @@ class Slot(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     campaign_id: Mapped[str] = mapped_column(String(100), index=True)
     starts_at: Mapped[datetime]  # naive, in the campaign's local timezone
+    practice_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     booked_lead_id: Mapped[int | None] = mapped_column(ForeignKey("lead.id"), nullable=True)
 
 
@@ -163,3 +185,51 @@ class Suppression(Base):
     phone: Mapped[str] = mapped_column(String(20), primary_key=True)
     reason: Mapped[str] = mapped_column(Text, default="")
     at: Mapped[datetime] = mapped_column(default=utcnow)
+
+
+class PracticeProfile(Base):
+    """How a practice appears to its patients: who's calling, where visits happen, who staff are.
+
+    Practices come from the EHR stand-in (Supabase `practices`). Nothing here is invented: the
+    doctor's name is the accepting doctor's own, and the address is a labeled demo address.
+    """
+
+    __tablename__ = "practice_profile"
+
+    practice_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    name: Mapped[str] = mapped_column(String(200))
+    doctor_name: Mapped[str] = mapped_column(String(200), default="")
+    address: Mapped[str] = mapped_column(Text, default="")
+    callback_phone: Mapped[str] = mapped_column(String(20), default="")
+    staff_phone: Mapped[str] = mapped_column(String(20), default="")
+    timezone: Mapped[str] = mapped_column(String(64), default="America/New_York")
+
+
+class TrialAcceptance(Base):
+    """A doctor said yes to a trial. Outreach to that practice's candidates starts from here."""
+
+    __tablename__ = "trial_acceptance"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    practice_id: Mapped[str] = mapped_column(String(64), index=True)
+    nct_id: Mapped[str] = mapped_column(String(20))
+    campaign_id: Mapped[str] = mapped_column(String(100))
+    accepted_by: Mapped[str] = mapped_column(String(200))
+    accepted_at: Mapped[datetime] = mapped_column(default=utcnow)
+    candidates: Mapped[int] = mapped_column(default=0)
+    chart_review: Mapped[int] = mapped_column(default=0)
+
+
+class InboxMessage(Base):
+    """Something for office staff that isn't tied to a known patient: an unknown caller's message,
+    or a text from a number we don't recognize."""
+
+    __tablename__ = "inbox_message"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    at: Mapped[datetime] = mapped_column(default=utcnow)
+    channel: Mapped[str] = mapped_column(String(10))  # call | sms
+    from_phone: Mapped[str] = mapped_column(String(20), default="")
+    name: Mapped[str] = mapped_column(String(200), default="")
+    text: Mapped[str] = mapped_column(Text, default="")
+    resolved: Mapped[bool] = mapped_column(default=False)

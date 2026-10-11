@@ -46,7 +46,7 @@ export const initials = (l: Pick<LeadSummary, "first_name" | "last_name">) =>
   `${l.first_name?.[0] ?? ""}${l.last_name?.[0] ?? ""}`.toUpperCase() || "?"
 
 export const sourceLabel = (s: string) =>
-  ({ demo_form: "Ad opt-in form", web_form: "Web form", mock: "Mock call", text_test: "Text test", browser_test: "Browser test", simulation: "Text simulation", scorecard: "Scorecard" })[s] ??
+  ({ demo_form: "Ad opt-in form", web_form: "Web form", mock: "Mock call", text_test: "Text test", browser_test: "Browser test", simulation: "Text simulation", scorecard: "Scorecard", practice: "Practice patient" })[s] ??
   s
 
 export function formatVisit(local: string) {
@@ -57,7 +57,7 @@ export function formatVisit(local: string) {
 export const STATUS: Record<LeadStatus, { label: string; tone: Tone }> = {
   booked: { label: "Booked", tone: "good" },
   calling: { label: "On call", tone: "live" },
-  needs_human: { label: "Needs a human", tone: "warning" },
+  needs_human: { label: "Needs staff", tone: "warning" },
   emergency: { label: "Emergency", tone: "critical" },
   no_answer: { label: "No answer", tone: "info" },
   queued: { label: "Queued", tone: "info" },
@@ -65,6 +65,8 @@ export const STATUS: Record<LeadStatus, { label: string; tone: Tone }> = {
   opted_out: { label: "Opted out", tone: "neutral" },
   closed: { label: "Closed", tone: "neutral" },
   new: { label: "New", tone: "neutral" },
+  chart_review: { label: "Chart review", tone: "warning" },
+  dropped: { label: "Dropped", tone: "neutral" },
 }
 
 export type Tone = "good" | "live" | "warning" | "critical" | "info" | "neutral"
@@ -72,9 +74,9 @@ export type Tone = "good" | "live" | "warning" | "critical" | "info" | "neutral"
 /** Outcome groups for the breakdown bar, in display order. */
 export const OUTCOME_GROUPS: { id: string; label: string; color: string; statuses: LeadStatus[] }[] = [
   { id: "booked", label: "Booked", color: "#059669", statuses: ["booked"] },
-  { id: "attention", label: "Needs a human", color: "#f59e0b", statuses: ["needs_human"] },
+  { id: "attention", label: "Needs staff", color: "#f59e0b", statuses: ["needs_human"] },
   { id: "emergency", label: "Emergency", color: "#dc2626", statuses: ["emergency"] },
   { id: "progress", label: "In progress", color: "#3b82f6", statuses: ["calling", "queued", "no_answer", "new"] },
   { id: "not_fit", label: "Not a fit", color: "#a1a1aa", statuses: ["not_a_fit"] },
-  { id: "closed", label: "Opted out / closed", color: "#d4d4d8", statuses: ["opted_out", "closed"] },
+  { id: "closed", label: "Opted out / closed", color: "#d4d4d8", statuses: ["opted_out", "closed", "dropped"] },
 ]

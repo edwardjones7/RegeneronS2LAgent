@@ -1,6 +1,6 @@
 # Outbound caller: design
 
-Date: 2026-10-11. Owner: Eddie. Status: draft for approval.
+Date: 2026-10-11. Owner: Eddie. Status: approved and built (`voice-agent/`).
 
 ## Intent
 

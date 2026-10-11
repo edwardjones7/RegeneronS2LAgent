@@ -2,7 +2,7 @@
   "nctId": "NCT07053423",
   "title": "A Study to Investigate Airway Inflammation With Dupilumab Subcutaneously in Participants Aged ≥40 to ≤85 Years With Chronic Obstructive Pulmonary Disease",
   "shortTitle": "Dupilumab for COPD",
-  "sponsor": "Regeneron Pharmaceuticals",
+  "sponsor": "Sanofi",
   "drug": "dupilumab (Dupixent)",
   "phase": "Phase 4",
   "status": "Recruiting",
@@ -152,5 +152,8 @@
         "withinMonths": 12
       }
     }
+  ],
+  "collaborators": [
+    "Regeneron Pharmaceuticals"
   ]
 }
