@@ -10,13 +10,13 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
 from app import ehr, outreach, prescreen, service
 from app.campaigns import get_campaign, phase_label
 from app.db import get_session
-from app.models import Call, InboxMessage, Lead, LeadStatus, TrialAcceptance
+from app.models import Answer, Call, Event, InboxMessage, Lead, LeadStatus, Note, Slot, TrialAcceptance
 from app.routes.read_api import _iso, lead_summary, require_api_key
 
 router = APIRouter(dependencies=[Depends(require_api_key)])
@@ -223,6 +223,30 @@ def restart(lead_id: int, s: Session = Depends(get_session)):
     lead.status = LeadStatus.QUEUED  # direct: staff override any final status except the ones above
     lead.status_reason = "restarted by office staff"
     return {"ok": True}
+
+
+@router.post("/practices/{practice_id}/reset")
+def reset(practice_id: str, nct_id: str | None = None, s: Session = Depends(get_session)):
+    """Wipe this practice's outreach, for one trial or all of them: its patients, calls, texts,
+    answers and history, the visits they booked, and the acceptances, so the trials can be accepted
+    again from scratch. The do-not-call list is kept."""
+    _practice(practice_id)
+    q = select(Lead.id).where(Lead.practice_id == practice_id)
+    if nct_id:
+        q = q.where(Lead.campaign_id == outreach.campaign_id_for(nct_id))
+    ids = list(s.scalars(q))
+    if ids:
+        s.execute(update(Slot).where(Slot.booked_lead_id.in_(ids)).values(booked_lead_id=None))
+        s.execute(update(Slot).where(Slot.held_by_lead_id.in_(ids)).values(held_by_lead_id=None, held_until=None))
+        for model in (Call, Answer, Event, Note):
+            s.execute(delete(model).where(model.lead_id.in_(ids)))
+        s.execute(delete(Lead).where(Lead.id.in_(ids)))
+    acc = delete(TrialAcceptance).where(TrialAcceptance.practice_id == practice_id)
+    if nct_id:
+        acc = acc.where(TrialAcceptance.nct_id == nct_id)
+    trials = s.execute(acc).rowcount
+    s.expunge_all()
+    return {"ok": True, "patients": len(ids), "trials": trials}
 
 
 @router.get("/inbox")
