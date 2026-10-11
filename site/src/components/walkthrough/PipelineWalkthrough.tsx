@@ -17,10 +17,15 @@ import type { WalkthroughData, WalkthroughTrial } from '@/pages/api/walkthrough'
  */
 
 const SCENES = [
-  { key: 'fetch', label: 'Fetch trials', ms: 6500 },
+  { key: 'fetch', label: 'Fetch trials', ms: 9000 },
   { key: 'match', label: 'Match with Jev', ms: 11500 },
   { key: 'recommend', label: 'Recommend', ms: 4200 },
 ] as const;
+
+type SceneKey = (typeof SCENES)[number]['key'];
+
+/** While a scene is being designed, play only it, on a loop. null plays the whole run. */
+const FOCUS: SceneKey | null = 'fetch';
 
 const TOTAL_MS = SCENES.reduce((n, s) => n + s.ms, 0);
 /** Matches duration-700 on the overlay. */
@@ -93,24 +98,56 @@ const LANES: Record<CriterionCheck, { label: string; className: string }> = {
 
 /* ————————— Scenes ————————— */
 
+/** One trial in the vertical carousel. */
+function TrialRow({ trial }: { trial: WalkthroughTrial }) {
+  const style = AREA_STYLES[trial.area];
+  return (
+    <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-line-2 bg-surface p-3 shadow-[0_1px_2px_rgba(30,36,48,0.05)]">
+      <span className={cn('flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br', style.gradient)}>
+        <AreaIcon area={trial.area} className="size-5 text-white" />
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate text-[14.5px] font-semibold">{trial.indication}</span>
+        <span className="block truncate text-[12.5px] text-ink-3">
+          {[trial.drug, AREA_LABELS[trial.area]].filter(Boolean).join(' · ')}
+        </span>
+      </span>
+    </div>
+  );
+}
+
 function FetchScene({ data, t }: { data: WalkthroughData; t: number }) {
   const count = Math.round(easeOut(t / 4200) * data.trialCount);
-  const shown = Math.floor(t / 230);
+  // Rendered twice so the upward marquee loops without a seam.
+  const rows = [...data.trials, ...data.trials];
+
   return (
-    <>
-      <SceneTitle step={1} title="Fetching open trials">
-        Every recruiting Regeneron trial on ClinicalTrials.gov, synced into the database with its criteria, sites and dates.
-      </SceneTitle>
-      <div className="mt-6 text-center">
-        <span className="text-[56px] font-semibold tabular-nums tracking-[-0.04em]">{count}</span>
-        <span className="ml-2 text-[15px] text-ink-3">open trials</span>
+    <div className="mx-auto grid w-full max-w-5xl animate-modal-in grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-16">
+      {/* Trials streaming in. */}
+      <div className="relative h-[560px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)]">
+        <div className="flex animate-marquee-up flex-col gap-3">
+          {rows.map((trial, i) => (
+            <TrialRow key={`${trial.nctId}-${i}`} trial={trial} />
+          ))}
+        </div>
       </div>
-      <div className="mx-auto mt-6 grid max-w-5xl grid-cols-6 gap-3">
-        {data.trials.map((trial, i) => (
-          <MiniCard key={trial.nctId} trial={trial} shown={i < shown} />
-        ))}
+
+      {/* The count. */}
+      <div>
+        <div className="flex items-center gap-2 text-[12.5px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+          <span className="size-2 animate-pulse rounded-full bg-accent" />
+          ClinicalTrials.gov
+        </div>
+        <h2 className="mt-3 text-[34px] font-semibold leading-tight tracking-[-0.03em]">Fetching open trials</h2>
+        <div className="mt-6 flex items-baseline gap-3">
+          <span className="text-[112px] font-semibold leading-none tabular-nums tracking-[-0.05em]">{count}</span>
+          <span className="text-[17px] text-ink-3">open trials</span>
+        </div>
+        <p className="mt-6 max-w-sm text-[15px] leading-relaxed text-ink-2">
+          Every recruiting Regeneron trial, synced into the database with its criteria, sites and dates.
+        </p>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -267,7 +304,7 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
       started.current ??= now;
       const t = now - started.current;
       setElapsed(t);
-      if (t >= TOTAL_MS) finish();
+      if (!FOCUS && t >= TOTAL_MS) finish();
       else frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
@@ -287,9 +324,14 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
 
   let sceneIndex = 0;
   let sceneStart = 0;
-  while (sceneIndex < SCENES.length - 1 && elapsed >= sceneStart + SCENES[sceneIndex].ms) {
-    sceneStart += SCENES[sceneIndex].ms;
-    sceneIndex += 1;
+  if (FOCUS) {
+    sceneIndex = SCENES.findIndex((s) => s.key === FOCUS);
+    sceneStart = elapsed - (elapsed % SCENES[sceneIndex].ms);
+  } else {
+    while (sceneIndex < SCENES.length - 1 && elapsed >= sceneStart + SCENES[sceneIndex].ms) {
+      sceneStart += SCENES[sceneIndex].ms;
+      sceneIndex += 1;
+    }
   }
   const t = elapsed - sceneStart;
   const scene = SCENES[sceneIndex];
@@ -306,43 +348,20 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(700px_280px_at_10%_0%,#FFD9C7,transparent),radial-gradient(700px_260px_at_50%_0%,#D4E9FB,transparent),radial-gradient(640px_240px_at_90%_0%,#E0F2D3,transparent)] [mask-image:linear-gradient(to_bottom,black_30%,transparent)]" />
 
-      {/* Progress: one segment per scene. */}
-      <div className="relative flex items-center justify-between gap-6 px-8 pt-6">
-        <span className="flex items-center gap-2 text-[14px] font-semibold">
-          <span className="size-5 rounded-md bg-linear-to-br from-[#FF9F80] via-[#F7B6CF] to-[#78B4F4]" />
-          How trialmatch works
-        </span>
-        <div className="flex flex-1 justify-center gap-3">
-          {SCENES.map((s, i) => {
-            const fill = i < sceneIndex ? 1 : i === sceneIndex ? Math.min(t / s.ms, 1) : 0;
-            return (
-              <div key={s.key} className="w-40">
-                <div className={cn('mb-1.5 text-[12px] font-semibold transition-colors', i <= sceneIndex ? 'text-ink' : 'text-ink-3')}>
-                  {i + 1}. {s.label}
-                </div>
-                <div className="h-1 overflow-hidden rounded-full bg-ink/10">
-                  {/* Width changes every frame, so it's the one inline style. */}
-                  <div className="h-full rounded-full bg-ink" style={{ width: `${fill * 100}%` }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <span className="flex items-center gap-2">
-          <button type="button" onClick={finish} className="h-8 rounded-full px-3 text-[12.5px] font-medium text-ink-2 ring-1 ring-line hover:text-ink">
-            Skip to dashboard
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close (Esc)"
-            className="flex size-8 items-center justify-center rounded-full text-ink-2 ring-1 ring-line hover:text-ink"
-          >
-            <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
-          </button>
-        </span>
+      <div className="relative flex justify-end gap-2 px-8 pt-6">
+        <button type="button" onClick={finish} className="h-8 rounded-full px-3 text-[12.5px] font-medium text-ink-2 ring-1 ring-line hover:text-ink">
+          Skip to dashboard
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close (Esc)"
+          className="flex size-8 items-center justify-center rounded-full text-ink-2 ring-1 ring-line hover:text-ink"
+        >
+          <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
       </div>
 
       <div className="relative flex flex-1 flex-col justify-center overflow-hidden px-8 pb-16">

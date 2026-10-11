@@ -8,6 +8,7 @@ import type { TherapeuticArea } from '@/lib/trials/areas';
 export interface WalkthroughTrial {
   nctId: string;
   indication: string;
+  drug: string | null;
   area: TherapeuticArea;
   hasProtocol: boolean;
 }
@@ -44,14 +45,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const byArea = new Map<string, typeof rest>();
     for (const t of rest) byArea.set(t.area, [...(byArea.get(t.area) ?? []), t]);
     const mixed: typeof rest = [];
-    while (mixed.length < 14 && [...byArea.values()].some((l) => l.length)) {
-      for (const list of byArea.values()) if (list.length && mixed.length < 14) mixed.push(list.shift()!);
+    while (mixed.length < 20 && [...byArea.values()].some((l) => l.length)) {
+      for (const list of byArea.values()) if (list.length && mixed.length < 20) mixed.push(list.shift()!);
     }
-    const sample = [...trials.filter((t) => t.hasProtocol), ...mixed].slice(0, 18);
+    const sample = [...trials.filter((t) => t.hasProtocol), ...mixed].slice(0, 24);
 
     const data: WalkthroughData = {
       trialCount: trials.length,
-      trials: sample.map((t) => ({ nctId: t.nctId, indication: t.indication, area: t.area, hasProtocol: t.hasProtocol })),
+      trials: sample.map((t) => ({ nctId: t.nctId, indication: t.indication, drug: t.drug, area: t.area, hasProtocol: t.hasProtocol })),
       protocolCount: ids.length,
       protocol: {
         indication: featured?.indication ?? protocol?.shortTitle ?? 'Demo protocol',
