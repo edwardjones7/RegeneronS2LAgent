@@ -92,15 +92,16 @@ Their motivation is **publication and academic notoriety**, not money. Investiga
 
 The engine runs where the data is. Only de-identified aggregate counts cross the network boundary. If a function signature sends a patient identifier, a name, a DOB, or an MRN outward, it is wrong. Small-cell suppression applies: do not emit a count below a threshold (default 5) because a count of 1 in a rare indication is re-identifiable.
 
-For the hackathon this is satisfied the easy and honest way: **run everything in the browser. No backend.**
+For the hackathon, **the Supabase `patients` table stands in for each practice's own EHR.** Decided by the team on 2026-10-10, replacing the earlier browser-only plan.
 
-- TypeScript. React. Next.js unless the team already started otherwise.
-- Matching engine is plain TypeScript in a **Web Worker** so evaluating thousands of patient records does not freeze the UI.
-- Data loaded client side from a local file. Nothing posted anywhere.
-- Charts: whatever moves fastest.
-- Deploy to Vercel so the README has a live link.
+- Every patient row belongs to one practice (`practice_id`). Row-level security means a signed-in practice user reads only their own practice's patients. Records are never pooled or queried across practices.
+- The matching engine runs per practice, against that practice's patients only.
+- What leaves a practice is de-identified counts: `practice_patient_counts()` and per-trial match counts, with counts under 5 suppressed.
+- The Jev evaluation model gets a de-identified summary per patient (no name, ID, birth date or location; dates as relative time). See `protocols/README.md`.
+- Server code uses the secret key, which bypasses row-level security, so every API route must scope its queries to one practice. See `site/src/lib/utils/db/client.ts`.
+- TypeScript, React, Next.js. Deploy to Vercel so the README has a live link.
 
-Why browser-only is the right call and not a shortcut: the judging criterion is "functional, replicable, ready to deploy." Client side means `git clone && npm install && npm run dev` works on a judge's machine with no API key, no database, and no server that dies mid-demo. It *also* is a literal demonstration of the privacy architecture. The architecture and the convenience point the same direction. Say that out loud in the demo.
+Say it in the demo: in production this table is the practice's own EHR (via FHIR), and the only thing that ever crosses to the sponsor is a count.
 
 ```
 /engine          matching logic, pure functions, no DOM, no fetch
@@ -217,7 +218,7 @@ If we pitch "AI calls patients," we are pitching their product with less infrast
 ## 11. Demo script, three minutes
 
 - **0:00 to 0:20** The problem, said by a person. Trials fail because sites cannot enroll. The industry advertises to patients. The actual bottleneck is finding the doctor who already has the patients.
-- **0:20 to 0:45** Here is a practice's data. It never leaves the browser. Show the network tab if you want to be a show-off about it.
+- **0:20 to 0:45** Here is a practice's data. It stays scoped to this practice; nothing about these patients is pooled or shared.
 - **0:45 to 1:45** Run the match. Here are five trials. You can fill two of them. Fourteen candidates, six need chart review. **Open one.** Here is exactly which criteria each patient passed and which need a human. This is the money shot, do not rush it.
 - **1:45 to 2:15** The doctor accepts. Here is the call list, their own patients, under their own name. The patient stays with this practice.
 - **2:15 to 2:40** What crosses the wire: a count. Here is what a sponsor sees, a map of which practices can fill which trial. Site selection from the other end.

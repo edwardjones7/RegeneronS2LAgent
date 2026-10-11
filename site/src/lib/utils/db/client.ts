@@ -7,9 +7,11 @@ import { getEnv } from '@/lib/utils/envManager';
  *
  * Never import this from a component or any browser code.
  *
- * Privacy rule (.claude/AGENTS.MD §5): identifiable patient data never goes
- * into Supabase. Store trials, protocols, practices, doctors and
- * de-identified aggregate counts only.
+ * Privacy rule (.claude/AGENTS.MD §5): the `patients` table stands in for each
+ * practice's own EHR. Only read patients scoped to one practice
+ * (`.eq('practice_id', ...)`), never across practices. Anything that leaves a
+ * practice, such as a sponsor view, uses de-identified counts only
+ * (`practice_patient_counts()`, small counts suppressed).
  */
 const supabase = createClient(
   getEnv('SUPABASE_URL'),
