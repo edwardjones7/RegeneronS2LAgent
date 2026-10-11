@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { PipelineWalkthrough } from '@/components/walkthrough/PipelineWalkthrough';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { cn } from '@/lib/utils/cn';
@@ -82,14 +82,81 @@ const initials = (name: string) =>
     .join('')
     .slice(0, 2);
 
+/** The signed-in doctor, at the foot of the sidebar. Tap for a menu with Sign out (back to the landing page). */
+function DoctorMenu() {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (e: PointerEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('pointerdown', onPointer);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative mt-2">
+      {open && (
+        <div
+          role="menu"
+          className="absolute inset-x-0 bottom-full z-20 mb-2 rounded-2xl border border-line-2 bg-surface p-1.5 shadow-[0_16px_40px_-16px_rgba(30,36,48,0.35)] motion-safe:animate-slide-up"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => void router.push('/')}
+            className="flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-xl px-2.5 text-[13.5px] font-medium text-ink-2 transition-colors hover:bg-ink/[0.04] hover:text-ink"
+          >
+            <svg {...ICON_PROPS}>
+              <path d="M14 4h3.5A2.5 2.5 0 0120 6.5v11a2.5 2.5 0 01-2.5 2.5H14M10 16l-4-4 4-4M6 12h9" />
+            </svg>
+            Sign out
+          </button>
+        </div>
+      )}
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          'flex w-full cursor-pointer items-center gap-2.5 rounded-2xl border border-white/80 p-2.5 text-left backdrop-blur-sm transition-colors',
+          open ? 'bg-white/90' : 'bg-white/60 hover:bg-white/80'
+        )}
+      >
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#A3CEF6] to-[#E0F2D3] text-[12px] font-semibold text-ink">
+          {initials(DEMO_PRACTICE.doctor)}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[13px] font-semibold">{DEMO_PRACTICE.doctor}</span>
+          <span className="block truncate text-[11.5px] text-ink-3" title="Illustrative practice name for the demo">
+            {DEMO_PRACTICE.name}
+          </span>
+        </span>
+        <svg className="size-4 shrink-0 text-ink-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8 10l4-4 4 4M8 14l4 4 4-4" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 /** Sidebar + main column. Every dashboard page renders inside this. */
 export function AppShell({ title, active, children }: AppShellProps) {
   const router = useRouter();
-  // Signing in from the landing page arrives with ?welcome=1: play the pipeline walkthrough once.
-  const [walkthrough, setWalkthrough] = useState(() => router.query.welcome === '1');
+  const [walkthrough, setWalkthrough] = useState(false);
   const closeWalkthrough = useCallback(() => setWalkthrough(false), []);
 
-  // Drop ?welcome from the URL so a refresh doesn't replay it.
+  // Signing in arrives with ?welcome=1 (the app plays the walkthrough, see _app). Drop it from the
+  // URL so a refresh doesn't replay it.
   useEffect(() => {
     if (router.query.welcome === undefined) return;
     const query = Object.fromEntries(Object.entries(router.query).filter(([key]) => key !== 'welcome'));
@@ -142,17 +209,7 @@ export function AppShell({ title, active, children }: AppShellProps) {
             Replay pipeline
           </button>
 
-          <div className="mt-2 flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/60 p-2.5 backdrop-blur-sm">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#A3CEF6] to-[#E0F2D3] text-[12px] font-semibold text-ink">
-              {initials(DEMO_PRACTICE.doctor)}
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-[13px] font-semibold">{DEMO_PRACTICE.doctor}</span>
-              <span className="block truncate text-[11.5px] text-ink-3" title="Illustrative practice name for the demo">
-                {DEMO_PRACTICE.name}
-              </span>
-            </span>
-          </div>
+          <DoctorMenu />
         </aside>
 
         <main className="min-w-0 flex-1 px-8 py-7">{children}</main>
