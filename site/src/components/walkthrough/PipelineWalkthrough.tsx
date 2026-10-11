@@ -15,8 +15,8 @@ import type { WalkthroughData, WalkthroughTrial } from '@/pages/api/walkthrough'
  */
 
 const SCENES = [
-  { key: 'fetch', label: 'Fetch trials', ms: 5500 },
-  { key: 'match', label: 'Match with Jev', ms: 6500 },
+  { key: 'fetch', label: 'Fetch trials', ms: 4600 },
+  { key: 'match', label: 'Match with Jev', ms: 4800 },
   { key: 'recommend', label: 'Recommend', ms: 3800 },
 ] as const;
 
@@ -26,6 +26,9 @@ type SceneKey = (typeof SCENES)[number]['key'];
 const FOCUS: SceneKey | null = null;
 
 const TOTAL_MS = SCENES.reduce((n, s) => n + s.ms, 0);
+/** How long the outgoing scene fades out while the next one comes in (matches animate-fade-out). */
+const CROSSFADE_MS = 220;
+
 /** Matches duration-700 on the overlay. */
 const LEAVE_MS = 700;
 
@@ -162,17 +165,20 @@ function MatchRow({ trial, i }: { trial: WalkthroughTrial; i: number }) {
   );
 }
 
-const MATCH_EVERY_MS = 1100;
+const MATCH_EVERY_MS = 900;
+/** First match lands just after the scene starts, while step 1 is still fading out. */
+const FIRST_MATCH_MS = 150;
 
 function MatchScene({ data, t }: { data: WalkthroughData; t: number }) {
   const matchable = data.trials.filter((trial) => trial.hasProtocol);
-  const matched = Math.min(matchable.length, Math.max(0, Math.floor((t - 700) / MATCH_EVERY_MS) + 1));
+  const matched = Math.min(matchable.length, Math.max(0, Math.floor((t - FIRST_MATCH_MS) / MATCH_EVERY_MS) + 1));
   const done = matched === matchable.length;
 
   return (
     <div className="mx-auto grid w-full max-w-5xl animate-modal-in grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-16">
       {/* Matched trials stack up; the skeleton on top is Jev still checking. Once done, it fades and the stack moves up. */}
-      <div className="relative h-[408px]">
+      {/* Same height as step 1's stack, so the two line up through the crossfade. */}
+      <div className="relative h-[492px]">
         <SkeletonRow className={cn('absolute inset-x-0 top-0 transition-opacity duration-500', done ? 'opacity-0' : 'opacity-100')} />
         {matchable.map((trial, i) => {
           if (i > matched) return null; // not reached yet
@@ -267,6 +273,12 @@ function RecommendScene({ data, t }: { data: WalkthroughData; t: number }) {
   );
 }
 
+function renderScene(key: SceneKey, data: WalkthroughData, t: number) {
+  if (key === 'fetch') return <FetchScene data={data} t={t} />;
+  if (key === 'match') return <MatchScene data={data} t={t} />;
+  return <RecommendScene data={data} t={t} />;
+}
+
 /* ————————— Overlay ————————— */
 
 export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
@@ -328,6 +340,7 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
   }
   const t = elapsed - sceneStart;
   const scene = SCENES[sceneIndex];
+  const previous = !FOCUS && sceneIndex > 0 && t < CROSSFADE_MS ? SCENES[sceneIndex - 1] : null;
 
   return (
     <div
@@ -360,10 +373,18 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
       <div className="relative flex flex-1 flex-col justify-center overflow-hidden px-8 pb-16">
         {error && <p className="text-center text-[14px] text-ink-3">Couldn&apos;t load the walkthrough.</p>}
         {!data && !error && <div className="mx-auto size-6 animate-spin rounded-full border-2 border-ink/20 border-t-ink" />}
-        {/* While focused on, the fetch scene runs on the total clock so its stream doesn't restart. */}
-        {data && scene.key === 'fetch' && <FetchScene data={data} t={FOCUS === 'fetch' ? elapsed : t} />}
-        {data && scene.key === 'match' && <MatchScene data={data} t={t} />}
-        {data && scene.key === 'recommend' && <RecommendScene data={data} t={t} />}
+        {/* Crossfade: the previous scene keeps running while it fades out over the new one's entrance. */}
+        {data && previous && (
+          <div key={previous.key} className="pointer-events-none absolute inset-0 flex animate-fade-out flex-col justify-center px-8 pb-16">
+            {renderScene(previous.key, data, previous.ms + t)}
+          </div>
+        )}
+        {data && (
+          <div key={scene.key} className="absolute inset-0 flex flex-col justify-center px-8 pb-16">
+            {/* While focused on, the fetch scene runs on the total clock so its stream doesn't restart. */}
+            {renderScene(scene.key, data, scene.key === 'fetch' && FOCUS === 'fetch' ? elapsed : t)}
+          </div>
+        )}
       </div>
     </div>
   );
