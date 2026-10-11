@@ -26,10 +26,8 @@ export function TrialCard({ trial }: { trial: TrialListItem }) {
       <div className="absolute inset-x-0 top-0 h-3/4 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.7),transparent_50%)]" />
 
       <div className="relative flex items-start justify-between gap-2">
-        <span className="flex items-center gap-1.5 rounded-full bg-white/80 py-1 pl-1.5 pr-2.5 text-[11px] font-semibold text-ink shadow-[0_1px_2px_rgba(30,36,48,0.06)] ring-1 ring-white/70 backdrop-blur-md">
-          <span className={cn('flex size-5 items-center justify-center rounded-full', style.dot)}>
-            <AreaIcon area={trial.area} className="size-3 text-white" />
-          </span>
+        <span className="flex items-center h-7 gap-1.5 rounded-full bg-white/80 px-2.5 text-[11px] font-semibold text-ink shadow-[0_1px_2px_rgba(30,36,48,0.06)] ring-1 ring-white/70 backdrop-blur-md">
+          <AreaIcon area={trial.area} className={cn('size-3.5 shrink-0', style.text)} />
           {AREA_LABELS[trial.area]}
         </span>
         <PhaseBadge
