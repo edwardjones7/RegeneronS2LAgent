@@ -132,7 +132,7 @@ The repo-root `vercel.json` deploys the whole repo as one project with three **S
 3. Add the env vars from `.env.example`, plus `CRON_SECRET`, `DASHBOARD_PASSWORD` and `GEMINI_API_KEY`: `vercel env add …`.
 4. Run `vercel --prod`. Then set `PUBLIC_BASE_URL` to the production URL and run `make elevenlabs` so ElevenLabs and Twilio point at it.
 
-Hobby plans only allow daily crons. On Hobby, change the schedule in `vercel.json`; retries then run when the cron fires.
+`/cron/tick` runs once a day at 14:00 UTC (10am Eastern, inside calling hours) so it fits the Hobby plan, which only allows daily crons. On Pro, set it to `*/5 * * * *` in the root `vercel.json` so retries and reminders go out promptly.
 
 ## Read API (dashboard source of truth)
 

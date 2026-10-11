@@ -34,7 +34,7 @@
     { "source": "/(.*)", "destination": { "service": "site" } }
   ],
   "crons": [
-    { "path": "/cron/tick", "schedule": "*/5 * * * *" },
+    { "path": "/cron/tick", "schedule": "0 14 * * *" },
     { "path": "/api/trials/sync", "schedule": "0 6 * * *" }
   ]
 }
