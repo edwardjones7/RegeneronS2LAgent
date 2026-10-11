@@ -411,3 +411,18 @@ describe('lab units', () => {
     assert.ok(!unitMatches('hba1c', 'mmol/mol'));
   });
 });
+
+describe('gated alternatives', () => {
+  it('a gated inclusion alternative does not pass its group for someone outside the gate', () => {
+    const base = {
+      id: 'inc_1', kind: 'inclusion' as const, class: 'record' as const, question: 'BMI 23-40?', sections: ['labs' as const],
+      original_text: 'x', code_check: null,
+      applies_to: { condition: 'East Asian ancestry', description: 'East Asian participants' },
+    };
+    const inGroup = structuredQuestion({ ...base, group: 'g1' });
+    assert.doesNotMatch(inGroup.criteria.accept, /not in the group/);
+    assert.match(inGroup.criteria.reject, /not in the group/);
+    const alone = structuredQuestion({ ...base, group: null });
+    assert.match(alone.criteria.accept, /not in the group/);
+  });
+});

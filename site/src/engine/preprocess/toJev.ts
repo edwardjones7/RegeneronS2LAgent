@@ -65,10 +65,14 @@ export function isReviewItem(c: StructuredCriterion): boolean {
 export function structuredQuestion(c: StructuredCriterion, order: Answer[] = DEFAULT_ORDER): JevChoiceQuestion {
   const gate = c.applies_to?.condition;
   const inc = c.kind === 'inclusion';
+  // Outside a gated inclusion criterion's group, it passes, unless it is one alternative
+  // in an OR group: then it simply isn't the alternative that applies, and must not
+  // satisfy the group on the patient's behalf.
+  const outside = gate ? ` Or the patient is not in the group: ${gate}.` : '';
   const options: Record<Answer, string> = inc
     ? {
-        accept: 'Yes, the record shows this.' + (gate ? ` Or the patient is not in the group: ${gate}.` : ''),
-        reject: 'No, the record shows otherwise.',
+        accept: 'Yes, the record shows this.' + (c.group ? '' : outside),
+        reject: 'No, the record shows otherwise.' + (c.group ? outside : ''),
         unknown: 'Not stated in the record.',
       }
     : {

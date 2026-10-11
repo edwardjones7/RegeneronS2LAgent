@@ -109,11 +109,11 @@ async function loadTrials(ids: string[] | undefined): Promise<LoadedTrial[]> {
   if (useSupabase) {
     const filter = ids ? `&nct_id=in.(${ids.join(',')})` : '';
     try {
-      return await supabaseGet<LoadedTrial>(`trials?select=${TRIAL_COLS},criteria_questions${filter}`);
+      return await supabaseGet<LoadedTrial>(`trials?select=${TRIAL_COLS},criteria_questions${filter}&order=nct_id`);
     } catch (err) {
       // Before migration 0002 there is no criteria_questions column (Postgres 42703); anything else is real.
       if (!String(err).includes('42703')) throw err;
-      return supabaseGet<LoadedTrial>(`trials?select=${TRIAL_COLS}${filter}`);
+      return supabaseGet<LoadedTrial>(`trials?select=${TRIAL_COLS}${filter}&order=nct_id`);
     }
   }
   if (!ids) throw new Error('Without Supabase, pass --trials');
@@ -142,9 +142,9 @@ async function fetchCtgovTrial(id: string): Promise<Trial> {
 async function loadPatients(): Promise<{ patients: Patient[]; codes: CodeBook }> {
   if (useSupabase) {
     const filter = args.practice ? `&practice_id=eq.${args.practice}` : '';
-    const patients = await supabaseGet<Patient>(`patients?select=id,practice_id,birth_date,sex,record${filter}`);
+    const patients = await supabaseGet<Patient>(`patients?select=id,practice_id,birth_date,sex,record${filter}&order=id`);
     const rows = await supabaseGet<{ system: keyof CodeBook; code: string; description: string }>(
-      'codes?select=system,code,description',
+      'codes?select=system,code,description&order=system,code',
     );
     const codes: CodeBook = { snomed: {}, rxnorm: {}, loinc: {} };
     for (const r of rows) codes[r.system][r.code] = r.description;
@@ -184,6 +184,7 @@ async function jev(state: unknown, questions: Record<string, unknown>): Promise<
   if (spent + estimate > maxCost) {
     budgetHit = true; // stop calling, keep what we have, still write the report
     calls--;
+    estTokens -= tokens;
     return null;
   }
   spent += estimate;
@@ -243,6 +244,10 @@ const outdated = new Set(trials.filter((t) => {
 if (outdated.size) console.warn(`Criteria older than the registry, so skipped (run npm run criteria): ${[...outdated].join(', ')}`);
 
 const sha = (x: string) => createHash('sha256').update(x).digest('hex').slice(0, 32);
+/** Bump when the way answers become buckets changes (combine, gates, thresholds), so stored results are redone. */
+const MATCHER_VERSION = 2;
+// The whole criteria document, so regrouping or rewording re-evaluates pairs.
+const criteriaHash = new Map(trials.map((t) => [t.nct_id, sha(JSON.stringify(structuredByTrial.get(t.nct_id)?.criteria ?? t.eligibility_criteria ?? ''))]));
 const conditionMap: TrialConditionMap = JSON.parse(readFileSync(resolve(REPO, 'data/conditions/trial_conditions.json'), 'utf8'));
 
 // 1. Demographics.
@@ -269,7 +274,7 @@ type Prepared = {
 function prepare(p: Patient, t: Trial, why: string): Prepared | null {
   if (outdated.has(t.nct_id)) return null;
   const tc = structuredByTrial.get(t.nct_id);
-  const settings = [JEV_MODEL, REJECT_THRESHOLD, CONFIDENT, order];
+  const settings = [MATCHER_VERSION, JEV_MODEL, REJECT_THRESHOLD, CONFIDENT, order, criteriaHash.get(t.nct_id)];
   if (!tc) {
     const criteria = criteriaByTrial.get(t.nct_id)!;
     if (!criteria.length) return null;
@@ -349,7 +354,7 @@ if (args.write) {
   const filter = `nct_id=in.(${trials.map((t) => t.nct_id).join(',')})${args.practice ? `&practice_id=eq.${args.practice}` : ''}`;
   // Also fails fast, before any paid call, if migration 0003 isn't applied.
   const stored = await supabaseGet<{ patient_id: string; nct_id: string; input_hash: string }>(
-    `prescreen_results?select=patient_id,nct_id,input_hash&${filter}`,
+    `prescreen_results?select=patient_id,nct_id,input_hash&${filter}&order=patient_id,nct_id`,
   );
   const storedHash = new Map(stored.map((r) => [key(r.patient_id, r.nct_id), r.input_hash]));
   todo = prepared.filter((x) => storedHash.get(key(x.p.id, x.t.nct_id)) !== x.hash);
@@ -419,7 +424,7 @@ const out = resolve(args.out ?? resolve(REPO, `data/matches/run-${Date.now()}.js
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(
   out,
-  JSON.stringify({ meta, summary, criteria: Object.fromEntries(criteriaByTrial), results }, null, 1),
+  JSON.stringify({ meta, summary, criteria: Object.fromEntries(trials.map((t) => [t.nct_id, structuredByTrial.get(t.nct_id)?.criteria ?? criteriaByTrial.get(t.nct_id)])), results }, null, 1),
 );
 console.log(`Wrote ${out}`);
 
