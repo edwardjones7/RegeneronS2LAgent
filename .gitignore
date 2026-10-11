@@ -30,3 +30,8 @@ next-env.d.ts
 .claude/worktrees/
 # Structured criteria written locally by site/scripts/preprocess-criteria.ts (stored in Supabase trials)
 /data/criteria/
+
+# Vercel CLI link and local build output; Python envs and test caches
+.vercel/
+.venv/
+.pytest_cache/
