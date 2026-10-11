@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AreaIcon } from '@/components/trials/AreaIcon';
 import { AREA_STYLES } from '@/components/trials/areaStyles';
 import { PhaseBadge } from '@/components/trials/PhaseBadge';
-import { TrialCard } from '@/components/trials/TrialCard';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { fetchJson } from '@/lib/utils/api';
 import { cn } from '@/lib/utils/cn';
@@ -20,7 +19,7 @@ import type { WalkthroughData, WalkthroughTrial } from '@/pages/api/walkthrough'
 const SCENES = [
   { key: 'fetch', label: 'Fetch trials', ms: 4600 },
   { key: 'match', label: 'Match patients', ms: 5400 },
-  { key: 'recommend', label: 'Recommend', ms: 3800 },
+  { key: 'recommend', label: 'Recommend', ms: 3200 },
 ] as const;
 
 type SceneKey = (typeof SCENES)[number]['key'];
@@ -241,47 +240,40 @@ function MatchScene({ data, t }: { data: WalkthroughData; t: number }) {
   );
 }
 
-/** Stagger for the final cards, as full class names so Tailwind generates them. */
-const STAGGER = ['delay-0', 'delay-[90ms]', 'delay-[180ms]', 'delay-[270ms]'];
-
-function RecommendScene({ data, t }: { data: WalkthroughData; t: number }) {
-  // Same order and illustrative counts as step 2 (keyed by position among the matchable trials),
-  // then ranked by candidates, most first.
-  const matchable = data.trials.filter((trial) => trial.hasProtocol);
-  const ranked = data.matched
-    .map((trial) => ({ trial, counts: mockCounts(matchable.findIndex((m) => m.nctId === trial.nctId)) }))
-    .sort((a, b) => b.counts.candidates - a.counts.candidates);
-
+/** The payoff: how many trials fit, then the overlay dissolves into the dashboard. */
+function RecommendScene({ data, onFinish }: { data: WalkthroughData; onFinish: () => void }) {
+  const fit = data.matched.length;
   return (
-    <div className="mx-auto w-full max-w-6xl animate-modal-in">
-      <h2 className="text-[34px] font-semibold leading-tight tracking-[-0.03em]">Recommended for your practice</h2>
-      <p className="mt-2 text-[15px] leading-relaxed text-ink-2">
-        The trials your patients could fill, ranked by candidates.{' '}
-        <span className="text-ink-3">Counts are illustrative for now.</span>
-      </p>
-      {/* The dashboard's own card; not clickable here. */}
-      <div className="pointer-events-none mt-8 grid grid-cols-4 gap-5">
-        {ranked.map(({ trial, counts }, order) => (
-          <div
-            key={trial.nctId}
-            className={cn(
-              STAGGER[order] ?? 'delay-0',
-              'transition-[opacity,translate,scale] duration-500 ease-out',
-              t > 120 ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-95 opacity-0'
-            )}
-          >
-            <TrialCard trial={trial} href={{ pathname: '/trials', query: { trial: trial.nctId } }} prescreen={counts} />
-          </div>
-        ))}
+    <div className="mx-auto max-w-2xl animate-modal-in text-center">
+      <div className="flex items-baseline justify-center gap-4">
+        <span className="text-[140px] font-semibold leading-none tabular-nums tracking-[-0.05em]">{fit}</span>
+        <span className="text-left text-[28px] font-semibold leading-tight tracking-[-0.025em]">
+          {fit === 1 ? 'trial fits' : 'trials fit'}
+          <br />
+          your patients
+        </span>
       </div>
+      <p className="mx-auto mt-6 max-w-md text-[16px] leading-relaxed text-ink-2">
+        Ranked by how many of your patients could join. Take a look.
+      </p>
+      <button
+        type="button"
+        onClick={onFinish}
+        className="mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[14px] font-semibold text-white transition-colors hover:bg-ink/85"
+      >
+        See your trials
+        <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </button>
     </div>
   );
 }
 
-function renderScene(key: SceneKey, data: WalkthroughData, t: number) {
+function renderScene(key: SceneKey, data: WalkthroughData, t: number, onFinish: () => void) {
   if (key === 'fetch') return <FetchScene data={data} t={t} />;
   if (key === 'match') return <MatchScene data={data} t={t} />;
-  return <RecommendScene data={data} t={t} />;
+  return <RecommendScene data={data} onFinish={onFinish} />;
 }
 
 /* ————————— Overlay ————————— */
@@ -381,13 +373,13 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
         {/* Crossfade: the previous scene keeps running while it fades out over the new one's entrance. */}
         {data && previous && (
           <div key={previous.key} className="pointer-events-none absolute inset-0 flex animate-fade-out flex-col justify-center px-8 pb-16">
-            {renderScene(previous.key, data, previous.ms + t)}
+            {renderScene(previous.key, data, previous.ms + t, finish)}
           </div>
         )}
         {data && (
           <div key={scene.key} className="absolute inset-0 flex flex-col justify-center px-8 pb-16">
             {/* While focused on, the fetch scene runs on the total clock so its stream doesn't restart. */}
-            {renderScene(scene.key, data, scene.key === 'fetch' && FOCUS === 'fetch' ? elapsed : t)}
+            {renderScene(scene.key, data, scene.key === 'fetch' && FOCUS === 'fetch' ? elapsed : t, finish)}
           </div>
         )}
       </div>
