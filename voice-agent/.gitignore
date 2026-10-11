@@ -7,3 +7,6 @@ __pycache__/
 web/out/
 web/.next/
 web/node_modules/
+# Copied from ../protocols and ../data by the Vercel build
+/protocols/
+/data/
