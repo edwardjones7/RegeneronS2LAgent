@@ -2,8 +2,7 @@ import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { AREA_STYLES } from '@/components/trials/areaStyles';
 import { TrialCard } from '@/components/trials/TrialCard';
-import { AppShell, type NavCounts } from '@/components/ui';
-import { getNavCounts } from '@/lib/nav';
+import { AppShell } from '@/components/ui';
 import { getPatientStats } from '@/lib/patients';
 import { DEMO_PRACTICE, greeting } from '@/lib/practice';
 import { listOpenTrials, type TrialListItem } from '@/lib/trials';
@@ -16,7 +15,6 @@ interface Filters {
 }
 
 interface TrialsPageProps {
-  counts: NavCounts;
   filters: Filters;
   trials: TrialListItem[];
   /** Trials per area, after the NJ filter. */
@@ -28,7 +26,7 @@ interface TrialsPageProps {
 
 export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ query }) => {
   const filters: Filters = { area: isTherapeuticArea(query.area) ? query.area : null, nj: query.nj === '1' };
-  const [counts, all] = await Promise.all([getNavCounts(), listOpenTrials()]);
+  const all = await listOpenTrials();
 
   const inScope = filters.nj ? all.filter((t) => t.njRecruiting > 0) : all;
   const areaCounts = AREA_ORDER.map((area) => ({ area, count: inScope.filter((t) => t.area === area).length })).filter(
@@ -37,7 +35,6 @@ export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ 
 
   return {
     props: {
-      counts,
       filters,
       trials: filters.area ? inScope.filter((t) => t.area === filters.area) : inScope,
       areaCounts,
@@ -82,9 +79,9 @@ function AreaPill({ area, count, href: to, active }: { area: TherapeuticArea; co
   );
 }
 
-export default function TrialsPage({ counts, filters, trials, areaCounts, total, greeting, practicePatients }: TrialsPageProps) {
+export default function TrialsPage({ filters, trials, areaCounts, total, greeting, practicePatients }: TrialsPageProps) {
   return (
-    <AppShell title="Trials" active="trials" counts={counts}>
+    <AppShell title="Trials" active="trials">
       <header className="relative isolate">
         {/* Soft wash of the area colors behind the greeting. */}
         <div className="pointer-events-none absolute -inset-x-8 -top-7 -z-10 h-64 bg-[radial-gradient(520px_200px_at_8%_0%,#FFD9C7,transparent),radial-gradient(520px_200px_at_40%_0%,#D4E9FB,transparent),radial-gradient(480px_180px_at_70%_0%,#E0F2D3,transparent)] [mask-image:linear-gradient(to_bottom,black_40%,transparent)]" />

@@ -1,4 +1,4 @@
-export { AppShell, type NavCounts, type NavKey } from './AppShell';
+export { AppShell, type NavKey } from './AppShell';
 export { Badge, type BadgeTone } from './Badge';
 export { Button, LinkButton } from './Button';
 export { Drawer, DrawerSection } from './Drawer';

@@ -1,7 +1,6 @@
 import type { GetServerSideProps } from 'next';
 import type { ReactNode } from 'react';
-import { AppShell, Badge, type BadgeTone, type NavCounts, PageHeader, Table, Tabs, Td, Th, Tr } from '@/components/ui';
-import { getNavCounts } from '@/lib/nav';
+import { AppShell, Badge, type BadgeTone, PageHeader, Table, Tabs, Td, Th, Tr } from '@/components/ui';
 import { getProtocol, type CriterionCheck, type Protocol, type ProtocolCriterion } from '@/lib/protocols';
 import { getTrialDetail, type TrialDetail } from '@/lib/trials';
 import { formatAgeRange, formatDate, formatPhases, formatStatus } from '@/lib/utils/format';
@@ -9,7 +8,6 @@ import { formatAgeRange, formatDate, formatPhases, formatStatus } from '@/lib/ut
 type Tab = 'overview' | 'criteria' | 'locations';
 
 interface TrialPageProps {
-  counts: NavCounts;
   tab: Tab;
   trial: TrialDetail;
   protocol: Protocol | null;
@@ -17,11 +15,11 @@ interface TrialPageProps {
 
 export const getServerSideProps: GetServerSideProps<TrialPageProps> = async ({ params, query }) => {
   const nctId = String(params?.nctId ?? '');
-  const [counts, trial] = await Promise.all([getNavCounts(), getTrialDetail(nctId)]);
+  const trial = await getTrialDetail(nctId);
   if (!trial) return { notFound: true };
 
   const tab: Tab = query.tab === 'criteria' || query.tab === 'locations' ? query.tab : 'overview';
-  return { props: { counts, tab, trial, protocol: getProtocol(nctId) } };
+  return { props: { tab, trial, protocol: getProtocol(nctId) } };
 };
 
 const CHECK_LABELS: Record<CriterionCheck, { label: string; tone: BadgeTone }> = {
@@ -63,11 +61,11 @@ function CriteriaList({ title, criteria }: { title: string; criteria: ProtocolCr
   );
 }
 
-export default function TrialPage({ counts, tab, trial, protocol }: TrialPageProps) {
+export default function TrialPage({ tab, trial, protocol }: TrialPageProps) {
   const base = `/trials/${trial.nctId}`;
 
   return (
-    <AppShell title={trial.nctId} active="trials" counts={counts}>
+    <AppShell title={trial.nctId} active="trials">
       <PageHeader
         back={{ href: '/trials', label: 'Open trials' }}
         title={protocol?.shortTitle ?? trial.conditions.slice(0, 2).join(', ') ?? trial.title}

@@ -8,7 +8,6 @@ import {
   DrawerSection,
   EmptyRow,
   LinkButton,
-  type NavCounts,
   PageHeader,
   StatCard,
   StatGrid,
@@ -17,7 +16,6 @@ import {
   Th,
   Tr,
 } from '@/components/ui';
-import { getNavCounts } from '@/lib/nav';
 import { getPatient, getPatientStats, listPatients, type PatientDetail, type PatientListResult, type PatientStats } from '@/lib/patients';
 import { formatDate } from '@/lib/utils/format';
 
@@ -28,7 +26,6 @@ interface Filters {
 }
 
 interface PatientsPageProps {
-  counts: NavCounts;
   stats: PatientStats;
   filters: Filters;
   result: PatientListResult;
@@ -43,7 +40,6 @@ export const getServerSideProps: GetServerSideProps<PatientsPageProps> = async (
 
   return {
     props: {
-      counts: await getNavCounts(),
       stats: getPatientStats(),
       filters,
       result: listPatients({ county: filters.county || undefined, query: filters.q || undefined, page: filters.page }),
@@ -170,12 +166,12 @@ function PatientDrawer({ patient, closeHref }: { patient: PatientDetail; closeHr
   );
 }
 
-export default function PatientsPage({ counts, stats, filters, result, selected }: PatientsPageProps) {
+export default function PatientsPage({ stats, filters, result, selected }: PatientsPageProps) {
   const first = (result.page - 1) * 50 + 1;
   const last = first + result.patients.length - 1;
 
   return (
-    <AppShell title="Patients" active="patients" counts={counts}>
+    <AppShell title="Patients" active="patients">
       <PageHeader
         title="Patients"
         description={`${stats.total.toLocaleString()} synthetic New Jersey patients from Synthea · records as of ${formatDate(result.asOf)} · not real people`}
