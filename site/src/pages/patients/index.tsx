@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { ConditionChip } from '@/components/patients/ConditionChip';
 import { PatientAvatar } from '@/components/patients/PatientAvatar';
-import { AREA_STYLES } from '@/components/trials/areaStyles';
+import { PatientToolbar } from '@/components/patients/PatientToolbar';
 import { AppShell, Drawer, DrawerSection } from '@/components/ui';
 import {
   getConditionCounts,
@@ -14,12 +14,11 @@ import {
   type PatientSummary,
 } from '@/lib/patients';
 import { DEMO_PRACTICE } from '@/lib/practice';
-import { classifyTrial } from '@/lib/trials/areas';
 import { cn } from '@/lib/utils/cn';
 import { formatDate } from '@/lib/utils/format';
 
 interface Filters {
-  condition: string;
+  conditions: string[];
   q: string;
   page: number;
 }
@@ -33,9 +32,10 @@ interface PatientsPageProps {
 }
 
 const str = (v: string | string[] | undefined) => (typeof v === 'string' ? v : '');
+const list = (v: string | string[] | undefined) => (Array.isArray(v) ? v : v ? [v] : []);
 
 export const getServerSideProps: GetServerSideProps<PatientsPageProps> = async ({ query }) => {
-  const filters: Filters = { condition: str(query.condition), q: str(query.q), page: Number(str(query.page)) || 1 };
+  const filters: Filters = { conditions: list(query.condition), q: str(query.q), page: Number(str(query.page)) || 1 };
   const patientId = str(query.patient);
   const selected = patientId ? getPatient(patientId) : null;
 
@@ -45,12 +45,12 @@ export const getServerSideProps: GetServerSideProps<PatientsPageProps> = async (
       // Only this practice's patients (AGENTS.MD §5).
       result: listPatients({
         county: DEMO_PRACTICE.county,
-        condition: filters.condition || undefined,
+        conditions: filters.conditions,
         query: filters.q || undefined,
         page: filters.page,
       }),
       panelSize: listPatients({ county: DEMO_PRACTICE.county }).total,
-      conditions: getConditionCounts(DEMO_PRACTICE.county, 10),
+      conditions: getConditionCounts(DEMO_PRACTICE.county, 40),
       selected: selected?.county === DEMO_PRACTICE.county ? selected : null,
     },
   };
@@ -60,7 +60,7 @@ export const getServerSideProps: GetServerSideProps<PatientsPageProps> = async (
 function href(filters: Filters, changes: Partial<Filters> & { patient?: string }): string {
   const next = { ...filters, ...changes };
   const params = new URLSearchParams();
-  if (next.condition) params.set('condition', next.condition);
+  for (const c of next.conditions) params.append('condition', c);
   if (next.q) params.set('q', next.q);
   if (next.page > 1) params.set('page', String(next.page));
   if (changes.patient) params.set('patient', changes.patient);
@@ -104,8 +104,20 @@ function Value({ value, flag }: { value: string | null; flag: Flag }) {
 
 const ROW_GRID = 'grid grid-cols-[minmax(200px,1.2fr)_minmax(0,2fr)_64px_64px_72px_16px] items-center gap-4';
 
-function PatientRow({ patient, href: to, selected }: { patient: PatientSummary; href: string; selected: boolean }) {
-  const shown = patient.activeDiagnoses.slice(0, 3);
+interface PatientRowProps {
+  patient: PatientSummary;
+  href: string;
+  selected: boolean;
+  /** Conditions being filtered on; shown first so the reason a patient is listed is visible. */
+  pinned: string[];
+}
+
+function PatientRow({ patient, href: to, selected, pinned }: PatientRowProps) {
+  const ordered = [
+    ...patient.activeDiagnoses.filter((d) => pinned.includes(d)),
+    ...patient.activeDiagnoses.filter((d) => !pinned.includes(d)),
+  ];
+  const shown = ordered.slice(0, Math.max(3, pinned.length));
   const more = patient.activeDiagnoses.length - shown.length;
   return (
     <Link
@@ -382,7 +394,7 @@ const chipClass = (active: boolean) =>
 export default function PatientsPage({ filters, result, panelSize, conditions, selected }: PatientsPageProps) {
   const first = (result.page - 1) * 50 + 1;
   const last = first + result.patients.length - 1;
-  const filtered = Boolean(filters.condition || filters.q);
+  const filtered = Boolean(filters.conditions.length || filters.q);
 
   return (
     <AppShell title="Patients" active="patients">
@@ -395,49 +407,7 @@ export default function PatientsPage({ filters, result, panelSize, conditions, s
         </p>
       </header>
 
-      <div className="mt-7 flex items-center gap-3">
-        <div className="relative min-w-0 flex-1">
-          <div className="flex items-center gap-2 overflow-x-auto pr-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <Link href={href(filters, { condition: '', page: 1 })} scroll={false} className={chipClass(!filters.condition)}>
-              All <span className="tabular-nums opacity-60">{panelSize}</span>
-            </Link>
-            {conditions.map((c) => (
-              <Link
-                key={c.name}
-                href={href(filters, { condition: filters.condition === c.name ? '' : c.name, page: 1 })}
-                scroll={false}
-                className={chipClass(filters.condition === c.name)}
-              >
-                <span className={cn('size-2 rounded-full', AREA_STYLES[classifyTrial([c.name], [])].dot)} />
-                {c.name} <span className="tabular-nums opacity-60">{c.count}</span>
-              </Link>
-            ))}
-          </div>
-          {/* Fade where the chips run out of room. */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-linear-to-l from-surface to-transparent" />
-        </div>
-
-        <form method="get" action="/patients" className="relative shrink-0">
-          {filters.condition && <input type="hidden" name="condition" value={filters.condition} />}
-          <svg
-            className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-ink-3"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.2}
-            strokeLinecap="round"
-          >
-            <circle cx="11" cy="11" r="6.5" />
-            <path d="M20 20l-4-4" />
-          </svg>
-          <input
-            name="q"
-            defaultValue={filters.q}
-            placeholder="Search patients"
-            className="h-8 w-56 rounded-full border border-line bg-surface pl-8 pr-3 text-[12.5px] placeholder:text-ink-3 focus:border-ink-3 focus:outline-none"
-          />
-        </form>
-      </div>
+      <PatientToolbar filters={{ conditions: filters.conditions, q: filters.q }} conditions={conditions} resultCount={result.total} />
 
       <div className="mt-5 overflow-hidden rounded-2xl border border-line-2 bg-surface">
         <div className={cn(ROW_GRID, 'border-b border-line-2 bg-surface-2/60 px-5 py-2.5 text-[11.5px] font-medium text-ink-3')}>
@@ -452,7 +422,13 @@ export default function PatientsPage({ filters, result, panelSize, conditions, s
           <p className="px-5 py-10 text-center text-[13px] text-ink-3">No patients match.</p>
         ) : (
           result.patients.map((p) => (
-            <PatientRow key={p.id} patient={p} href={href(filters, { patient: p.id })} selected={selected?.id === p.id} />
+            <PatientRow
+              key={p.id}
+              patient={p}
+              href={href(filters, { patient: p.id })}
+              selected={selected?.id === p.id}
+              pinned={filters.conditions}
+            />
           ))
         )}
       </div>

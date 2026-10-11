@@ -245,13 +245,19 @@ export function getConditionCounts(county: string, limit = 12): { name: string; 
     .slice(0, limit);
 }
 
-export function listPatients(opts: { county?: string; condition?: string; query?: string; page?: number }): PatientListResult {
+export function listPatients(opts: {
+  county?: string;
+  /** Patient must have every one of these active conditions. */
+  conditions?: string[];
+  query?: string;
+  page?: number;
+}): PatientListResult {
   const { asOf, source } = getBundle();
   const query = opts.query?.trim().toLowerCase();
 
   let rows = getSummaries();
   if (opts.county) rows = rows.filter((r) => r.county === opts.county);
-  if (opts.condition) rows = rows.filter((r) => r.activeDiagnoses.includes(opts.condition!));
+  if (opts.conditions?.length) rows = rows.filter((r) => opts.conditions!.every((c) => r.activeDiagnoses.includes(c)));
   if (query) {
     rows = rows.filter(
       (r) => r.name.toLowerCase().includes(query) || r.activeDiagnoses.some((d) => d.toLowerCase().includes(query))
