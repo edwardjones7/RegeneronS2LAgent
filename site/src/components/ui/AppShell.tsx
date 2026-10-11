@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { cn } from '@/lib/utils/cn';
 
-export type NavKey = 'trials' | 'outreach' | 'patients';
+export type NavKey = 'trials' | 'outreach' | 'calendar' | 'patients';
 
 interface AppShellProps {
   title: string;
@@ -42,6 +42,18 @@ const NAV: { key: NavKey; label: string; href: string; icon: ReactNode }[] = [
       <svg {...ICON_PROPS}>
         <path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" />
         <path d="M15 3.5a6 6 0 015.5 5.5M15 7a2.5 2.5 0 012 2" />
+      </svg>
+    ),
+  },
+  {
+    key: 'calendar',
+    label: 'Calendar',
+    href: '/calendar',
+    icon: (
+      <svg {...ICON_PROPS}>
+        <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+        <path d="M3.5 10h17M8 3v4M16 3v4" />
+        <path d="M8 14h2M14 14h2M8 17.5h2" />
       </svg>
     ),
   },

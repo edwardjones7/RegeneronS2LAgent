@@ -1,9 +1,8 @@
 import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { WeekCalendar } from '@/components/outreach/WeekCalendar';
 import { AppShell, Button, LinkButton, PageHeader, Tabs } from '@/components/ui';
-import { calendarWeekStart, getCalendar, getOutreachOverview, type OutreachOverview, type OutreachPatient, type PracticeCalendar } from '@/lib/caller';
+import { getOutreachOverview, type OutreachOverview, type OutreachPatient } from '@/lib/caller';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { fetchJson, getErrorMessage } from '@/lib/utils/api';
 import { formatDate } from '@/lib/utils/format';
@@ -16,7 +15,6 @@ import { formatDate } from '@/lib/utils/format';
 interface OutreachPageProps {
   nct: string | null;
   initial: OutreachOverview;
-  calendar: PracticeCalendar;
   /** The practice's local date, YYYY-MM-DD. */
   today: string;
 }
@@ -24,8 +22,7 @@ interface OutreachPageProps {
 export const getServerSideProps: GetServerSideProps<OutreachPageProps> = async ({ query }) => {
   const nct = typeof query.nct === 'string' && /^NCT\d{8}$/.test(query.nct) ? query.nct : null;
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
-  const [initial, calendar] = await Promise.all([getOutreachOverview(nct ?? undefined), getCalendar(calendarWeekStart(), 5)]);
-  return { props: { nct, initial, calendar, today } };
+  return { props: { nct, initial: await getOutreachOverview(nct ?? undefined), today } };
 };
 
 const first = (name: string) => name.split(' ')[0];
@@ -80,7 +77,11 @@ function NeedsYouItem({ p, onDone }: { p: OutreachPatient; onDone: () => void })
   );
 }
 
-export default function OutreachPage({ nct, initial, calendar, today }: OutreachPageProps) {
+function visitTime(local: string) {
+  return new Date(local).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+export default function OutreachPage({ nct, initial, today }: OutreachPageProps) {
   const [data, setData] = useState(initial);
   const url = `/api/outreach${nct ? `?nct=${nct}` : ''}`;
   const load = () =>
@@ -108,6 +109,7 @@ export default function OutreachPage({ nct, initial, calendar, today }: Outreach
     .sort((a, b) => Number(b.status === 'emergency') - Number(a.status === 'emergency'));
   const charts = data.patients.filter((p) => p.status === 'chart_review');
   const tests = data.patients.filter((p) => p.testBirthDate);
+  const comingUp = data.visits.filter((v) => v.startsAt.slice(0, 10) >= today);
   const everyone = `/outreach/patients${nct ? `?nct=${nct}` : ''}`;
 
   return (
@@ -163,8 +165,25 @@ export default function OutreachPage({ nct, initial, calendar, today }: Outreach
             )}
           </section>
 
-          <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <WeekCalendar initial={calendar} today={today} />
+          <div className="mt-8 grid gap-10 lg:grid-cols-2">
+            <section>
+              <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-3">Coming up</h2>
+              {comingUp.length === 0 ? (
+                <p className="mt-3 text-[13.5px] text-ink-3">No one&rsquo;s booked yet. Ava is still calling.</p>
+              ) : (
+                <ul className="mt-2">
+                  {comingUp.slice(0, 5).map((v) => (
+                    <li key={v.leadId} className="flex items-baseline justify-between gap-4 border-b border-line-2 py-2.5 text-[13.5px] last:border-b-0">
+                      <span className="font-medium">{v.name}</span>
+                      <span className="shrink-0 tabular-nums text-ink-2">{visitTime(v.startsAt)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <Link href="/calendar" className="mt-3 inline-block text-[13px] font-semibold text-accent hover:underline">
+                {comingUp.length > 5 ? `See all ${comingUp.length} on the calendar →` : 'Open the calendar →'}
+              </Link>
+            </section>
 
             <section>
               <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-3">
