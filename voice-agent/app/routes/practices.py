@@ -6,6 +6,7 @@ queries across practices.
 
 from __future__ import annotations
 
+import time
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -14,6 +15,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
 from app import ehr, outreach, prescreen, service
+from app.config import get_settings
 from app.campaigns import get_campaign, phase_label
 from app.db import get_session
 from app.models import Answer, Call, Event, InboxMessage, Lead, LeadStatus, Note, Slot, TrialAcceptance
@@ -122,7 +124,34 @@ def accept(practice_id: str, nct_id: str, body: AcceptIn, s: Session = Depends(g
         a = outreach.accept_trial(s, practice_id, nct_id, body.doctor_name)
     except outreach.OutreachError as exc:
         raise HTTPException(400, str(exc)) from exc
-    return {"acceptance_id": a.id, "candidates": a.candidates, "chart_review": a.chart_review, "accepted_by": a.accepted_by}
+    result = {"acceptance_id": a.id, "candidates": a.candidates, "chart_review": a.chart_review, "accepted_by": a.accepted_by}
+    s.commit()
+    if get_settings().vercel:
+        # Serverless has no background worker (Vercel Cron only runs daily), so start the first
+        # batch of calls now instead of waiting for the next cron tick.
+        _tick(force=True)
+    return result
+
+
+_last_tick = 0.0
+TICK_EVERY_SECS = 15
+
+
+def _tick(force: bool = False) -> None:
+    """On Vercel, advance the call queue (dial due leads, settle calls, resolve simulations).
+    Runs on accept and, at most every TICK_EVERY_SECS, while a dashboard polls."""
+    global _last_tick
+    if not force and time.monotonic() - _last_tick < TICK_EVERY_SECS:
+        return
+    _last_tick = time.monotonic()
+    from app.main import worker_tick  # main imports this module; import lazily
+
+    try:
+        worker_tick()
+    except Exception:  # never fail the request the doctor is waiting on
+        import logging
+
+        logging.getLogger(__name__).exception("inline worker tick failed")
 
 
 STAGES = {
@@ -136,6 +165,8 @@ STAGES = {
 def outreach_overview(practice_id: str, nct_id: str | None = None, s: Session = Depends(get_session)):
     """Everything the staff dashboard shows for one practice (optionally one trial)."""
     _practice(practice_id)
+    if get_settings().vercel:
+        _tick()  # dashboards poll this every few seconds; it keeps calls moving without a worker
     q = select(Lead).where(Lead.practice_id == practice_id)
     if nct_id:
         q = q.where(Lead.campaign_id == outreach.campaign_id_for(nct_id))
