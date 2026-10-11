@@ -42,12 +42,17 @@ export function TrialCard({ trial }: { trial: TrialListItem }) {
         <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug tracking-[-0.015em]">{trial.indication}</h3>
         <p className="mt-0.5 truncate text-[13px] text-ink-3">{trial.drug ?? 'Intervention not listed'}</p>
 
-        <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line-2 pt-3">
-          <Fact label="Ages">{formatAgeRange(trial.minimumAge, trial.maximumAge)}</Fact>
-          <Fact label="Enrolling">{trial.enrollment?.toLocaleString() ?? '—'}</Fact>
-          <Fact label="NJ sites">{trial.njRecruiting || 'None'}</Fact>
-          <Fact label="Ends">{trial.primaryCompletion ? formatDate(trial.primaryCompletion.slice(0, 7)) : '—'}</Fact>
-        </dl>
+        {/* Details slide up on hover; the title rises with them. */}
+        <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:grid-rows-[1fr] group-focus-visible:grid-rows-[1fr]">
+          <div className="overflow-hidden">
+            <dl className="mt-3 grid translate-y-3 grid-cols-2 gap-x-3 gap-y-2 border-t border-line-2 pt-3 opacity-0 transition duration-300 ease-out group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+              <Fact label="Ages">{formatAgeRange(trial.minimumAge, trial.maximumAge)}</Fact>
+              <Fact label="Enrolling">{trial.enrollment?.toLocaleString() ?? '—'}</Fact>
+              <Fact label="NJ sites">{trial.njRecruiting || 'None'}</Fact>
+              <Fact label="Ends">{trial.primaryCompletion ? formatDate(trial.primaryCompletion.slice(0, 7)) : '—'}</Fact>
+            </dl>
+          </div>
+        </div>
       </div>
     </Link>
   );
