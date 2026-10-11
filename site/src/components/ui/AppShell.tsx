@@ -79,7 +79,9 @@ export function AppShell({ title, active, children }: AppShellProps) {
             </span>
             <span className="min-w-0">
               <span className="block truncate text-[13px] font-semibold">{DEMO_PRACTICE.doctor}</span>
-              <span className="block truncate text-[11.5px] text-ink-3">{DEMO_PRACTICE.name}</span>
+              <span className="block truncate text-[11.5px] text-ink-3" title="Illustrative practice name for the demo">
+                {DEMO_PRACTICE.name}
+              </span>
             </span>
           </div>
 
@@ -107,7 +109,7 @@ export function AppShell({ title, active, children }: AppShellProps) {
               </svg>
               Patient data stays here
             </span>
-            <span className="mt-1 block">Records never leave your practice. Patients stay with you.</span>
+            <span className="mt-1 block">Records stay scoped to your practice. Sponsors only see counts. Patients stay with you.</span>
           </div>
         </aside>
 

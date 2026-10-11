@@ -1,6 +1,8 @@
 import type { GetServerSideProps } from 'next';
 import type { ReactNode } from 'react';
+import { AcceptCard } from '@/components/trials/AcceptCard';
 import { AppShell, Badge, type BadgeTone, PageHeader, Table, Tabs, Td, Th, Tr } from '@/components/ui';
+import { getTrialOutreach, type TrialOutreach } from '@/lib/caller';
 import { getProtocol, type CriterionCheck, type Protocol, type ProtocolCriterion } from '@/lib/protocols';
 import { getTrialDetail, type TrialDetail } from '@/lib/trials';
 import { formatAgeRange, formatDate, formatPhases, formatStatus } from '@/lib/utils/format';
@@ -11,6 +13,7 @@ interface TrialPageProps {
   tab: Tab;
   trial: TrialDetail;
   protocol: Protocol | null;
+  outreach: TrialOutreach;
 }
 
 export const getServerSideProps: GetServerSideProps<TrialPageProps> = async ({ params, query }) => {
@@ -19,7 +22,7 @@ export const getServerSideProps: GetServerSideProps<TrialPageProps> = async ({ p
   if (!trial) return { notFound: true };
 
   const tab: Tab = query.tab === 'criteria' || query.tab === 'locations' ? query.tab : 'overview';
-  return { props: { tab, trial, protocol: getProtocol(nctId) } };
+  return { props: { tab, trial, protocol: getProtocol(nctId), outreach: await getTrialOutreach(nctId) } };
 };
 
 const CHECK_LABELS: Record<CriterionCheck, { label: string; tone: BadgeTone }> = {
@@ -61,7 +64,7 @@ function CriteriaList({ title, criteria }: { title: string; criteria: ProtocolCr
   );
 }
 
-export default function TrialPage({ tab, trial, protocol }: TrialPageProps) {
+export default function TrialPage({ tab, trial, protocol, outreach }: TrialPageProps) {
   const base = `/trials/${trial.nctId}`;
 
   return (
@@ -105,18 +108,21 @@ export default function TrialPage({ tab, trial, protocol }: TrialPageProps) {
               </div>
             )}
           </div>
-          <div className="grid grid-cols-2 content-start gap-x-4 gap-y-4 rounded-[10px] border border-line p-4">
-            <Fact label="Status">
-              <Badge tone="pass">{formatStatus(trial.status)}</Badge>
-            </Fact>
-            <Fact label="Enrollment">{trial.enrollment?.toLocaleString() ?? '—'}</Fact>
-            <Fact label="Ages">{formatAgeRange(trial.minimumAge, trial.maximumAge)}</Fact>
-            <Fact label="Sex">{trial.sex ? formatStatus(trial.sex) : '—'}</Fact>
-            <Fact label="Healthy volunteers">{trial.healthyVolunteers ? 'Yes' : 'No'}</Fact>
-            <Fact label="NJ sites">{`${trial.njRecruiting} recruiting`}</Fact>
-            <Fact label="Start">{formatDate(trial.startDate)}</Fact>
-            <Fact label="Primary completion">{formatDate(trial.primaryCompletion)}</Fact>
-            <Fact label="Last updated">{formatDate(trial.lastUpdate)}</Fact>
+          <div className="flex flex-col gap-4">
+            <AcceptCard nctId={trial.nctId} initial={outreach} />
+            <div className="grid grid-cols-2 content-start gap-x-4 gap-y-4 rounded-[10px] border border-line p-4">
+              <Fact label="Status">
+                <Badge tone="pass">{formatStatus(trial.status)}</Badge>
+              </Fact>
+              <Fact label="Enrollment">{trial.enrollment?.toLocaleString() ?? '—'}</Fact>
+              <Fact label="Ages">{formatAgeRange(trial.minimumAge, trial.maximumAge)}</Fact>
+              <Fact label="Sex">{trial.sex ? formatStatus(trial.sex) : '—'}</Fact>
+              <Fact label="Healthy volunteers">{trial.healthyVolunteers ? 'Yes' : 'No'}</Fact>
+              <Fact label="NJ sites">{`${trial.njRecruiting} recruiting`}</Fact>
+              <Fact label="Start">{formatDate(trial.startDate)}</Fact>
+              <Fact label="Primary completion">{formatDate(trial.primaryCompletion)}</Fact>
+              <Fact label="Last updated">{formatDate(trial.lastUpdate)}</Fact>
+            </div>
           </div>
         </div>
       )}

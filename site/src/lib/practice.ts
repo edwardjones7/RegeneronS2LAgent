@@ -1,11 +1,15 @@
 /**
  * The practice the demo is signed in as. Placeholder until there's real doctor data:
- * one Synthea county stands in for one practice's patient panel.
+ * one Synthea county stands in for one practice's patient panel. The doctor and practice
+ * names are illustrative, made up for the demo (.claude/AGENTS.MD §7).
+ *
+ * `practiceId` is the same county's id in Supabase `practices` and in the outreach caller.
  */
 export const DEMO_PRACTICE = {
   doctor: 'Dr. Rivera',
   name: 'New Brunswick Family Medicine',
   county: 'Middlesex County',
+  practiceId: 'middlesex',
 } as const;
 
 /** "Good morning" / "Good afternoon" / "Good evening" for the practice's local time. */

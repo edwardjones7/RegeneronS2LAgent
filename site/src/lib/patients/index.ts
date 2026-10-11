@@ -2,8 +2,12 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 /**
- * Synthetic patients from data/synthea-nj.json (Synthea, no real people).
- * Read from disk on the server only. Patient data never goes to Supabase.
+ * Synthetic patients from data/synthea-nj.json (Synthea, no real people), read from disk on the
+ * server only. The same patients are in Supabase's `patients` table, which stands in for each
+ * practice's own EHR (.claude/AGENTS.MD §5).
+ *
+ * Privacy rule, same as the database and the outreach caller: a practice only ever sees its own
+ * patients. Pass the signed-in practice's county to every read; nothing here pools practices.
  */
 
 /* ————————— Bundle shape (see data/build_synthea_bundle.py) ————————— */
@@ -194,8 +198,11 @@ function toSummary(p: RawPatient, asOf: string): PatientSummary {
   };
 }
 
-export function getPatientStats(): PatientStats {
-  const { patients, asOf } = getBundle();
+/** Without a county: counts per county only (no patient data), e.g. for the trials header. */
+export function getPatientStats(county?: string): PatientStats {
+  const bundle = getBundle();
+  const { asOf } = bundle;
+  const patients = county ? bundle.patients.filter((p) => p.group === county) : bundle.patients;
   const counts = new Map<string, number>();
   for (const p of patients) counts.set(p.group, (counts.get(p.group) ?? 0) + 1);
   const ages = patients.map((p) => ageOn(p.birthDate, asOf)).sort((a, b) => a - b);
@@ -235,9 +242,10 @@ export function listPatients(opts: { county?: string; query?: string; page?: num
   };
 }
 
-export function getPatient(id: string): PatientDetail | null {
+/** One patient, only if they belong to this practice's county. */
+export function getPatient(id: string, county: string): PatientDetail | null {
   const { patients, asOf } = getBundle();
-  const p = patients.find((x) => x.id === id);
+  const p = patients.find((x) => x.id === id && x.group === county);
   if (!p) return null;
 
   const byDateDesc = <T extends { date: string }>(a: T, b: T) => b.date.localeCompare(a.date);

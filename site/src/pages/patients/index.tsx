@@ -17,6 +17,7 @@ import {
   Tr,
 } from '@/components/ui';
 import { getPatient, getPatientStats, listPatients, type PatientDetail, type PatientListResult, type PatientStats } from '@/lib/patients';
+import { DEMO_PRACTICE } from '@/lib/practice';
 import { formatDate } from '@/lib/utils/format';
 
 interface Filters {
@@ -35,15 +36,17 @@ interface PatientsPageProps {
 const str = (v: string | string[] | undefined) => (typeof v === 'string' ? v : '');
 
 export const getServerSideProps: GetServerSideProps<PatientsPageProps> = async ({ query }) => {
-  const filters: Filters = { county: str(query.county), q: str(query.q), page: Number(str(query.page)) || 1 };
+  // A practice sees only its own patients (.claude/AGENTS.MD §5): always the signed-in practice's county.
+  const county = DEMO_PRACTICE.county;
+  const filters: Filters = { county, q: str(query.q), page: Number(str(query.page)) || 1 };
   const patientId = str(query.patient);
 
   return {
     props: {
-      stats: getPatientStats(),
+      stats: getPatientStats(county),
       filters,
-      result: listPatients({ county: filters.county || undefined, query: filters.q || undefined, page: filters.page }),
-      selected: patientId ? getPatient(patientId) : null,
+      result: listPatients({ county, query: filters.q || undefined, page: filters.page }),
+      selected: patientId ? getPatient(patientId, county) : null,
     },
   };
 };
@@ -52,7 +55,6 @@ export const getServerSideProps: GetServerSideProps<PatientsPageProps> = async (
 function href(filters: Filters, changes: Partial<Filters> & { patient?: string }): string {
   const next = { ...filters, ...changes };
   const params = new URLSearchParams();
-  if (next.county) params.set('county', next.county);
   if (next.q) params.set('q', next.q);
   if (next.page > 1) params.set('page', String(next.page));
   if (changes.patient) params.set('patient', changes.patient);
@@ -174,29 +176,17 @@ export default function PatientsPage({ stats, filters, result, selected }: Patie
     <AppShell title="Patients" active="patients">
       <PageHeader
         title="Patients"
-        description={`${stats.total.toLocaleString()} synthetic New Jersey patients from Synthea · records as of ${formatDate(result.asOf)} · not real people`}
+        description={`${DEMO_PRACTICE.name}'s ${stats.total.toLocaleString()} patients · synthetic (Synthea), not real people · records as of ${formatDate(result.asOf)}`}
       />
 
       <StatGrid>
-        <StatCard label="Patients" value={stats.total.toLocaleString()} href="/patients" selected={!filters.county && !filters.q} />
-        <StatCard label="Counties" value={stats.counties.length} hint="Each county stands in for a practice" />
+        <StatCard label="Patients" value={stats.total.toLocaleString()} href="/patients" selected={!filters.q} />
+        <StatCard label="Practice" value={DEMO_PRACTICE.county.replace(' County', '')} hint="Synthea county standing in for this practice" />
         <StatCard label="Median age" value={stats.medianAge} />
         <StatCard label="Female" value={`${Math.round(stats.femaleShare * 100)}%`} />
       </StatGrid>
 
       <form method="get" action="/patients" className="mt-5 flex flex-wrap items-center gap-2">
-        <select
-          name="county"
-          defaultValue={filters.county}
-          className="rounded-[7px] border border-line bg-surface px-3 py-2 text-[13px] focus:border-accent focus:outline-none"
-        >
-          <option value="">All counties</option>
-          {stats.counties.map((c) => (
-            <option key={c.name} value={c.name}>
-              {c.name} ({c.count})
-            </option>
-          ))}
-        </select>
         <input
           name="q"
           defaultValue={filters.q}
@@ -204,7 +194,7 @@ export default function PatientsPage({ stats, filters, result, selected }: Patie
           className="w-80 rounded-[7px] border border-line px-3 py-2 text-[13px] placeholder:text-ink-3 focus:border-accent focus:outline-none"
         />
         <Button type="submit">Filter</Button>
-        {(filters.county || filters.q) && (
+        {filters.q && (
           <LinkButton href="/patients" variant="secondary">
             Clear
           </LinkButton>

@@ -25,6 +25,8 @@ npm run dev                  # http://localhost:3000, health check at /api/healt
 
 Checks: `npm run typecheck` and `npm run lint` from `site/`.
 
+**Accepting a trial starts outreach.** A trial's page in `site/` shows this practice's pre-screen candidates and an **Accept trial** button. Accepting calls the outreach caller in `voice-agent/`, and Ava starts calling those patients from the doctor's office. Set `CALLER_URL`, `CALLER_API_KEY` (the caller's `READ_API_KEY`) and `CALLER_PUBLIC_URL` in `site/.env`. For a demo with no phones, run `make outreach-demo` in `voice-agent/`.
+
 ## Load the patient data
 
 1. Run each file in `supabase/migrations/` in the Supabase SQL editor.
