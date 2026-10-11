@@ -116,41 +116,52 @@ function TrialRow({ trial }: { trial: WalkthroughTrial }) {
   );
 }
 
-/** Visible slots in the found-trials stack; one extra slot fades out at the bottom. */
-const STACK = 6;
+/** Placeholder row: the trial still being looked for (top) or one leaving (bottom). */
+function SkeletonRow({ className }: { className?: string }) {
+  return (
+    <div className={cn('flex h-[72px] items-center gap-3 rounded-2xl border border-line-2 bg-surface p-3', className)}>
+      <span className="size-11 shrink-0 animate-pulse rounded-xl bg-surface-2" />
+      <span className="flex-1 space-y-2">
+        <span className="block h-3 w-3/5 animate-pulse rounded-full bg-surface-2" />
+        <span className="block h-2.5 w-2/5 animate-pulse rounded-full bg-surface-2" />
+      </span>
+    </div>
+  );
+}
 
-/** Vertical position per slot (72px row + 12px gap), as full class names for Tailwind. */
-const SLOT_Y = ['translate-y-0', 'translate-y-[84px]', 'translate-y-[168px]', 'translate-y-[252px]', 'translate-y-[336px]', 'translate-y-[420px]', 'translate-y-[504px]'];
+/** Six slots, 72px rows with a 12px gap, as full class names for Tailwind. Slots 0 and 5 hold skeletons. */
+const SLOT_Y = ['translate-y-0', 'translate-y-[84px]', 'translate-y-[168px]', 'translate-y-[252px]', 'translate-y-[336px]', 'translate-y-[420px]'];
+const FOUND_EVERY_MS = 450;
 
+/** `t` keeps running across loops, so the stream of found trials never restarts. */
 function FetchScene({ data, t }: { data: WalkthroughData; t: number }) {
-  const progress = easeOut(t / 4200);
-  const count = Math.round(progress * data.trialCount);
-  // Trials turn up in step with the counter: quickly at first, then slowing.
-  const found = Math.round(progress * data.trials.length);
-  // Newest first; the oldest of these sits in the extra slot, fading out.
-  const shown = data.trials.slice(Math.max(0, found - STACK - 1), found).reverse();
+  const count = Math.round(easeOut(t / 3500) * data.trialCount);
+  const found = 1 + Math.floor(t / FOUND_EVERY_MS);
+
+  // Trial `seq` sits `found - seq` slots down: 0 = still hidden behind the top skeleton,
+  // 1–4 = visible, 5 = fading out over the bottom skeleton.
+  const rows = [];
+  for (let seq = Math.max(0, found - 5); seq <= found; seq++) rows.push({ seq, slot: found - seq });
 
   return (
     <div className="mx-auto grid w-full max-w-5xl animate-modal-in grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-16">
-      {/* Trials as they're found: each new one lands on top and pushes the rest down. */}
-      <div className="relative h-[504px]">
-        {shown.map((trial, slot) => (
+      <div className="relative h-[492px]">
+        <SkeletonRow className={cn('absolute inset-x-0 top-0', SLOT_Y[0])} />
+        <SkeletonRow className={cn('absolute inset-x-0 top-0 opacity-50', SLOT_Y[5])} />
+        {rows.map(({ seq, slot }) => (
           <div
-            key={trial.nctId}
+            key={seq}
             className={cn(
-              'absolute inset-x-0 top-0 transition-[transform,opacity] duration-500 ease-out',
+              'absolute inset-x-0 top-0 transition-[transform,opacity] duration-300 ease-out',
               SLOT_Y[slot],
-              slot >= STACK ? 'opacity-0' : 'opacity-100'
+              slot === 0 || slot === 5 ? 'opacity-0' : 'opacity-100'
             )}
           >
-            <div className={cn(slot === 0 && 'animate-modal-in')}>
-              <TrialRow trial={trial} />
-            </div>
+            <TrialRow trial={data.trials[seq % data.trials.length]} />
           </div>
         ))}
       </div>
 
-      {/* The count. */}
       <div>
         <h2 className="text-[34px] font-semibold leading-tight tracking-[-0.03em]">Fetching open trials</h2>
         <div className="mt-6 flex items-baseline gap-3">
@@ -381,7 +392,8 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
       <div className="relative flex flex-1 flex-col justify-center overflow-hidden px-8 pb-16">
         {error && <p className="text-center text-[14px] text-ink-3">Couldn&apos;t load the walkthrough.</p>}
         {!data && !error && <div className="mx-auto size-6 animate-spin rounded-full border-2 border-ink/20 border-t-ink" />}
-        {data && scene.key === 'fetch' && <FetchScene data={data} t={t} />}
+        {/* While focused on, the fetch scene runs on the total clock so its stream doesn't restart. */}
+        {data && scene.key === 'fetch' && <FetchScene data={data} t={FOCUS === 'fetch' ? elapsed : t} />}
         {data && scene.key === 'match' && <MatchScene data={data} t={t} ms={scene.ms} />}
         {data && scene.key === 'recommend' && <RecommendScene data={data} t={t} />}
       </div>
