@@ -131,6 +131,7 @@ function SkeletonRow({ className }: { className?: string }) {
 
 /** Six slots, 72px rows with a 12px gap, as full class names for Tailwind. Slots 0 and 5 hold skeletons. */
 const SLOT_Y = ['translate-y-0', 'translate-y-[84px]', 'translate-y-[168px]', 'translate-y-[252px]', 'translate-y-[336px]', 'translate-y-[420px]'];
+/** The push-down slide (duration-[420ms]) nearly fills each gap, so the stack keeps moving. */
 const FOUND_EVERY_MS = 450;
 
 /** `t` keeps running across loops, so the stream of found trials never restarts. */
@@ -152,7 +153,7 @@ function FetchScene({ data, t }: { data: WalkthroughData; t: number }) {
           <div
             key={seq}
             className={cn(
-              'absolute inset-x-0 top-0 transition-[transform,opacity] duration-300 ease-out',
+              'absolute inset-x-0 top-0 transition-[translate,opacity] duration-[420ms] ease-in-out',
               SLOT_Y[slot],
               slot === 0 || slot === 5 ? 'opacity-0' : 'opacity-100'
             )}
@@ -364,7 +365,7 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
   return (
     <div
       className={cn(
-        'fixed inset-0 z-50 flex animate-fade-in flex-col bg-surface/95 backdrop-blur-xl transition-[opacity,transform] duration-700 ease-out',
+        'fixed inset-0 z-50 flex animate-fade-in flex-col bg-surface/95 backdrop-blur-xl transition-[opacity,scale] duration-700 ease-out',
         leaving ? 'scale-[1.02] opacity-0' : 'scale-100 opacity-100'
       )}
       role="dialog"
