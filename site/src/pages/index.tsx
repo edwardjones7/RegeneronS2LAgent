@@ -85,7 +85,7 @@ function SignInButton({ busy, onClick, size = 'md' }: { busy: boolean; onClick: 
       onClick={onClick}
       disabled={busy}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-full bg-ink font-semibold text-white transition-colors hover:bg-ink/85 disabled:opacity-80',
+        'inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-ink font-semibold text-white transition-colors hover:bg-ink/85 disabled:cursor-default disabled:opacity-80',
         size === 'lg' ? 'h-12 px-6 text-[15px]' : 'h-9 px-4 text-[13.5px]'
       )}
     >
@@ -95,12 +95,7 @@ function SignInButton({ busy, onClick, size = 'md' }: { busy: boolean; onClick: 
           Signing in…
         </>
       ) : (
-        <>
-          Sign in
-          <Icon className="size-4">
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </Icon>
-        </>
+        'Sign in'
       )}
     </button>
   );
