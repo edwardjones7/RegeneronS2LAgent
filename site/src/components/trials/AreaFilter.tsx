@@ -20,9 +20,11 @@ interface AreaPillProps {
   active: boolean;
   /** Label always shown; otherwise it's a dot that opens on hover. */
   open: boolean;
+  /** Called when a collapsed pill starts opening, so the row can keep it in view. */
+  onReveal?: (el: HTMLElement) => void;
 }
 
-function AreaPill({ area, count, href, active, open }: AreaPillProps) {
+function AreaPill({ area, count, href, active, open, onReveal }: AreaPillProps) {
   const body = (
     <>
       <span className={cn('size-2.5 shrink-0 rounded-full', AREA_STYLES[area].dot)} />
@@ -40,7 +42,14 @@ function AreaPill({ area, count, href, active, open }: AreaPillProps) {
   );
   const className = cn(pillClass(active), 'group/pill px-2.5');
   return href ? (
-    <Link href={href} scroll={false} aria-label={AREA_LABELS[area]} className={className}>
+    <Link
+      href={href}
+      scroll={false}
+      aria-label={AREA_LABELS[area]}
+      className={className}
+      onMouseEnter={open ? undefined : (e) => onReveal?.(e.currentTarget)}
+      onFocus={open ? undefined : (e) => onReveal?.(e.currentTarget)}
+    >
       {body}
     </Link>
   ) : (
@@ -89,6 +98,19 @@ export function AreaFilter({ filters, areaCounts, total }: AreaFilterProps) {
     setOpenAreas(open);
   }, [areaCounts, filters.area]);
 
+  /** Follows a pill while it opens (the width animates for 300ms), scrolling the row so its right edge stays visible. */
+  const reveal = useCallback((el: HTMLElement) => {
+    const row = rowRef.current;
+    if (!row) return;
+    const start = performance.now();
+    const follow = () => {
+      const overflow = el.offsetLeft + el.offsetWidth + 2 - (row.scrollLeft + row.clientWidth);
+      if (overflow > 0) row.scrollLeft += overflow;
+      if (performance.now() - start < 350) requestAnimationFrame(follow);
+    };
+    requestAnimationFrame(follow);
+  }, []);
+
   useLayoutEffect(() => {
     fit();
     const observer = new ResizeObserver(fit);
@@ -97,20 +119,27 @@ export function AreaFilter({ filters, areaCounts, total }: AreaFilterProps) {
   }, [fit]);
 
   return (
-    <div ref={rowRef} className="relative flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
-      <Link href={filtersHref({ ...filters, area: null })} scroll={false} className={pillClass(!filters.area)}>
-        All <span className="ml-1.5 tabular-nums opacity-60">{total}</span>
-      </Link>
-      {areaCounts.map(({ area, count }) => (
-        <AreaPill
-          key={area}
-          area={area}
-          count={count}
-          href={filtersHref({ ...filters, area })}
-          active={filters.area === area}
-          open={openAreas.has(area)}
-        />
-      ))}
+    <div className="relative min-w-0 flex-1 overflow-hidden">
+      {/* Scrolls sideways without a scrollbar, so an opening pill near the edge can be brought into view. */}
+      <div
+        ref={rowRef}
+        className="relative flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <Link href={filtersHref({ ...filters, area: null })} scroll={false} className={pillClass(!filters.area)}>
+          All <span className="ml-1.5 tabular-nums opacity-60">{total}</span>
+        </Link>
+        {areaCounts.map(({ area, count }) => (
+          <AreaPill
+            key={area}
+            area={area}
+            count={count}
+            href={filtersHref({ ...filters, area })}
+            active={filters.area === area}
+            open={openAreas.has(area)}
+            onReveal={reveal}
+          />
+        ))}
+      </div>
 
       {/* Off-screen copies used only to measure pill widths: [All, a dot, each area open]. */}
       <div ref={measureRef} aria-hidden className="pointer-events-none invisible absolute left-0 top-0 flex">
