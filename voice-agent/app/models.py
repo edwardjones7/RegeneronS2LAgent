@@ -128,6 +128,9 @@ class Slot(Base):
     campaign_id: Mapped[str] = mapped_column(String(100), index=True)
     starts_at: Mapped[datetime]  # naive, in the campaign's local timezone
     practice_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    # Times Ava just offered a patient on a live call are held for them for a few minutes.
+    held_by_lead_id: Mapped[int | None] = mapped_column(nullable=True)
+    held_until: Mapped[datetime | None] = mapped_column(nullable=True)
     booked_lead_id: Mapped[int | None] = mapped_column(ForeignKey("lead.id"), nullable=True)
 
 

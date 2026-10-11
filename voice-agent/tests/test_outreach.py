@@ -395,3 +395,17 @@ def test_activity_feed_speaks_plain_english(client):
     feed = client.get(f"/practices/{PRACTICE}/activity", headers=READ).json()
     assert feed["recent"][0]["text"].startswith(f"Booked {name} for ")
     assert client.get(f"/practices/bergen/activity", headers=READ).json()["recent"] == []
+
+
+def test_times_offered_on_a_call_are_held_for_that_patient(s):
+    accept(s)
+    a, b = leads(s, LeadStatus.QUEUED)[:2]
+    for x in (a, b):
+        service.tool_verify_identity(s, x, x.birth_date)
+    offered = service.tool_get_open_slots(s, a)
+    first_id = int(offered.split("slot_id ")[1].split(":")[0])
+    # Someone else (another call, or a simulated patient) can't see or take the held times.
+    assert f"slot_id {first_id}:" not in service.tool_get_open_slots(s, b)
+    from app import slots as sl
+    assert not sl.book(s, first_id, b.id)
+    assert "Booked" in service.tool_book_visit(s, a, first_id)

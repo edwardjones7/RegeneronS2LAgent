@@ -30,9 +30,11 @@ def coordinator_booked(
     flag_text = "no flags" if not flags else "flags: " + "; ".join(flags)
     speed = f" Called {seconds_to_call}s after opt-in." if seconds_to_call is not None else ""
     last = f" {last_name[0]}." if last_name else ""
+    # Practice calls ask no phone questions; only mention the pre-screen when there was one.
+    screen = f" Pre-screen: {answered}/{total} answered, {flag_text}." if total else (f" Notes: {'; '.join(flags)}." if flags else "")
     return (
         f"New visit booked: {first_name}{last}, {when_short}, {campaign.study_short_name} study "
-        f"({campaign.nct_id}). Pre-screen: {answered}/{total} answered, {flag_text}.{speed} {record_link}"
+        f"({campaign.nct_id}).{screen}{speed} {record_link}"
     )
 
 
