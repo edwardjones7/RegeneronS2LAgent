@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { cn } from '@/lib/utils/cn';
+import { TrialistLogo } from './TrialistLogo';
 
 export type NavKey = 'trials' | 'outreach' | 'calendar' | 'patients';
 
@@ -84,7 +85,7 @@ export function AppShell({ title, active, children }: AppShellProps) {
   return (
     <>
       <Head>
-        <title>{`${title} · trialmatch`}</title>
+        <title>{`${title} · Trialist`}</title>
       </Head>
       <div className="relative isolate flex min-h-screen">
         {/* Soft wash of the area colors across the top, behind the sidebar and the page. */}
@@ -92,8 +93,7 @@ export function AppShell({ title, active, children }: AppShellProps) {
 
         <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-ink/[0.06] px-3 py-5">
           <Link href="/" className="flex items-center gap-2 px-2">
-            <span className="size-6 rounded-lg bg-linear-to-br from-[#FF9F80] via-[#F7B6CF] to-[#78B4F4]" />
-            <span className="text-[15px] font-semibold tracking-[-0.02em]">trialmatch</span>
+            <TrialistLogo className="h-6 text-ink" />
           </Link>
 
           <div className="mt-6 flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/60 p-2.5 backdrop-blur-sm">
