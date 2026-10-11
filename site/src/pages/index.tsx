@@ -158,16 +158,13 @@ export default function Landing({ showcase, openTrials, fitting }: LandingProps)
                 How it works
               </a>
             </div>
-            <p className="mt-6 text-[13px] text-ink-3">
-              Demo practice: {DEMO_PRACTICE.name}. Synthetic patients, no real people.
-            </p>
           </div>
 
           {showcase.length > 0 && (
             <div className="relative mx-auto h-[400px] w-full max-w-[620px] motion-safe:animate-fade-in" aria-hidden inert>
               {showcase.map((t, i) => (
                 <div key={t.nctId} className={cn('absolute w-[250px] shadow-[0_24px_60px_-28px_rgba(30,36,48,0.45)]', FAN[i])}>
-                  <TrialCard trial={t} href={{ pathname: '/trials', query: {} }} prescreen={t.prescreen} />
+                  <TrialCard trial={t} href={{ pathname: '/trials', query: {} }} prescreen={t.prescreen} showBlurb={false} />
                 </div>
               ))}
               {fitting > 0 && (

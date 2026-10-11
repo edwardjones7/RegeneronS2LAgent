@@ -18,9 +18,11 @@ interface TrialCardProps {
   outreach?: { booked: number; called: number };
   /** Pre-screen counts for this practice's patients; null until the matcher has run on this trial. */
   prescreen?: PrescreenCounts | null;
+  /** The short description under the title; off where the card is shown as a picture (the landing page). */
+  showBlurb?: boolean;
 }
 
-export function TrialCard({ trial, href, outreach, prescreen }: TrialCardProps) {
+export function TrialCard({ trial, href, outreach, prescreen, showBlurb = true }: TrialCardProps) {
   const style = AREA_STYLES[trial.area];
 
   return (
@@ -65,7 +67,7 @@ export function TrialCard({ trial, href, outreach, prescreen }: TrialCardProps) 
         <PrescreenLine prescreen={prescreen ?? null} />
         <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug tracking-[-0.015em]">{trial.indication}</h3>
         <p className="mt-0.5 truncate text-[13px] text-ink-3">{trial.drug ?? 'Intervention not listed'}</p>
-        {trial.blurb && <p className="mt-2.5 line-clamp-3 text-[13px] leading-relaxed text-ink-2">{trial.blurb}</p>}
+        {showBlurb && trial.blurb && <p className="mt-2.5 line-clamp-3 text-[13px] leading-relaxed text-ink-2">{trial.blurb}</p>}
 
         <div className="h-16 pt-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
           <dl className="grid grid-cols-4 gap-x-3 border-t border-line-2 pt-3">
