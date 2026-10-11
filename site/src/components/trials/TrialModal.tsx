@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import type { TrialOutreach } from '@/lib/caller';
-import type { CriterionCheck, ProtocolCriterion } from '@/lib/protocols';
+import type { ProtocolCriterion } from '@/lib/protocols';
 import type { TrialArm, TrialDetail, TrialLocation } from '@/lib/trials';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { fetchJson, getErrorMessage } from '@/lib/utils/api';
@@ -111,12 +111,6 @@ const armName = (arm: TrialArm) => arm.label.replace(/^(experimental|control|com
 
 /* ————————— Pieces ————————— */
 
-const CHECKS: Record<CriterionCheck, { label: string; dot: string }> = {
-  code: { label: 'Checked from chart data', dot: 'bg-accent' },
-  jev: { label: 'Judged by Jev from the chart', dot: 'bg-ink-3' },
-  review: { label: 'Confirm at screening', dot: 'bg-unk' },
-};
-
 /** Criteria the "Who can join" line already covers. */
 const COVERED_BY_SUMMARY = new Set(['age', 'sex']);
 
@@ -169,9 +163,8 @@ function IconButton({ label, onClick, disabled, children }: { label: string; onC
 
 function Criterion({ criterion }: { criterion: ProtocolCriterion }) {
   const include = criterion.type === 'inclusion';
-  const check = CHECKS[criterion.check];
   return (
-    <li className="flex gap-3 py-3">
+    <li className="flex items-start gap-3 py-3">
       <span
         className={cn(
           'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full',
@@ -183,14 +176,16 @@ function Criterion({ criterion }: { criterion: ProtocolCriterion }) {
           <path d={include ? 'M5 12.5l4.5 4.5L19 7.5' : 'M7 7l10 10M17 7L7 17'} />
         </svg>
       </span>
-      <div className="min-w-0">
-        <div className="text-[14.5px] leading-snug">{criterion.text}</div>
-        <div className="mt-1 flex items-center gap-1.5 text-[12.5px] text-ink-3">
-          <span className={cn('size-1.5 shrink-0 rounded-full', check.dot)} />
-          {check.label}
-          {criterion.reason && <span className="truncate">· {criterion.reason}</span>}
-        </div>
-      </div>
+      <div className="min-w-0 flex-1 text-[14.5px] leading-snug">{criterion.text}</div>
+      {/* Only flag what the chart can't answer: these patients land in chart review. */}
+      {criterion.check === 'review' && (
+        <span
+          title={criterion.reason ?? 'Not in the chart; confirmed at the screening visit.'}
+          className="shrink-0 rounded-full bg-unk-bg px-2 py-0.5 text-[11.5px] font-semibold text-unk"
+        >
+          At screening
+        </span>
+      )}
     </li>
   );
 }
@@ -515,7 +510,7 @@ export function TrialModal({ order }: TrialModalProps) {
                       <span className="font-semibold text-ink">Ages {formatAgeRange(trial.minimumAge, trial.maximumAge)}</span>
                       {trial.sex && `, ${SEX_TEXT[trial.sex] ?? formatStatus(trial.sex).toLowerCase()}`}
                       {trial.healthyVolunteers ? ', healthy volunteers accepted' : ''}.
-                      {protocol && ` Key criteria from the protocol, and how each one is checked:`}
+                      {protocol && ' Key criteria from the protocol:'}
                     </p>
 
                     {protocol ? (
