@@ -40,6 +40,13 @@ export interface TrialLocation {
   country: string | null;
 }
 
+export interface TrialArm {
+  /** EXPERIMENTAL, PLACEBO_COMPARATOR, ACTIVE_COMPARATOR, NO_INTERVENTION, … */
+  type: string | null;
+  label: string;
+  description: string | null;
+}
+
 export interface TrialDetail extends TrialListItem {
   officialTitle: string | null;
   summary: string | null;
@@ -47,9 +54,42 @@ export interface TrialDetail extends TrialListItem {
   healthyVolunteers: boolean | null;
   startDate: string | null;
   lastUpdate: string;
-  interventions: { type: string | null; name: string | null }[];
+  /** From the registry's design module, e.g. RANDOMIZED / NONE (open label) / TREATMENT. */
+  design: { allocation: string | null; masking: string | null; purpose: string | null };
+  arms: TrialArm[];
+  primaryOutcomes: { measure: string; timeFrame: string | null }[];
+  /** Collaborators other than the lead sponsor, e.g. Regeneron on an academic-led trial. */
+  collaborators: string[];
+  /** The registry's central contact, for a practice that wants to ask about joining. */
+  contact: { name: string | null; email: string | null; phone: string | null } | null;
   locations: TrialLocation[];
 }
+
+/** Registry modules pulled from `raw` for the detail view (ClinicalTrials.gov API v2 field names). */
+interface RawDetail {
+  design_info: { allocation?: string; maskingInfo?: { masking?: string }; primaryPurpose?: string } | null;
+  arm_groups: { type?: string; label?: string; description?: string }[] | null;
+  primary_outcomes: { measure?: string; timeFrame?: string }[] | null;
+  collaborators: { name?: string }[] | null;
+  central_contacts: { name?: string; email?: string; phone?: string }[] | null;
+}
+
+/** Columns selected for the detail view; Supabase can't infer types from the built-up select string. */
+interface DetailRow extends TrialRowSubset, RawDetail {
+  official_title: string | null;
+  eligibility_criteria: string | null;
+  healthy_volunteers: boolean | null;
+  start_date: string | null;
+  last_update_post_date: string;
+}
+
+const RAW_DETAIL_COLUMNS = [
+  'design_info:raw->protocolSection->designModule->designInfo',
+  'arm_groups:raw->protocolSection->armsInterventionsModule->armGroups',
+  'primary_outcomes:raw->protocolSection->outcomesModule->primaryOutcomes',
+  'collaborators:raw->protocolSection->sponsorCollaboratorsModule->collaborators',
+  'central_contacts:raw->protocolSection->contactsLocationsModule->centralContacts',
+].join(', ');
 
 interface TrialRowSubset {
   nct_id: string;
@@ -159,11 +199,11 @@ export async function listOpenTrials(): Promise<TrialListItem[]> {
 }
 
 export async function getTrialDetail(nctId: string): Promise<TrialDetail | null> {
-  const [{ data: row, error }, { data: locations, error: locationsError }] = await Promise.all([
+  const [{ data, error }, { data: locations, error: locationsError }] = await Promise.all([
     supabase
       .from('trials')
       .select(
-        `${LIST_COLUMNS}, official_title, eligibility_criteria, healthy_volunteers, start_date, last_update_post_date`
+        `${LIST_COLUMNS}, official_title, eligibility_criteria, healthy_volunteers, start_date, last_update_post_date, ${RAW_DETAIL_COLUMNS}`
       )
       .eq('nct_id', nctId)
       .maybeSingle(),
@@ -171,17 +211,19 @@ export async function getTrialDetail(nctId: string): Promise<TrialDetail | null>
   ]);
   if (error) throw new Error(`Failed to load trial: ${error.message}`);
   if (locationsError) throw new Error(`Failed to load trial locations: ${locationsError.message}`);
-  if (!row) return null;
+  if (!data) return null;
+  const row = data as unknown as DetailRow;
 
   const rank = (l: TrialLocation) => (l.state === HOME_STATE ? 0 : l.country === 'United States' ? 1 : 2);
   const sorted = [...locations].sort(
     (a, b) => rank(a) - rank(b) || (a.state ?? '').localeCompare(b.state ?? '') || (a.city ?? '').localeCompare(b.city ?? '')
   );
   const nj = sorted.filter((l) => l.state === HOME_STATE);
+  const contact = row.central_contacts?.[0];
 
   return {
     ...toListItem(
-      row as TrialRowSubset,
+      row,
       { total: nj.length, recruiting: nj.filter((l) => l.status === 'RECRUITING').length },
       new Set(listProtocolIds())
     ),
@@ -191,7 +233,17 @@ export async function getTrialDetail(nctId: string): Promise<TrialDetail | null>
     healthyVolunteers: row.healthy_volunteers,
     startDate: row.start_date,
     lastUpdate: row.last_update_post_date,
-    interventions: (row.interventions as { type: string | null; name: string | null }[]).map(({ type, name }) => ({ type, name })),
+    design: {
+      allocation: row.design_info?.allocation ?? null,
+      masking: row.design_info?.maskingInfo?.masking ?? null,
+      purpose: row.design_info?.primaryPurpose ?? null,
+    },
+    arms: (row.arm_groups ?? []).map((a) => ({ type: a.type ?? null, label: a.label ?? 'Arm', description: a.description ?? null })),
+    primaryOutcomes: (row.primary_outcomes ?? [])
+      .filter((o) => o.measure)
+      .map((o) => ({ measure: o.measure!, timeFrame: o.timeFrame ?? null })),
+    collaborators: (row.collaborators ?? []).map((c) => c.name).filter((n): n is string => Boolean(n)),
+    contact: contact ? { name: contact.name ?? null, email: contact.email ?? null, phone: contact.phone ?? null } : null,
     locations: sorted,
   };
 }

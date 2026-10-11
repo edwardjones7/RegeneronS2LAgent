@@ -139,5 +139,5 @@ export async function syncTrials(scope: TrialScopeId, opts: { mode?: SyncMode } 
   return { scope, mode, since, ctgovDataTimestamp, studiesUpserted, skipped: false };
 }
 
-export { countOpenTrials, getTrialDetail, listOpenTrials, type TrialDetail, type TrialListItem, type TrialLocation } from './queries';
+export { countOpenTrials, getTrialDetail, listOpenTrials, type TrialArm, type TrialDetail, type TrialListItem, type TrialLocation } from './queries';
 export { AREA_LABELS, AREA_ORDER, isTherapeuticArea, type TherapeuticArea } from './areas';
