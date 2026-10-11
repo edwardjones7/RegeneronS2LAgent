@@ -125,14 +125,14 @@ Performance:
 
 ## Deploy on Vercel
 
-`vercel.json` defines two **Services** in one project: `web` (the Next.js dashboard and opt-in page) and `api` (FastAPI). There is no long-running process on Vercel, so **Vercel Cron** calls `/cron/tick` for retries, queued leads, reminders and stale calls, and calls are dialed inline.
+The repo-root `vercel.json` deploys the whole repo as one project with three **Services**: `site` (the doctor app), `caller` (this FastAPI app) and `dashboard` (`web/`, the office dashboard and opt-in page). `site` reaches the caller through a service binding (`CALLER_URL`). There is no long-running process on Vercel, so **Vercel Cron** calls `/cron/tick` for retries, queued leads, reminders and stale calls, and calls are dialed inline.
 
-1. Log in and link the project: `vercel login`, then `vercel link`.
+1. Log in and link the project from the repo root: `vercel login`, then `vercel link`.
 2. Add Postgres (Neon) from the Marketplace: `vercel integration add neon`. This sets `DATABASE_URL`.
 3. Add the env vars from `.env.example`, plus `CRON_SECRET`, `DASHBOARD_PASSWORD` and `GEMINI_API_KEY`: `vercel env add …`.
 4. Run `vercel --prod`. Then set `PUBLIC_BASE_URL` to the production URL and run `make elevenlabs` so ElevenLabs and Twilio point at it.
 
-Hobby plans only allow daily crons. On Hobby, change the schedule in `vercel.json`; retries then run when the cron fires.
+`/cron/tick` runs once a day at 14:00 UTC (10am Eastern, inside calling hours) so it fits the Hobby plan, which only allows daily crons. On Pro, set it to `*/5 * * * *` in the root `vercel.json` so retries and reminders go out promptly.
 
 ## Read API (dashboard source of truth)
 
