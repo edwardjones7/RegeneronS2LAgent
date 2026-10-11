@@ -2,22 +2,24 @@ import { useRouter } from 'next/router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AreaIcon } from '@/components/trials/AreaIcon';
 import { AREA_STYLES } from '@/components/trials/areaStyles';
+import { PhaseBadge } from '@/components/trials/PhaseBadge';
 import { TrialCard } from '@/components/trials/TrialCard';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { fetchJson } from '@/lib/utils/api';
 import { cn } from '@/lib/utils/cn';
+import type { TrialListItem } from '@/lib/trials';
 import type { WalkthroughData, WalkthroughTrial } from '@/pages/api/walkthrough';
 
 /**
- * A motion walkthrough of the pipeline, for the demo: fetch trials → Jev matches them
+ * A motion walkthrough of the pipeline, for the demo: fetch trials → match them
  * against the practice's patients → the dashboard. Visual only; nothing is run.
  * Real: the trial count, which trials have criteria, the panel size. Illustrative (and
- * labelled so): the candidate and chart-review counts, until Jev's results are wired in.
+ * labelled so): the candidate and chart-review counts, until real match results are wired in.
  */
 
 const SCENES = [
   { key: 'fetch', label: 'Fetch trials', ms: 4600 },
-  { key: 'match', label: 'Match with Jev', ms: 4800 },
+  { key: 'match', label: 'Match patients', ms: 5400 },
   { key: 'recommend', label: 'Recommend', ms: 3800 },
 ] as const;
 
@@ -132,87 +134,108 @@ function mockCounts(i: number) {
   return { candidates: 6 + Math.floor(rand(i) * 11), review: 2 + Math.floor(rand(i + 50) * 6) };
 }
 
-function CountsLine({ i, short = false }: { i: number; short?: boolean }) {
-  const { candidates, review } = mockCounts(i);
-  return (
-    <span className="text-ink-2">
-      <span className="font-semibold text-pass">{candidates} candidates</span> ·{' '}
-      <span className="text-unk">{short ? `${review} to review` : `${review} need chart review`}</span>
-    </span>
-  );
-}
+/** Deck depth: the newest card in front, older ones peeking out above and behind. Full class names for Tailwind. */
+const DECK = [
+  'z-40 translate-y-0 scale-100 opacity-100',
+  'z-30 -translate-y-5 scale-95 opacity-80',
+  'z-20 -translate-y-10 scale-90 opacity-50',
+  'z-10 -translate-y-14 scale-[0.85] opacity-25',
+];
 
-/** A trial Jev confirmed against the practice's patients. */
-function MatchRow({ trial, i }: { trial: WalkthroughTrial; i: number }) {
+const PANEL_SIZE_DOTS = 200;
+
+/** One trial being matched: its patients as dots, the matches lighting up as the counts tick up. */
+function MatchCard({ trial, i, age }: { trial: TrialListItem; i: number; age: number }) {
   const style = AREA_STYLES[trial.area];
+  const { candidates, review } = mockCounts(i);
+  const progress = easeOut((age - 250) / 900);
+  // Which dots light up: a stable shuffle per trial, candidates first, then those to review.
+  const rank = Array.from({ length: PANEL_SIZE_DOTS }, (_, j) => j).sort((a, b) => rand(a + i * 997) - rand(b + i * 997));
+  const order = new Map(rank.map((dot, k) => [dot, k]));
+  const lit = progress * (candidates + review);
+
   return (
-    <div className="flex h-[72px] items-center gap-3 overflow-hidden rounded-2xl border border-line-2 bg-surface p-3 shadow-[0_1px_2px_rgba(30,36,48,0.05)]">
-      <span className={cn('flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br', style.gradient)}>
-        <AreaIcon area={trial.area} className="size-5 text-white" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[14.5px] font-semibold">{trial.indication}</span>
-        <span className="block truncate text-[12.5px]">
-          <CountsLine i={i} />
+    <div className="relative flex h-[440px] flex-col overflow-hidden rounded-3xl border border-line-2 bg-surface p-5 shadow-[0_16px_40px_-20px_rgba(30,36,48,0.3)]">
+      <div className={cn('absolute inset-x-0 top-0 h-48 bg-linear-to-br [mask-image:linear-gradient(to_bottom,black_20%,transparent)]', style.gradient)} />
+      <div className="relative flex items-start justify-between gap-2">
+        <span className="flex h-7 items-center gap-1.5 rounded-full bg-white/80 px-2.5 text-[11px] font-semibold ring-1 ring-white/70 backdrop-blur-md">
+          <AreaIcon area={trial.area} className={cn('size-3.5', style.text)} />
+          {AREA_LABELS[trial.area]}
         </span>
-      </span>
-      <span className="flex shrink-0 items-center gap-1 rounded-full bg-pass-bg px-2 py-0.5 text-[11.5px] font-semibold text-pass">
-        <svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 12.5l4.5 4.5L19 7.5" />
-        </svg>
-        Matched
-      </span>
+        <PhaseBadge phases={trial.phases} className="h-7 shrink-0 whitespace-nowrap rounded-full bg-white/80 px-2.5 ring-1 ring-white/70 backdrop-blur-md" />
+      </div>
+
+      <div className="relative mt-auto">
+        <h3 className="text-[20px] font-semibold leading-snug tracking-[-0.02em]">{trial.indication}</h3>
+        <p className="mt-0.5 truncate text-[13px] text-ink-3">{trial.drug}</p>
+
+        {/* The practice's patients, one dot each. */}
+        <div className="mt-4 grid grid-cols-25 gap-[3px]">
+          {Array.from({ length: PANEL_SIZE_DOTS }, (_, dot) => {
+            const k = order.get(dot)!;
+            const tone = k < Math.min(lit, candidates) ? 'bg-pass' : k >= candidates && k < lit ? 'bg-unk' : 'bg-ink/[0.08]';
+            return <span key={dot} className={cn('aspect-square rounded-full transition-colors duration-300', tone)} />;
+          })}
+        </div>
+
+        <div className="mt-4 flex gap-6 border-t border-line-2 pt-3">
+          <span>
+            <span className="block text-[26px] font-semibold leading-none tabular-nums tracking-[-0.03em] text-pass">
+              {Math.round(progress * candidates)}
+            </span>
+            <span className="text-[12px] text-ink-3">candidates</span>
+          </span>
+          <span>
+            <span className="block text-[26px] font-semibold leading-none tabular-nums tracking-[-0.03em] text-unk">
+              {Math.round(progress * review)}
+            </span>
+            <span className="text-[12px] text-ink-3">to chart review</span>
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
 
-const MATCH_EVERY_MS = 900;
-/** First match lands just after the scene starts, while step 1 is still fading out. */
+const MATCH_EVERY_MS = 1150;
+/** First card lands just after the scene starts, while step 1 is still fading out. */
 const FIRST_MATCH_MS = 150;
 
 function MatchScene({ data, t }: { data: WalkthroughData; t: number }) {
-  const matchable = data.trials.filter((trial) => trial.hasProtocol);
+  const matchable = data.matched;
   const matched = Math.min(matchable.length, Math.max(0, Math.floor((t - FIRST_MATCH_MS) / MATCH_EVERY_MS) + 1));
-  const done = matched === matchable.length;
 
   return (
     <div className="mx-auto grid w-full max-w-5xl animate-modal-in grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-16">
-      {/* Matched trials stack up; the skeleton on top is Jev still checking. Once done, it fades and the stack moves up. */}
-      {/* Same height as step 1's stack, so the two line up through the crossfade. */}
-      <div className="relative h-[492px]">
-        <SkeletonRow className={cn('absolute inset-x-0 top-0 transition-opacity duration-500', done ? 'opacity-0' : 'opacity-100')} />
+      {/* A deck: each matched trial is dealt on top, the earlier ones stacking up behind it. */}
+      <div className="relative mx-auto mt-14 h-[440px] w-[360px]">
         {matchable.map((trial, i) => {
-          if (i > matched) return null; // not reached yet
-          const slot = i === matched ? 0 : matched - i - (done ? 1 : 0);
+          if (i > matched) return null; // not dealt yet
+          const depth = matched - 1 - i; // -1 = waiting below, about to be dealt
           return (
             <div
               key={trial.nctId}
               className={cn(
-                'absolute inset-x-0 top-0 transition-[translate,opacity] duration-500 ease-in-out',
-                SLOT_Y[slot],
-                i === matched ? 'opacity-0' : 'opacity-100'
+                'absolute inset-0 transition-[translate,scale,opacity] duration-500 ease-out',
+                depth < 0 ? 'z-50 translate-y-24 opacity-0' : (DECK[depth] ?? 'z-0 -translate-y-14 scale-[0.85] opacity-0')
               )}
             >
-              <MatchRow trial={trial} i={i} />
+              <MatchCard trial={trial} i={i} age={t - FIRST_MATCH_MS - i * MATCH_EVERY_MS} />
             </div>
           );
         })}
       </div>
 
       <div>
-        <h2 className="flex items-center gap-3 text-[34px] font-semibold leading-tight tracking-[-0.03em]">
-          Matching with Jev
-          <span className={cn('size-2.5 rounded-full', done ? 'bg-pass' : 'animate-pulse bg-accent')} />
-        </h2>
+        <h2 className="text-[34px] font-semibold leading-tight tracking-[-0.03em]">Matching your patients</h2>
         <div className="mt-6 flex items-baseline gap-3">
           <span className="text-[112px] font-semibold leading-none tabular-nums tracking-[-0.05em]">{matched}</span>
           <span className="text-[17px] text-ink-3">{matched === 1 ? 'trial matches' : 'trials match'} your patients</span>
         </div>
         <p className="mt-6 max-w-sm text-[15px] leading-relaxed text-ink-2">
-          {data.patientCount} patients checked against each trial&apos;s criteria. Records stay in your practice; Jev sees
-          de-identified summaries only.
+          {data.patientCount} patients checked against each trial&apos;s criteria. Records never leave your practice.
         </p>
-        <p className="mt-3 text-[12px] text-ink-3">Candidate counts are illustrative until Jev&apos;s results are in.</p>
+        <p className="mt-3 text-[12px] text-ink-3">Candidate counts are illustrative for now.</p>
       </div>
     </div>
   );
@@ -234,7 +257,7 @@ function RecommendScene({ data, t }: { data: WalkthroughData; t: number }) {
       <h2 className="text-[34px] font-semibold leading-tight tracking-[-0.03em]">Recommended for your practice</h2>
       <p className="mt-2 text-[15px] leading-relaxed text-ink-2">
         The trials your patients could fill, ranked by candidates.{' '}
-        <span className="text-ink-3">Counts are illustrative until Jev&apos;s results are in.</span>
+        <span className="text-ink-3">Counts are illustrative for now.</span>
       </p>
       {/* The dashboard's own card; not clickable here. */}
       <div className="pointer-events-none mt-8 grid grid-cols-4 gap-5">
