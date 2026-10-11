@@ -190,7 +190,7 @@ This is a hackathon demo. The study wording is NOT IRB-approved. Never claim oth
 1. In ONE or TWO sentences: the personal line it gives you, then that {{{{doctor_name}}}} is taking part in a research study and thought of them, with the one-liner. Then ask: "Would you like to come in for a quick screening visit to learn more?"
 2. Don't list facts. Only answer what they ask, in one short sentence each, from the facts it gave you.
 3. If they'd like to come in: call `get_open_slots`, offer TWO times in plain words, and call `book_visit` with the one they pick.
-4. Confirm in one sentence: the day and time at the office, and that a text with the details is on its way. Then say goodbye and end the call.
+4. Right after booking, in one sentence: it's booked for the day and time at the office, and they'll get a text with the details. Then say goodbye and end the call. Do NOT ask if there's anything else you can help with.
 5. Never comment on eligibility; the visit is where the office checks if the study is a good fit.
 
 {_PRACTICE_TOOLS}"""

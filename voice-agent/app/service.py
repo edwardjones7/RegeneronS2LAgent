@@ -323,7 +323,7 @@ def tool_get_open_slots(s: Session, lead: Lead) -> str:
             return f"Not yet: the screening isn't finished. Ask next: {_question_line(nxt)}"
         return "Not available: do not offer a visit. Follow the instructions from the last record_answer result."
     existing = booked_slot(s, lead)
-    if existing:
+    if existing and not is_practice(lead):
         return f"Already booked for {slots.spoken(existing.starts_at)} (slot_id {existing.id}). Just confirm it."
     campaign = campaign_for(lead)
     found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id, for_lead_id=lead.id)
@@ -335,14 +335,20 @@ def tool_get_open_slots(s: Session, lead: Lead) -> str:
     if not found:
         return "No open times right now. Say the research team will call to schedule, then call escalate_to_human with reason 'no open slots'."
     options = "; ".join(f"slot_id {sl.id}: {slots.spoken(sl.starts_at)}" for sl in found)
+    if existing:
+        return (f"They're already booked for {slots.spoken(existing.starts_at)}. If they want to change it, these are "
+                f"open (offer two, in plain words): {options}. book_visit with the new slot_id moves the visit.")
     return f"Open times (offer these, in plain words): {options}."
 
 
 def tool_book_visit(s: Session, lead: Lead, slot_id: int) -> str:
     campaign = campaign_for(lead)
     existing = booked_slot(s, lead)
+    if existing and (not is_practice(lead) or int(slot_id) == existing.id):
+        return (f"Already booked: {slots.spoken(existing.starts_at)}. Confirm that time with them in one sentence, then say "
+                "goodbye and end the call. Nothing changed, so don't mention a new text or ask if there's anything else.")
     if existing:
-        return f"Already booked: {slots.spoken(existing.starts_at)}. Confirm that time with them."
+        return _move_visit(s, lead, existing, int(slot_id))
     if is_practice(lead) and not lead.identity_verified:
         return "Can't book yet: confirm their date of birth with verify_identity first."
     if is_practice(lead) and (nxt := practice_next_question(lead)):
@@ -384,10 +390,13 @@ def tool_book_visit(s: Session, lead: Lead, slot_id: int) -> str:
         except Exception as exc:  # noqa: BLE001
             log.exception("sms to %s failed", kind)
             log_event(s, lead, "sms_failed", to=kind, error=str(exc)[:300])
-    who = "the office" if is_practice(lead) else "the research team"
+    if is_practice(lead):
+        return (f"Booked for {slots.spoken(slot.starts_at)}. In one sentence, say it's booked for that time at the office "
+                "and they'll get a text with the details. Then say goodbye and end the call. Don't ask if there's "
+                "anything else you can help with.")
     return (
         f"Booked for {slots.spoken(slot.starts_at)}. Read the time back, tell them a text confirmation is on its way, "
-        f"and that {who} will check whether the study is a good fit at the visit."
+        "and that the research team will check whether the study is a good fit at the visit."
     )
 
 
@@ -448,6 +457,28 @@ def alert_coordinator(s: Session, lead: Lead, kind: str, detail: str) -> None:
         log_event(s, lead, "sms_failed", to="coordinator", error=str(exc)[:300])
 
 
+def _move_visit(s: Session, lead: Lead, old: Slot, slot_id: int) -> str:
+    """A booked patient picked a different time on the phone: move the visit and text them."""
+    new = s.get(Slot, slot_id)
+    if new is None or new.practice_id != lead.practice_id:
+        return "That slot_id doesn't exist. Call get_open_slots again and offer those times."
+    if not slots.book(s, new.id, lead.id):
+        return "That time was just taken. Call get_open_slots again and offer the new times."
+    old.booked_lead_id = None
+    s.refresh(new)
+    set_status(s, lead, LeadStatus.BOOKED, f"visit {new.starts_at.isoformat()}")
+    log_event(s, lead, "visit_rescheduled", starts_at=new.starts_at.isoformat(), via="call")
+    campaign = campaign_for(lead)
+    send_sms_logged(
+        s, lead, lead.phone,
+        f"Hi {lead.first_name}, your visit with {campaign.team_name} is now {slots.short(new.starts_at)}, "
+        f"{campaign.clinic_address}. Add to calendar: {calendar_link(lead.id)} Reply C to confirm or R to reschedule.",
+        "patient",
+    )
+    return (f"Moved: their visit is now {slots.spoken(new.starts_at)}. In one sentence, say it's moved to that time and "
+            "they'll get a text with the details. Then say goodbye and end the call. Don't ask if there's anything else.")
+
+
 # ---------------------------------------------------------------- practice outreach tools
 
 MAX_DOB_TRIES = 2
@@ -483,6 +514,14 @@ def tool_verify_identity(s: Session, lead: Lead, date_of_birth: str) -> str:
 
 def _study_briefing(s: Session, lead: Lead) -> str:
     campaign = campaign_for(lead)
+    booked = booked_slot(s, lead)
+    if booked:
+        return (
+            f"ALREADY BOOKED for {slots.spoken(booked.starts_at)} at the office. Don't pitch the study again. "
+            "Tell them warmly they're booked for that time and ask if it still works. If it does, thank them and say "
+            "goodbye (no new text is sent). If they'd like a different time, call get_open_slots, offer two of the new "
+            "times, and call book_visit with the one they pick: that moves their visit and texts them the new time."
+        )
     facts = "\n".join(f"- {f.fact}" for f in campaign.approved_facts)
     q = practice_next_question(lead)
     nxt = (
