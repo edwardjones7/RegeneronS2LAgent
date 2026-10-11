@@ -103,10 +103,28 @@ def _fake_phone(patient_id: str) -> str:
     return f"+1555{n:07d}"
 
 
+def ensure_campaign(s: Session, nct_id: str) -> Campaign | None:
+    """The trial's practice call script: an existing campaign, else one built from its public
+    registry row (campaigns.from_trial, templated, no LLM) and stored. None when neither exists."""
+    campaign = get_campaign(campaign_id_for(nct_id))
+    if campaign is not None:
+        return campaign
+    row = ehr.trial(nct_id)
+    if row is None:
+        return None
+    from app import campaigns
+
+    log.info("built a call script for %s from the trial registry", nct_id)
+    return campaigns.save_campaign(s, campaigns.from_trial(row), note="built from the trial registry")
+
+
 def accept_trial(s: Session, practice_id: str, nct_id: str, doctor_name: str) -> TrialAcceptance:
     """The doctor said yes. Build the call list; calls start on the next worker tick."""
-    campaign = get_campaign(campaign_id_for(nct_id))
-    if campaign is None or prescreen.protocol(nct_id) is None:
+    # Something to screen against: the engine's stored results for this practice, or a protocol.
+    if prescreen.protocol(nct_id) is None and not ehr.prescreen_results(practice_id, nct_id):
+        raise OutreachError(f"no pre-screen results for {nct_id} at this practice")
+    campaign = ensure_campaign(s, nct_id)
+    if campaign is None:
         raise OutreachError(f"no call script for {nct_id}")
     existing = s.scalars(
         select(TrialAcceptance).where(TrialAcceptance.practice_id == practice_id, TrialAcceptance.nct_id == nct_id)
