@@ -1,0 +1,82 @@
+{
+  "nctId": "NCT06931717",
+  "title": "A Clinical Study to Assess the Efficacy of Adjuvant Immunotherapy With Cemiplimab in Patients With Surgically Removed Non-small Cell Lung Cancer Who Have Not Received Prior Chemotherapy",
+  "shortTitle": "Cemiplimab after lung cancer surgery",
+  "sponsor": "Regeneron Pharmaceuticals",
+  "drug": "cemiplimab (Libtayo)",
+  "phase": "Phase 3",
+  "status": "Recruiting",
+  "targetEnrollment": 390,
+  "url": "https://clinicaltrials.gov/study/NCT06931717",
+  "note": "Simplified for the demo, not the full protocol. Key criteria only.",
+  "criteria": [
+    {
+      "id": "age",
+      "type": "inclusion",
+      "text": "Age 18 or older",
+      "check": "code",
+      "rule": { "type": "age", "gte": 18 }
+    },
+    {
+      "id": "nsclc",
+      "type": "inclusion",
+      "text": "Non-small cell lung cancer",
+      "check": "code",
+      "rule": { "type": "condition", "codes": ["254637007", "424132000"], "names": ["non-small cell"] }
+    },
+    {
+      "id": "stage",
+      "type": "inclusion",
+      "text": "Pathological stage II–IIIA",
+      "check": "jev",
+      "question": {
+        "uses": ["conditions"],
+        "instructions": "What stage is this patient's non-small cell lung cancer? Choose MATCH if the record documents stage II, IIA, IIB or IIIA. Choose NO_MATCH if it documents stage I, IIIB, IIIC or IV, or there's no lung cancer. Choose UNKNOWN if lung cancer is present but no stage is recorded."
+      }
+    },
+    {
+      "id": "complete_resection",
+      "type": "inclusion",
+      "text": "Complete surgical removal (lobectomy, sleeve lobectomy, bilobectomy, pneumonectomy, or segmentectomy for small tumors; wedge resection not allowed)",
+      "check": "code",
+      "rule": { "type": "procedure", "names": ["lobectomy", "bilobectomy", "pneumonectomy", "segmentectomy"] },
+      "notes": "Clear surgical margins (R0) are confirmed from the pathology report at screening."
+    },
+    {
+      "id": "pd_l1",
+      "type": "inclusion",
+      "text": "Tumor PD-L1 expression of at least 1%, with archival tissue available",
+      "check": "review",
+      "reason": "From the pathology report; not in the record."
+    },
+    {
+      "id": "not_for_chemo",
+      "type": "inclusion",
+      "text": "Not getting adjuvant platinum chemotherapy, because the patient declined or is unfit for it",
+      "check": "review",
+      "reason": "An oncologist's decision, documented in notes."
+    },
+    {
+      "id": "no_prior_systemic_treatment",
+      "type": "exclusion",
+      "text": "Prior neoadjuvant or adjuvant systemic treatment for this lung cancer",
+      "check": "code",
+      "rule": { "type": "procedure", "names": ["chemotherapy"] },
+      "notes": "Any chemotherapy on file counts. Checking whether it was for this cancer is a screening question."
+    },
+    {
+      "id": "no_recent_mi",
+      "type": "exclusion",
+      "text": "Heart attack in the last 6 months",
+      "check": "code",
+      "rule": { "type": "condition", "codes": ["22298006", "401303003", "401314000"], "names": ["myocardial infarction"], "withinMonths": 6 }
+    },
+    {
+      "id": "no_organ_transplant",
+      "type": "exclusion",
+      "text": "Organ transplant at any time",
+      "check": "code",
+      "rule": { "type": "procedure", "names": ["transplant"] }
+    }
+  ]
+}

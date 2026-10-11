@@ -1,0 +1,156 @@
+{
+  "nctId": "NCT07053423",
+  "title": "A Study to Investigate Airway Inflammation With Dupilumab Subcutaneously in Participants Aged ≥40 to ≤85 Years With Chronic Obstructive Pulmonary Disease",
+  "shortTitle": "Dupilumab for COPD",
+  "sponsor": "Regeneron Pharmaceuticals",
+  "drug": "dupilumab (Dupixent)",
+  "phase": "Phase 4",
+  "status": "Recruiting",
+  "targetEnrollment": 218,
+  "url": "https://clinicaltrials.gov/study/NCT07053423",
+  "note": "Simplified for the demo, not the full protocol. Key criteria only.",
+  "criteria": [
+    {
+      "id": "age",
+      "type": "inclusion",
+      "text": "Age 40 to 85",
+      "check": "code",
+      "rule": {
+        "type": "age",
+        "gte": 40,
+        "lt": 86
+      }
+    },
+    {
+      "id": "copd",
+      "type": "inclusion",
+      "text": "Physician diagnosis of COPD",
+      "check": "code",
+      "rule": {
+        "type": "condition",
+        "codes": [
+          "87433001",
+          "185086009"
+        ],
+        "names": [
+          "chronic obstructive",
+          "emphysema"
+        ],
+        "active": true
+      }
+    },
+    {
+      "id": "smoking_history",
+      "type": "inclusion",
+      "text": "Current or former smoker",
+      "check": "code",
+      "rule": {
+        "type": "observationIn",
+        "field": "smoking_status",
+        "values": [
+          "Ex-smoker (finding)",
+          "Smokes tobacco daily (finding)",
+          "Smokes tobacco (finding)",
+          "Occasional tobacco smoker (finding)"
+        ]
+      }
+    },
+    {
+      "id": "pack_years",
+      "type": "inclusion",
+      "text": "Smoking history of at least 10 pack-years",
+      "check": "review",
+      "reason": "Smoking status is recorded but not how much. Check the social history."
+    },
+    {
+      "id": "airflow_obstruction",
+      "type": "inclusion",
+      "text": "Moderate-to-severe COPD: post-bronchodilator FEV1/FVC under 0.70, and FEV1 30–70% of predicted",
+      "check": "code",
+      "rule": {
+        "type": "observation",
+        "field": "fev1_fvc",
+        "lt": 70,
+        "maxAgeMonths": 24
+      },
+      "notes": "FEV1/FVC is stored as a percentage in this data. FEV1 % predicted isn't recorded, so a pass here still needs the full spirometry report at screening."
+    },
+    {
+      "id": "frequent_exacerbations",
+      "type": "inclusion",
+      "text": "Frequent or severe exacerbations (GOLD group E)",
+      "check": "jev",
+      "question": {
+        "uses": [
+          "conditions",
+          "medications",
+          "procedures",
+          "acuteVisits"
+        ],
+        "instructions": "Does this patient with COPD have frequent or severe COPD exacerbations in the last year: two or more flare-ups treated with oral steroids or antibiotics, or at least one hospital admission for COPD? Choose MATCH if the record shows that. Choose NO_MATCH if the record covers the last year and shows no COPD-related emergency visits, admissions or steroid courses. Choose UNKNOWN if there are emergency or urgent care visits with no reason recorded, or the record can't settle it."
+      }
+    },
+    {
+      "id": "triple_therapy",
+      "type": "inclusion",
+      "text": "Triple inhaler therapy (inhaled corticosteroid + LABA + LAMA) for 3 months, or LABA + LAMA if a steroid is contraindicated",
+      "check": "review",
+      "reason": "Synthea, which made the demo data, doesn't prescribe LAMA inhalers, so this can't be checked here. With real EHR data it's a medication-list check."
+    },
+    {
+      "id": "eosinophils",
+      "type": "inclusion",
+      "text": "Blood eosinophils at least 300 cells/μL at screening, or at least 150 at screening with a past value of at least 300",
+      "check": "review",
+      "reason": "Measured at the screening visit; rarely in the record."
+    },
+    {
+      "id": "no_asthma",
+      "type": "exclusion",
+      "text": "Current or past diagnosis of asthma",
+      "check": "code",
+      "rule": {
+        "type": "condition",
+        "codes": [
+          "195967001",
+          "233678006"
+        ],
+        "names": [
+          "asthma"
+        ]
+      }
+    },
+    {
+      "id": "no_other_lung_disease",
+      "type": "exclusion",
+      "text": "Significant lung disease other than COPD (lung fibrosis, sarcoidosis, interstitial lung disease, pulmonary hypertension, bronchiectasis) or alpha-1 antitrypsin deficiency",
+      "check": "code",
+      "rule": {
+        "type": "condition",
+        "names": [
+          "fibrosis of lung",
+          "pulmonary fibrosis",
+          "sarcoidosis",
+          "interstitial lung",
+          "pulmonary hypertension",
+          "bronchiectasis",
+          "alpha-1"
+        ]
+      }
+    },
+    {
+      "id": "no_biologic",
+      "type": "exclusion",
+      "text": "Any biologic therapy, including dupilumab",
+      "check": "code",
+      "rule": {
+        "type": "medication",
+        "names": [
+          "mab\\b",
+          "dupilumab"
+        ],
+        "withinMonths": 12
+      }
+    }
+  ]
+}

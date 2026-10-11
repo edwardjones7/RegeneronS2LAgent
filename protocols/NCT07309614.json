@@ -1,0 +1,99 @@
+{
+  "nctId": "NCT07309614",
+  "title": "A Study Assessing the Effect of Dupilumab on Inducing Clinical Remission in Asthma",
+  "shortTitle": "Dupilumab for asthma remission",
+  "sponsor": "Regeneron Pharmaceuticals",
+  "drug": "dupilumab (Dupixent)",
+  "phase": "Phase 3",
+  "status": "Recruiting",
+  "targetEnrollment": 150,
+  "url": "https://clinicaltrials.gov/study/NCT07309614",
+  "note": "Simplified for the demo, not the full protocol. Key criteria only.",
+  "criteria": [
+    {
+      "id": "age",
+      "type": "inclusion",
+      "text": "Age 18 to under 80",
+      "check": "code",
+      "rule": { "type": "age", "gte": 18, "lt": 80 }
+    },
+    {
+      "id": "asthma_6_months",
+      "type": "inclusion",
+      "text": "Physician diagnosis of asthma for at least 6 months",
+      "check": "code",
+      "rule": { "type": "condition", "codes": ["195967001", "233678006"], "names": ["asthma"], "active": true, "minDurationMonths": 6 }
+    },
+    {
+      "id": "airflow_variability",
+      "type": "inclusion",
+      "text": "Documented variable airflow: a positive reversibility test, FEV1 variability between visits, a positive bronchial challenge, or peak flow variability over 20%",
+      "check": "review",
+      "reason": "Reversibility and challenge test results aren't in the record. Check pulmonary function reports."
+    },
+    {
+      "id": "type2_biomarkers",
+      "type": "inclusion",
+      "text": "Blood eosinophils at least 0.3 × 10⁹/L and FeNO at least 35 ppb at screening",
+      "check": "review",
+      "reason": "Measured at the screening visit. FeNO isn't in the record and eosinophils rarely are."
+    },
+    {
+      "id": "recent_attack",
+      "type": "inclusion",
+      "text": "At least one asthma attack in the last 2 years needing oral or injected steroids for 3+ days, or an emergency or hospital visit",
+      "check": "jev",
+      "question": {
+        "uses": ["conditions", "medications", "acuteVisits"],
+        "instructions": "Did this patient have at least one asthma attack in the last 2 years that needed a course of oral steroids (such as prednisone) or an emergency or hospital visit? Choose MATCH if the record shows an emergency or hospital admission for asthma, or a short oral steroid course alongside an active asthma diagnosis, in the last 2 years. Choose NO_MATCH if the record covers the last 2 years and shows no asthma-related emergency visits, admissions or steroid courses. Choose UNKNOWN if there are emergency or urgent care visits with no reason recorded, or the record can't settle it."
+      }
+    },
+    {
+      "id": "inhaled_steroid",
+      "type": "inclusion",
+      "text": "Stable at least medium-dose inhaled corticosteroid (over 250 mcg/day fluticasone propionate or equivalent) for at least 3 months",
+      "check": "jev",
+      "question": {
+        "uses": ["medications"],
+        "instructions": "Is this patient on a maintenance inhaled corticosteroid (fluticasone, budesonide, beclomethasone, mometasone, ciclesonide), alone or combined with a long-acting bronchodilator, started at least 3 months ago and still active? Choose MATCH if so and the inhaler strength suggests at least a medium dose (fluticasone propionate 250 mcg per day or more, or equivalent). Choose NO_MATCH if there is no inhaled corticosteroid on the medication list, or only a rescue inhaler like albuterol. Choose UNKNOWN if an inhaled corticosteroid is present but the dose or duration can't be told from the record."
+      }
+    },
+    {
+      "id": "no_current_smoking",
+      "type": "exclusion",
+      "text": "Current smoker, or quit less than 6 months ago",
+      "check": "code",
+      "rule": { "type": "observationIn", "field": "smoking_status", "values": ["Smokes tobacco daily (finding)", "Smokes tobacco (finding)", "Occasional tobacco smoker (finding)"] },
+      "notes": "Ex-smokers pass here. Their quit date and pack-years are checked at screening."
+    },
+    {
+      "id": "no_other_lung_disease",
+      "type": "exclusion",
+      "text": "Other significant lung disease, including COPD, lung fibrosis, sarcoidosis, interstitial lung disease, pulmonary hypertension or bronchiectasis",
+      "check": "code",
+      "rule": { "type": "condition", "codes": ["87433001", "185086009"], "names": ["chronic obstructive", "emphysema", "fibrosis of lung", "pulmonary fibrosis", "sarcoidosis", "interstitial lung", "pulmonary hypertension", "bronchiectasis"] }
+    },
+    {
+      "id": "no_recent_cancer",
+      "type": "exclusion",
+      "text": "Active cancer or a cancer in the last 5 years (except basal cell skin cancer)",
+      "check": "code",
+      "rule": { "type": "condition", "names": ["malignant", "carcinoma", "leukemia", "lymphoma", "cancer \\(", "neoplasm of prostate"], "withinMonths": 60 },
+      "notes": "Suspected-cancer findings aren't counted; basal cell carcinoma isn't in this data."
+    },
+    {
+      "id": "no_biologic",
+      "type": "exclusion",
+      "text": "Recent monoclonal antibody treatment for asthma",
+      "check": "code",
+      "rule": { "type": "medication", "names": ["dupilumab", "omalizumab", "mepolizumab", "benralizumab", "reslizumab", "tezepelumab"], "withinMonths": 6 }
+    },
+    {
+      "id": "not_already_eligible_for_dupixent",
+      "type": "exclusion",
+      "text": "Already eligible for dupilumab through an approved use, such as atopic dermatitis or nasal polyps",
+      "check": "code",
+      "rule": { "type": "condition", "codes": ["24079001"], "names": ["atopic dermatitis", "nasal polyp", "eosinophilic esophagitis", "prurigo nodularis"], "active": true }
+    }
+  ]
+}

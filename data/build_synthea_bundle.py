@@ -1,7 +1,8 @@
 """Trim Synthea's raw CSV export into one small JSON bundle the browser can load.
 
 Synthea writes ~1.7 GB of CSV for 2,000 patients. The matching engine only needs
-demographics, conditions, medications, procedures and a short list of labs and
+demographics, conditions, medications, procedures, recent acute-care visits, a
+year of weights and the latest value of a short list of labs and
 vitals, so this keeps those and drops the rest (claims, costs, addresses, IDs).
 
 Patients are grouped by the county Synthea placed them in. Counties stand in for
@@ -17,7 +18,7 @@ import csv
 import json
 import re
 import sys
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 # LOINC codes the trial criteria use. Latest value per patient is kept.
@@ -48,6 +49,13 @@ OBSERVATIONS = {
     "711-2": "eosinophils",
     "72166-2": "smoking_status",
 }
+
+
+# Weight history window (for "weight change in the last 3 months") and the
+# acute-care window (for "an asthma attack or COPD flare-up in the last 2 years").
+WEIGHT_HISTORY_DAYS = 365
+ACUTE_VISIT_DAYS = 3 * 365
+ACUTE_CLASSES = {"emergency", "urgentcare", "inpatient"}
 
 
 def day(value: str) -> str | None:
@@ -81,6 +89,8 @@ def build(folder: Path) -> dict:
             "medications": {},
             "procedures": {},
             "observations": {},
+            "weights": [],
+            "acuteVisits": [],
         }
 
     codes: dict[str, dict[str, str]] = {"snomed": {}, "rxnorm": {}, "loinc": {}}
@@ -114,7 +124,18 @@ def build(folder: Path) -> dict:
         if when > p["procedures"].get(r["CODE"], ""):
             p["procedures"][r["CODE"]] = when
 
-    # Observations: latest value per kept LOINC code.
+    weights_since = (date.today() - timedelta(days=WEIGHT_HISTORY_DAYS)).isoformat()
+    acute_since = (date.today() - timedelta(days=ACUTE_VISIT_DAYS)).isoformat()
+
+    # Emergency, urgent care and hospital visits, with the reason recorded.
+    for r in rows(folder, "encounters.csv"):
+        p = patients.get(r["PATIENT"])
+        when = day(r["START"])
+        if not p or r["ENCOUNTERCLASS"] not in ACUTE_CLASSES or when < acute_since:
+            continue
+        p["acuteVisits"].append([when, r["ENCOUNTERCLASS"], r["DESCRIPTION"], r["REASONDESCRIPTION"] or None])
+
+    # Observations: latest value per kept LOINC code, plus a year of weights.
     for r in rows(folder, "observations.csv"):
         field = OBSERVATIONS.get(r["CODE"])
         p = patients.get(r["PATIENT"])
@@ -122,6 +143,8 @@ def build(folder: Path) -> dict:
             continue
         codes["loinc"][r["CODE"]] = r["DESCRIPTION"]
         when = day(r["DATE"])
+        if field == "weight_kg" and when >= weights_since:
+            p["weights"].append([when, round(float(r["VALUE"]), 1)])
         seen = p["observations"].get(field)
         if seen and seen["date"] >= when:
             continue
@@ -135,6 +158,9 @@ def build(folder: Path) -> dict:
         p["conditions"] = [[c, s, e] for c, (s, e) in sorted(p["conditions"].items())]
         p["medications"] = [[c, s, e] for c, (s, e) in sorted(p["medications"].items())]
         p["procedures"] = [[c, d] for c, d in sorted(p["procedures"].items())]
+        p["weights"] = sorted(set(map(tuple, p["weights"])))
+        p["weights"] = [list(w) for w in p["weights"]]
+        p["acuteVisits"].sort()
         out.append(p)
     out.sort(key=lambda p: (p["group"], p["name"]))
 

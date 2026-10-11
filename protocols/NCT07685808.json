@@ -1,0 +1,171 @@
+{
+  "nctId": "NCT07685808",
+  "title": "Study of Olatorepatide in Adult Participants Living With Overweight or Obesity Without Diabetes",
+  "shortTitle": "Olatorepatide for obesity",
+  "sponsor": "Regeneron Pharmaceuticals",
+  "drug": "olatorepatide",
+  "phase": "Phase 2",
+  "status": "Recruiting",
+  "targetEnrollment": 360,
+  "url": "https://clinicaltrials.gov/study/NCT07685808",
+  "note": "Simplified for the demo, not the full protocol. Key criteria only.",
+  "criteria": [
+    {
+      "id": "age",
+      "type": "inclusion",
+      "text": "Age 18 or older",
+      "check": "code",
+      "rule": {
+        "type": "age",
+        "gte": 18
+      }
+    },
+    {
+      "id": "bmi",
+      "type": "inclusion",
+      "text": "BMI 30 to under 45, or BMI 27 or higher with at least one weight-related condition: hypertension, dyslipidemia, prediabetes, obstructive sleep apnea, coronary artery disease, heart failure or cerebrovascular disease",
+      "check": "code",
+      "rule": {
+        "type": "anyOf",
+        "rules": [
+          {
+            "type": "observation",
+            "field": "bmi",
+            "gte": 30,
+            "lt": 45,
+            "maxAgeMonths": 24
+          },
+          {
+            "type": "allOf",
+            "rules": [
+              {
+                "type": "observation",
+                "field": "bmi",
+                "gte": 27,
+                "maxAgeMonths": 24
+              },
+              {
+                "type": "condition",
+                "active": true,
+                "codes": [
+                  "59621000",
+                  "55822004",
+                  "302870006",
+                  "714628002",
+                  "78275009",
+                  "73430006",
+                  "414545008",
+                  "22298006",
+                  "399211009",
+                  "401303003",
+                  "401314000",
+                  "84114007",
+                  "88805009",
+                  "230690007"
+                ],
+                "label": "hypertension, hyperlipidemia, hypertriglyceridemia, prediabetes, sleep apnea, ischemic heart disease, myocardial infarction, heart failure or stroke"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "no_diabetes",
+      "type": "exclusion",
+      "text": "Previous or current diagnosis of type 1 or type 2 diabetes",
+      "check": "code",
+      "rule": {
+        "type": "anyOf",
+        "rules": [
+          {
+            "type": "condition",
+            "names": [
+              "diabetes mellitus",
+              "due to type 2 diabetes",
+              "due to type ii diabetes",
+              "due to diabetes mellitus"
+            ]
+          },
+          {
+            "type": "medication",
+            "names": [
+              "insulin"
+            ]
+          }
+        ]
+      },
+      "notes": "Metformin alone isn't treated as diabetes because it's also prescribed for prediabetes, which this trial allows."
+    },
+    {
+      "id": "stable_weight",
+      "type": "exclusion",
+      "text": "Body weight changed more than 5 kg in about the last 3 months",
+      "check": "code",
+      "rule": {
+        "type": "weightChange",
+        "moreThanKg": 5,
+        "withinMonths": 3
+      },
+      "notes": "Excludes only when the record shows a change of more than 5 kg in the last 3 months. With fewer than 2 weights in that window it passes here and is confirmed at screening (most patients are weighed about once a year).",
+      "unknownAs": "MATCH"
+    },
+    {
+      "id": "no_bariatric_surgery",
+      "type": "exclusion",
+      "text": "Bariatric surgery, including any revision, reversal or removal",
+      "check": "code",
+      "rule": {
+        "type": "procedure",
+        "names": [
+          "bariatric",
+          "gastric bypass",
+          "sleeve gastrectomy",
+          "gastric band",
+          "gastroplasty"
+        ]
+      }
+    },
+    {
+      "id": "no_pancreas_gallbladder",
+      "type": "exclusion",
+      "text": "History of acute or chronic pancreatitis, cholecystitis or symptomatic gallstones",
+      "check": "code",
+      "rule": {
+        "type": "anyOf",
+        "rules": [
+          {
+            "type": "condition",
+            "codes": [
+              "65275009",
+              "235919008"
+            ],
+            "names": [
+              "pancreatitis",
+              "cholecystitis",
+              "gallstone",
+              "cholelithiasis"
+            ]
+          },
+          {
+            "type": "procedure",
+            "codes": [
+              "45595009"
+            ],
+            "names": [
+              "cholecystectomy"
+            ]
+          }
+        ]
+      },
+      "notes": "A gallbladder removal counts as a sign of past symptomatic gallstones or cholecystitis."
+    },
+    {
+      "id": "no_mtc_men2",
+      "type": "exclusion",
+      "text": "Personal or family history of medullary thyroid carcinoma or multiple endocrine neoplasia type 2",
+      "check": "review",
+      "reason": "Family history isn't in the record. Ask the patient or check the chart."
+    }
+  ]
+}
