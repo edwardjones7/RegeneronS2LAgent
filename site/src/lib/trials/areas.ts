@@ -52,7 +52,7 @@ const RULES: AreaRule[] = [
   {
     area: 'cardiovascular',
     label: 'Heart and blood',
-    text: /thrombo|embolism|fibrillation|artery disease|hemophilia|hemoglobinuria|anemia|cardiomyopathy|heart failure/i,
+    text: /thrombo|embolism|fibrillation|artery disease|hemophilia|hemoglobinuria|anemia|cardiomyopathy|heart|hypertension|cardiac/i,
     mesh: /Cardiovascular Diseases|Hematologic Diseases/,
   },
   {
