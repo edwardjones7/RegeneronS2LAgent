@@ -409,3 +409,25 @@ def test_times_offered_on_a_call_are_held_for_that_patient(s):
     from app import slots as sl
     assert not sl.book(s, first_id, b.id)
     assert "Booked" in service.tool_book_visit(s, a, first_id)
+
+
+def test_booked_patient_calling_back_can_keep_or_move_their_visit(s):
+    accept(s)
+    lead = first_candidate(s)
+    service.tool_verify_identity(s, lead, lead.birth_date)
+    first_slot = int(service.tool_get_open_slots(s, lead).split("slot_id ")[1].split(":")[0])
+    service.tool_book_visit(s, lead, first_slot)
+    # Calling back: Ava is told they're booked, not to pitch again.
+    assert service._study_briefing(s, lead).startswith("ALREADY BOOKED")
+    # Same time: nothing changes, and no new text is promised.
+    texts = len([e for e in lead.events if e.type == "sms_sent"])
+    out = service.tool_book_visit(s, lead, first_slot)
+    assert "Nothing changed" in out and len([e for e in lead.events if e.type == "sms_sent"]) == texts
+    # A different time moves the visit and texts the new time.
+    offer = service.tool_get_open_slots(s, lead)
+    assert "already booked" in offer
+    new_slot = int(offer.split("slot_id ")[1].split(":")[0])
+    assert "Moved" in service.tool_book_visit(s, lead, new_slot)
+    assert service.booked_slot(s, lead).id == new_slot and lead.status == LeadStatus.BOOKED
+    s.refresh(lead)
+    assert any(e.type == "visit_rescheduled" for e in lead.events)

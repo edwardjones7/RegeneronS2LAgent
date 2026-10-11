@@ -284,30 +284,6 @@ export async function fetchRecording(leadId: number, callId: number): Promise<Re
   return res.ok ? res : null;
 }
 
-/* ————————— Live activity ————————— */
-
-export interface Activity {
-  onCall: { leadId: number; name: string; direction: 'outbound' | 'inbound'; simulated: boolean }[];
-  recent: { at: string; type: string; text: string; leadId: number; patientId: string | null }[];
-}
-
-/** What Ava is doing at this practice right now, and the latest things that happened. */
-export async function getActivity(limit = 8): Promise<Activity> {
-  if (!config()) return { onCall: [], recent: [] };
-  try {
-    const r = await call<{
-      on_call: { lead_id: number; name: string; direction: 'outbound' | 'inbound'; simulated: boolean }[];
-      recent: { at: string; type: string; text: string; lead_id: number; patient_id: string | null }[];
-    }>(`/practices/${practice}/activity?limit=${limit}`);
-    return {
-      onCall: r.on_call.map((x) => ({ leadId: x.lead_id, name: x.name, direction: x.direction, simulated: x.simulated })),
-      recent: r.recent.map((x) => ({ at: x.at, type: x.type, text: x.text, leadId: x.lead_id, patientId: x.patient_id })),
-    };
-  } catch {
-    return { onCall: [], recent: [] };
-  }
-}
-
 /* ————————— The practice's visit calendar ————————— */
 
 export interface CalendarSlot {

@@ -1,70 +1,108 @@
 import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { ActivityFeed } from '@/components/outreach/ActivityFeed';
-import { OutreachHero } from '@/components/outreach/OutreachHero';
-import { AppShell, Button, LinkButton, PageHeader, Tabs } from '@/components/ui';
-import { type Activity, getActivity, getOutreachOverview, type OutreachOverview, type OutreachPatient } from '@/lib/caller';
+import { AppShell, Badge, type BadgeTone, Button, EmptyRow, LinkButton, PageHeader, StatCard, StatGrid, Table, Tabs, Td, Th, Tr } from '@/components/ui';
+import { getOutreachOverview, type OutreachOverview, type OutreachPatient, type OutreachStatus } from '@/lib/caller';
 import { DEMO_PRACTICE } from '@/lib/practice';
-import { getTrialAreas } from '@/lib/trialAreas';
-import type { TherapeuticArea } from '@/lib/trials/areas';
 import { fetchJson, getErrorMessage } from '@/lib/utils/api';
 import { cn } from '@/lib/utils/cn';
 import { formatDate } from '@/lib/utils/format';
 
-/**
- * The doctor's view of outreach: how many are coming in, who's next, what needs them, and what Ava
- * is doing right now. Every patient and every try is one click away at /outreach/patients.
- */
-
 interface OutreachPageProps {
   nct: string | null;
   initial: OutreachOverview;
-  activity: Activity;
-  areas: Record<string, TherapeuticArea>;
-  /** The practice's local date, YYYY-MM-DD. */
-  today: string;
 }
 
 export const getServerSideProps: GetServerSideProps<OutreachPageProps> = async ({ query }) => {
   const nct = typeof query.nct === 'string' && /^NCT\d{8}$/.test(query.nct) ? query.nct : null;
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
-  const [initial, activity, areas] = await Promise.all([getOutreachOverview(nct ?? undefined), getActivity(), getTrialAreas()]);
-  return { props: { nct, initial, activity, areas, today } };
+  return { props: { nct, initial: await getOutreachOverview(nct ?? undefined) } };
 };
 
-const first = (name: string) => name.split(' ')[0];
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+const STATUS: Record<OutreachStatus, { label: string; tone: BadgeTone }> = {
+  booked: { label: 'Booked', tone: 'pass' },
+  calling: { label: 'On a call', tone: 'accent' },
+  queued: { label: 'Up next', tone: 'neutral' },
+  no_answer: { label: 'Trying again', tone: 'neutral' },
+  needs_human: { label: 'Needs a person', tone: 'unknown' },
+  emergency: { label: 'Urgent', tone: 'fail' },
+  chart_review: { label: 'Chart review', tone: 'unknown' },
+  not_a_fit: { label: 'Office follow-up', tone: 'neutral' },
+  closed: { label: 'Not interested', tone: 'neutral' },
+  opted_out: { label: 'Opted out', tone: 'neutral' },
+  dropped: { label: 'Dropped', tone: 'neutral' },
+  new: { label: 'New', tone: 'neutral' },
+};
 
-/** What happened, in one plain sentence, for a patient Ava handed to the office. */
-function whatHappened(p: OutreachPatient): string {
-  const r = p.reason.trim();
-  if (p.status === 'emergency') return `${p.name} mentioned something that could be an emergency. Ava told them to call 911.`;
-  if (/^no answer after/.test(r)) return `${p.name} didn’t pick up after 3 tries.`;
-  if (/requested a person/i.test(r)) return `${p.name} wants to talk to someone at the office.`;
-  if (/^medical question:/i.test(r)) return `${p.name} has a medical question: “${r.replace(/^medical question:\s*/i, '')}”`;
-  if (/^callback requested:/i.test(r)) return `${p.name} asked to be called back ${r.replace(/^callback requested:\s*/i, '')}.`;
-  if (/identity/i.test(r) || /date of birth/i.test(r)) return `Ava couldn’t confirm she was talking to ${p.name}.`;
-  if (/screening finished|ended before/i.test(r)) return `${p.name}’s call dropped partway through.`;
-  if (/texted/i.test(r)) return `${p.name} texted back and is waiting on a reply.`;
-  if (/language/i.test(r)) return `${p.name} would rather talk in another language.`;
-  if (/talk (it over )?(with|to) the doctor/i.test(r)) return `${p.name} wants to talk it over with you first.`;
-  return `${p.name}: ${r.charAt(0).toLowerCase()}${r.slice(1)}.`.replace(/\.\.$/, '.');
+const ACTIVITY: Record<string, string> = {
+  call_started: 'Ava called',
+  call_ended: 'Call ended',
+  sms_sent: 'Texted times',
+  sms_received: 'Texted back',
+  slots_offered: 'Texted times',
+  visit_booked: 'Booked a visit',
+  visit_confirmed: 'Confirmed the visit',
+  visit_rescheduled: 'Rescheduled',
+  retry_scheduled: 'Retry scheduled',
+  identity_verified: 'Identity confirmed',
+  inbound_call: 'Called back',
+  call_window_set: 'Asked for a later time',
+  lead_received: 'Added from the pre-screen',
+  chart_review_cleared: 'Chart cleared',
+  staff_contacted: 'Reached by staff',
+  status: 'Updated',
+};
+
+function timeAgo(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const min = Math.round((Date.now() - new Date(iso.endsWith('Z') ? iso : `${iso}Z`).getTime()) / 60000);
+  if (min < 1) return 'just now';
+  if (min < 60) return `${min}m ago`;
+  const h = Math.round(min / 60);
+  return h < 24 ? `${h}h ago` : `${Math.round(h / 24)}d ago`;
 }
 
-function NeedsYouCard({ p, onDone }: { p: OutreachPatient; onDone: () => void }) {
-  const [busy, setBusy] = useState<string | null>(null);
+const visitTime = (local: string) =>
+  new Date(local).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+/** One dot per try (3 max); the last one shows where it ended. */
+function Tries({ p }: { p: OutreachPatient }) {
+  const tries = Math.min(p.attempts, 3);
+  return (
+    <span className="inline-flex gap-1" title={`${tries} of 3 tries`} aria-label={`${tries} of 3 tries`}>
+      {[0, 1, 2].map((i) => {
+        const last = i === tries - 1;
+        return (
+          <span
+            key={i}
+            className={cn(
+              'size-2.5 rounded-full border',
+              i >= tries && 'border-dashed border-ink-3/40',
+              i < tries && !last && 'border-accent/40 bg-accent-weak',
+              last && p.status === 'booked' && 'border-pass bg-pass',
+              last && p.status === 'calling' && 'animate-pulse border-accent bg-accent',
+              last && (p.status === 'needs_human' || p.status === 'emergency') && 'border-unk bg-unk-bg',
+              last && !['booked', 'calling', 'needs_human', 'emergency'].includes(p.status) && 'border-accent/60 bg-accent-weak'
+            )}
+          />
+        );
+      })}
+    </span>
+  );
+}
+
+function PatientLink({ p }: { p: OutreachPatient }) {
+  return (
+    <Link href={`/patients?patient=${encodeURIComponent(p.patientId)}`} className="font-medium hover:text-accent">
+      {p.name}
+    </Link>
+  );
+}
+
+function QueueItem({ p, onDone }: { p: OutreachPatient; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [confirmDrop, setConfirmDrop] = useState(false);
-  const urgent = p.status === 'emergency';
-  const act = async (action: 'restart' | 'contacted' | 'drop') => {
-    setBusy(action);
+  const act = async (action: 'restart' | 'contacted' | 'drop' | 'clear') => {
+    setBusy(true);
     setError(null);
     try {
       const res = await fetch(`/api/outreach/leads/${p.id}/${action}`, { method: 'POST' });
@@ -74,116 +112,97 @@ function NeedsYouCard({ p, onDone }: { p: OutreachPatient; onDone: () => void })
     } catch (err) {
       setError(getErrorMessage(err, 'That didn’t work'));
     } finally {
-      setBusy(null);
+      setBusy(false);
     }
   };
+  const review = p.status === 'chart_review';
   return (
-    <li
-      className={cn(
-        'flex animate-slide-up gap-3 rounded-xl border border-line border-l-[3px] bg-surface p-3.5',
-        urgent ? 'border-l-fail' : 'border-l-unk'
-      )}
-    >
-      <span
-        className={cn(
-          'grid size-9 shrink-0 place-items-center rounded-full text-[12px] font-semibold',
-          urgent ? 'bg-fail-bg text-fail' : 'bg-unk-bg text-unk'
-        )}
-      >
-        {initials(p.name)}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[13.5px] leading-snug">{whatHappened(p)}</p>
-        <div className="mt-2.5 flex flex-wrap gap-2">
-          <Button className="px-3 py-1.5" disabled={busy !== null} onClick={() => act('contacted')}>
-            {busy === 'contacted' ? 'Saving…' : `I’ll call ${first(p.name)}`}
-          </Button>
-          {!urgent && (
-            <Button variant="secondary" className="px-3 py-1.5" disabled={busy !== null} onClick={() => act('restart')}>
-              {busy === 'restart' ? 'Saving…' : 'Ava, try again'}
-            </Button>
-          )}
-          {/* Remove them from the outreach: no more calls or texts, and off this list. */}
-          {confirmDrop ? (
-            <span className="flex items-center gap-1.5 text-[12.5px]">
-              <Button variant="secondary" className="border-fail/40 px-3 py-1.5 text-fail" disabled={busy !== null} onClick={() => act('drop')}>
-                {busy === 'drop' ? 'Removing…' : `Remove ${first(p.name)}`}
-              </Button>
-              <button className="text-ink-3 hover:text-ink-2" onClick={() => setConfirmDrop(false)} disabled={busy !== null}>
-                Keep
-              </button>
-            </span>
-          ) : (
-            <button
-              className="px-1.5 text-[12.5px] font-medium text-ink-3 hover:text-fail"
-              disabled={busy !== null}
-              onClick={() => setConfirmDrop(true)}
-            >
-              Don&rsquo;t follow up
-            </button>
-          )}
-        </div>
-        {error && <p className="mt-1.5 text-xs text-fail">{error}</p>}
+    <li className="border-b border-line-2 px-4 py-3 last:border-b-0">
+      <div className="flex items-baseline justify-between gap-2">
+        <PatientLink p={p} />
+        <span className="shrink-0 text-xs text-ink-3">{timeAgo(p.lastActivity?.at)}</span>
       </div>
+      <p className="mt-0.5 line-clamp-2 text-[12.5px] text-ink-2">{p.reason}</p>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {review ? (
+          <Button className="px-2.5 py-1" disabled={busy} onClick={() => act('clear')}>
+            Chart checked, call
+          </Button>
+        ) : (
+          <>
+            {p.status !== 'emergency' && (
+              <Button variant="secondary" className="px-2.5 py-1" disabled={busy} onClick={() => act('restart')}>
+                Have Ava call again
+              </Button>
+            )}
+            <Button variant="secondary" className="px-2.5 py-1" disabled={busy} onClick={() => act('contacted')}>
+              I reached them
+            </Button>
+          </>
+        )}
+        <Button variant="secondary" className="px-2.5 py-1 text-ink-3" disabled={busy} onClick={() => act('drop')}>
+          Drop
+        </Button>
+      </div>
+      {error && <p className="mt-1.5 text-xs text-fail">{error}</p>}
     </li>
   );
 }
 
-function DateTile({ local, today }: { local: string; today: string }) {
-  const d = new Date(local);
-  const isToday = local.slice(0, 10) === today;
+function Panel({ title, count, children }: { title: string; count?: number; children: React.ReactNode }) {
   return (
-    <span
-      className={cn(
-        'grid w-11 shrink-0 place-items-center rounded-lg border py-1 leading-none',
-        isToday ? 'border-accent-line bg-accent-weak text-accent' : 'border-line bg-surface'
-      )}
-    >
-      <span className="text-[10px] font-semibold uppercase tracking-[0.06em]">{d.toLocaleDateString('en-US', { weekday: 'short' })}</span>
-      <span className="mt-0.5 text-[17px] font-semibold tabular-nums">{d.getDate()}</span>
-    </span>
+    <section className="overflow-hidden rounded-[10px] border border-line bg-surface">
+      <h2 className="flex items-center justify-between border-b border-line bg-surface-2 px-4 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+        {title}
+        {count !== undefined && <span className="tabular-nums">{count}</span>}
+      </h2>
+      {children}
+    </section>
   );
 }
 
-const timeOf = (local: string) => new Date(local).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+const FILTERS = [
+  { key: 'all', label: 'All', match: () => true },
+  { key: 'booked', label: 'Booked', match: (p: OutreachPatient) => p.status === 'booked' },
+  { key: 'progress', label: 'In progress', match: (p: OutreachPatient) => ['calling', 'queued', 'no_answer'].includes(p.status) },
+  { key: 'closed', label: 'Closed', match: (p: OutreachPatient) => ['closed', 'opted_out', 'dropped', 'not_a_fit'].includes(p.status) },
+] as const;
 
-export default function OutreachPage({ nct, initial, activity, areas, today }: OutreachPageProps) {
+export default function OutreachPage({ nct, initial }: OutreachPageProps) {
   const [data, setData] = useState(initial);
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]['key']>('all');
   const url = `/api/outreach${nct ? `?nct=${nct}` : ''}`;
-  const refresh = () => void fetchJson<OutreachOverview>(url).then(setData).catch(() => {});
+  const refresh = () => fetchJson<OutreachOverview>(url).then(setData).catch(() => {});
 
-  // Ava works in the background; keep the page current while it's open.
+  // Ava works in the background; keep the page live while it's open.
   useEffect(() => {
-    const id = setInterval(() => !document.hidden && fetchJson<OutreachOverview>(url).then(setData).catch(() => {}), 5000);
+    const id = setInterval(() => !document.hidden && fetchJson<OutreachOverview>(url).then(setData).catch(() => {}), 4000);
     return () => clearInterval(id);
   }, [url]);
 
   const t = data.totals;
-  const trial = nct ? data.trials.find((x) => x.nctId === nct) : null;
-  const area = (nct && areas[nct]) || (data.trials.length === 1 ? areas[data.trials[0].nctId] : null) || null;
-  const callable = t.patients - t.chartReview;
-  const needsYou = data.patients
-    .filter((p) => p.status === 'needs_human' || p.status === 'emergency')
-    .sort((a, b) => Number(b.status === 'emergency') - Number(a.status === 'emergency'));
-  const charts = data.patients.filter((p) => p.status === 'chart_review');
+  const staff = data.patients.filter((p) => p.status === 'needs_human' || p.status === 'emergency');
+  const review = data.patients.filter((p) => p.status === 'chart_review');
   const tests = data.patients.filter((p) => p.testBirthDate);
-  const comingUp = data.visits.filter((v) => v.startsAt.slice(0, 10) >= today);
-  const everyone = `/outreach/patients${nct ? `?nct=${nct}` : ''}`;
-  const testLine = tests.length
-    ? `Test call: when your phone rings, you’re ${tests.map((p) => `${p.name}, born ${formatDate(p.testBirthDate!)}`).join(' or ')}.`
-    : null;
+  const now = new Date();
+  const upcoming = data.visits.filter((v) => new Date(v.startsAt) >= new Date(now.getTime() - 3600_000)).slice(0, 8);
+  const match = FILTERS.find((f) => f.key === filter)!.match;
+  const rows = data.patients
+    .filter(match)
+    .sort((a, b) => (b.lastActivity?.at ?? '').localeCompare(a.lastActivity?.at ?? ''));
 
   return (
     <AppShell title="Outreach" active="outreach">
       <PageHeader
-        title={trial ? `Outreach · ${trial.title}` : 'Outreach'}
+        title="Outreach"
+        description={`Ava is calling your pre-screened patients from ${DEMO_PRACTICE.doctor}’s office and booking screening visits here.`}
         tabs={
-          data.trials.length > 1 ? (
+          data.trials.length > 0 ? (
             <Tabs
               active={nct ?? 'all'}
               items={[
                 { key: 'all', label: 'All trials', href: '/outreach' },
-                ...data.trials.map((x) => ({ key: x.nctId, label: x.title, href: `/outreach?nct=${x.nctId}` })),
+                ...data.trials.map((x) => ({ key: x.nctId, label: x.title, href: `/outreach?nct=${x.nctId}`, count: x.booked })),
               ]}
             />
           ) : undefined
@@ -191,96 +210,146 @@ export default function OutreachPage({ nct, initial, activity, areas, today }: O
       />
 
       {!data.available ? (
-        <p className="mt-8 rounded-2xl border border-line p-6 text-[13px] text-ink-3">
-          Can&rsquo;t reach Ava right now. Calls already underway keep going; this page catches up when she&rsquo;s back.
+        <p className="mt-8 rounded-[10px] border border-line p-6 text-[13px] text-ink-3">
+          The outreach caller isn&rsquo;t reachable right now. Calls already in progress keep going; this page will catch up when it&rsquo;s back.
         </p>
       ) : data.trials.length === 0 ? (
-        <div className="mt-8 rounded-2xl border border-line p-10 text-center">
-          <h2 className="text-lg font-semibold">Nothing to follow yet</h2>
-          <p className="mx-auto mt-1.5 max-w-md text-[13.5px] text-ink-2">
-            Accept a trial and Ava calls its pre-screened patients from your office and books them in. You don&rsquo;t need to do anything else.
+        <div className="mt-8 rounded-[10px] border border-line p-8 text-center">
+          <h2 className="text-base font-semibold">No outreach yet</h2>
+          <p className="mx-auto mt-1.5 max-w-md text-[13px] text-ink-2">
+            Accept a trial and Ava starts calling its pre-screened patients from your office. There&rsquo;s nothing else to set up.
           </p>
-          <LinkButton href="/trials" className="mt-5">
+          <LinkButton href="/trials" className="mt-4">
             See recommended trials
           </LinkButton>
         </div>
       ) : (
         <>
-          <OutreachHero booked={t.booked} called={t.called} total={callable} area={area} testLine={testLine} />
+          {tests.length > 0 && (
+            <div className="mt-5 rounded-lg border border-line border-l-[3px] border-l-accent bg-surface-2 px-4 py-3 text-[13px] text-ink-2">
+              <span className="font-semibold text-ink">Test call.</span> When your phone rings, you&rsquo;re{' '}
+              {tests.map((p, i) => (
+                <span key={p.id}>
+                  {i > 0 && ' or '}
+                  <span className="font-semibold text-ink">{p.name}</span>, born {formatDate(p.testBirthDate!)}
+                </span>
+              ))}
+              . Ava will ask you to confirm that birthday before she says anything about the study.
+            </div>
+          )}
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_minmax(0,1fr)]">
-            <section>
-              <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-3">
-                Needs you{needsYou.length + (charts.length ? 1 : 0) > 0 && ` · ${needsYou.length + (charts.length ? 1 : 0)}`}
-              </h2>
-              {needsYou.length === 0 && charts.length === 0 ? (
-                <div className="mt-3 flex items-center gap-3 rounded-xl border border-line bg-pass-bg/50 p-4">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-pass-bg text-pass">✓</span>
-                  <p className="text-[13.5px]">
-                    <span className="font-semibold">All caught up.</span> <span className="text-ink-2">Ava hands patients to you here when they need a person.</span>
-                  </p>
-                </div>
-              ) : (
-                <ul className="mt-3 flex flex-col gap-2.5">
-                  {needsYou.slice(0, 5).map((p) => (
-                    <NeedsYouCard key={p.id} p={p} onDone={refresh} />
-                  ))}
-                  {needsYou.length > 5 && (
-                    <li>
-                      <Link href={everyone} className="text-[13px] font-semibold text-accent hover:underline">
-                        {needsYou.length - 5} more people need a call →
-                      </Link>
-                    </li>
-                  )}
-                  {charts.length > 0 && (
-                    <li className="flex gap-3 rounded-xl border border-line border-l-[3px] border-l-accent bg-surface p-3.5">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-weak text-[13px] font-semibold text-accent">
-                        {charts.length}
-                      </span>
-                      <div>
-                        <p className="text-[13.5px] leading-snug">
-                          {charts.length === 1 ? 'A chart needs' : `${charts.length} charts need`} a quick look before Ava calls.
-                        </p>
-                        <LinkButton href={`${everyone}${nct ? '&' : '?'}show=review`} variant="secondary" className="mt-2.5 px-3 py-1.5">
-                          Check charts
-                        </LinkButton>
-                      </div>
-                    </li>
-                  )}
-                </ul>
-              )}
-            </section>
-
-            <section>
-              <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-3">Coming up</h2>
-              {comingUp.length === 0 ? (
-                <p className="mt-3 text-[13.5px] text-ink-3">No one&rsquo;s booked yet. Ava is still calling.</p>
-              ) : (
-                <ul className="mt-3 flex flex-col gap-2">
-                  {comingUp.slice(0, 5).map((v) => (
-                    <li key={v.leadId} className="flex items-center gap-3">
-                      <DateTile local={v.startsAt} today={today} />
-                      <span className="min-w-0">
-                        <span className="block truncate text-[13.5px] font-medium">{v.name}</span>
-                        <span className="block text-[12px] text-ink-3">{timeOf(v.startsAt)} · screening visit</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <Link href="/calendar" className="mt-3 inline-block text-[13px] font-semibold text-accent hover:underline">
-                {comingUp.length > 5 ? `See all ${comingUp.length} on the calendar →` : 'Open the calendar →'}
-              </Link>
-            </section>
-
-            <ActivityFeed initial={activity} />
+          <div className="mt-6">
+            <StatGrid>
+              <StatCard label="Called" value={t.called} suffix={`/ ${t.patients}`} hint={`${t.inProgress} on a call now`} />
+              <StatCard label="Reached" value={t.called ? `${Math.round((t.reached / t.called) * 100)}%` : '—'} hint={`${t.texted} texted after a missed call`} />
+              <StatCard label="Booked" value={t.booked} hint="Screening visits here" selected />
+              <StatCard label="Needs a person" value={t.needsStaff + t.chartReview} hint={`${t.chartReview} waiting on a chart check`} />
+            </StatGrid>
           </div>
 
-          <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-4 text-[13px]">
-            <Link href={everyone} className="font-semibold text-accent hover:underline">
-              See every patient →
-            </Link>
-            <span className="text-ink-3">Patients stay with {DEMO_PRACTICE.name}. Sponsors only see counts.</span>
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
+            <div className="min-w-0">
+              <div className="mb-3 flex gap-1.5">
+                {FILTERS.map((f) => (
+                  <button
+                    key={f.key}
+                    onClick={() => setFilter(f.key)}
+                    className={cn(
+                      'rounded-full border px-3 py-1 text-[12px] font-semibold',
+                      filter === f.key ? 'border-accent-line bg-accent-weak text-accent' : 'border-line text-ink-2 hover:border-ink-3'
+                    )}
+                  >
+                    {f.label} <span className="ml-0.5 tabular-nums text-ink-3">{data.patients.filter(f.match).length}</span>
+                  </button>
+                ))}
+              </div>
+              <Table>
+                <thead>
+                  <tr>
+                    <Th>Patient</Th>
+                    <Th>Status</Th>
+                    <Th>Tries</Th>
+                    <Th>Last activity</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.slice(0, 150).map((p) => (
+                    <Tr key={p.id}>
+                      <Td>
+                        <PatientLink p={p} />
+                        <div className="text-xs text-ink-3">
+                          {p.simulated ? 'Simulated' : 'Real phone'}
+                          {p.callWindow ? ` · prefers ${p.callWindow}` : ''}
+                          {p.callbacks ? ` · called back ${p.callbacks}×` : ''}
+                        </div>
+                      </Td>
+                      <Td>
+                        <Badge tone={STATUS[p.status]?.tone ?? 'neutral'}>{STATUS[p.status]?.label ?? p.status}</Badge>
+                      </Td>
+                      <Td>
+                        <Tries p={p} />
+                      </Td>
+                      <Td className="text-ink-2">
+                        {p.lastActivity ? (
+                          <>
+                            {ACTIVITY[p.lastActivity.type] ?? p.lastActivity.type.replaceAll('_', ' ')}{' '}
+                            <span className="text-xs text-ink-3">· {timeAgo(p.lastActivity.at)}</span>
+                          </>
+                        ) : (
+                          '—'
+                        )}
+                      </Td>
+                    </Tr>
+                  ))}
+                  {rows.length === 0 && <EmptyRow colSpan={4}>No patients here.</EmptyRow>}
+                </tbody>
+              </Table>
+            </div>
+
+            <div className="flex flex-col gap-5">
+              {review.length > 0 && (
+                <Panel title="Check these charts before Ava calls" count={review.length}>
+                  <ul>
+                    {review.map((p) => (
+                      <QueueItem key={p.id} p={p} onDone={refresh} />
+                    ))}
+                  </ul>
+                </Panel>
+              )}
+              <Panel title="Coming up" count={data.visits.length}>
+                {upcoming.length === 0 ? (
+                  <p className="px-4 py-6 text-center text-[13px] text-ink-3">No visits booked yet.</p>
+                ) : (
+                  <ul>
+                    {upcoming.map((v) => (
+                      <li key={v.leadId} className="flex items-baseline justify-between gap-3 border-b border-line-2 px-4 py-2.5 text-[13px] last:border-b-0">
+                        <span className="font-medium">{v.name}</span>
+                        <span className="shrink-0 text-xs tabular-nums text-ink-2">{visitTime(v.startsAt)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Panel>
+
+              <Panel title="Needs a person" count={staff.length}>
+                {staff.length === 0 ? (
+                  <p className="px-4 py-6 text-center text-[13px] text-ink-3">Nothing waiting. Ava hands patients over here.</p>
+                ) : (
+                  <ul>
+                    {staff.map((p) => (
+                      <QueueItem key={p.id} p={p} onDone={refresh} />
+                    ))}
+                  </ul>
+                )}
+              </Panel>
+
+
+              {data.dashboardUrl && (
+                <a href={data.dashboardUrl} target="_blank" rel="noreferrer" className="text-[12px] text-ink-3 hover:text-ink-2">
+                  Call transcripts and recordings ↗
+                </a>
+              )}
+            </div>
           </div>
         </>
       )}
