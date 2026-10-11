@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type { TrialListItem } from '@/lib/trials';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { cn } from '@/lib/utils/cn';
-import { formatAgeRange, formatDate, formatPhases } from '@/lib/utils/format';
+import { formatAgeRange, formatDate, formatPhases, formatStatus } from '@/lib/utils/format';
 import { AREA_STYLES } from './areaStyles';
 
 export function TrialCard({ trial }: { trial: TrialListItem }) {
@@ -48,8 +48,9 @@ export function TrialCard({ trial }: { trial: TrialListItem }) {
         {trial.blurb && <p className="mt-2.5 line-clamp-3 text-[13px] leading-relaxed text-ink-2">{trial.blurb}</p>}
 
         <div className="h-16 pt-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
-          <dl className="grid grid-cols-3 gap-x-3 border-t border-line-2 pt-3">
+          <dl className="grid grid-cols-4 gap-x-3 border-t border-line-2 pt-3">
             <Fact label="Ages">{formatAgeRange(trial.minimumAge, trial.maximumAge)}</Fact>
+            <Fact label="Sex">{trial.sex ? formatStatus(trial.sex) : '—'}</Fact>
             <Fact label="Enrolling">{trial.enrollment?.toLocaleString() ?? '—'}</Fact>
             <Fact label="Ends">{trial.primaryCompletion ? formatDate(trial.primaryCompletion.slice(0, 7)) : '—'}</Fact>
           </dl>

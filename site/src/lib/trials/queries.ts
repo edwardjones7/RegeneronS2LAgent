@@ -23,6 +23,8 @@ export interface TrialListItem {
   enrollment: number | null;
   minimumAge: number | null;
   maximumAge: number | null;
+  /** ALL, FEMALE or MALE. */
+  sex: string | null;
   status: string;
   primaryCompletion: string | null;
   njLocations: number;
@@ -42,7 +44,6 @@ export interface TrialDetail extends TrialListItem {
   officialTitle: string | null;
   summary: string | null;
   eligibilityCriteria: string | null;
-  sex: string | null;
   healthyVolunteers: boolean | null;
   startDate: string | null;
   lastUpdate: string;
@@ -63,12 +64,13 @@ interface TrialRowSubset {
   enrollment_count: number | null;
   minimum_age_years: number | null;
   maximum_age_years: number | null;
+  sex: string | null;
   overall_status: string;
   primary_completion_date: string | null;
 }
 
 const LIST_COLUMNS =
-  'nct_id, brief_title, brief_summary, conditions, condition_meshes, condition_mesh_ancestors, interventions, phases, lead_sponsor, enrollment_count, minimum_age_years, maximum_age_years, overall_status, primary_completion_date';
+  'nct_id, brief_title, brief_summary, conditions, condition_meshes, condition_mesh_ancestors, interventions, phases, lead_sponsor, enrollment_count, minimum_age_years, maximum_age_years, sex, overall_status, primary_completion_date';
 
 /** Regeneron study drugs: antibodies (-mab), traps (-cept), siRNAs (-siran), peptides (-tide), or a REGN code. */
 const STUDY_DRUG = /REGN|mab\b|cept\b|siran\b|tide\b/i;
@@ -105,6 +107,7 @@ function toListItem(row: TrialRowSubset, nj: { total: number; recruiting: number
     enrollment: row.enrollment_count,
     minimumAge: row.minimum_age_years,
     maximumAge: row.maximum_age_years,
+    sex: row.sex,
     status: row.overall_status,
     primaryCompletion: row.primary_completion_date,
     njLocations: nj.total,
@@ -160,7 +163,7 @@ export async function getTrialDetail(nctId: string): Promise<TrialDetail | null>
     supabase
       .from('trials')
       .select(
-        `${LIST_COLUMNS}, official_title, eligibility_criteria, sex, healthy_volunteers, start_date, last_update_post_date`
+        `${LIST_COLUMNS}, official_title, eligibility_criteria, healthy_volunteers, start_date, last_update_post_date`
       )
       .eq('nct_id', nctId)
       .maybeSingle(),
@@ -185,7 +188,6 @@ export async function getTrialDetail(nctId: string): Promise<TrialDetail | null>
     officialTitle: row.official_title,
     summary: row.brief_summary,
     eligibilityCriteria: row.eligibility_criteria,
-    sex: row.sex,
     healthyVolunteers: row.healthy_volunteers,
     startDate: row.start_date,
     lastUpdate: row.last_update_post_date,
