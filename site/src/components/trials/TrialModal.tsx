@@ -4,7 +4,6 @@ import type { TrialOutreach } from '@/lib/caller';
 import type { StructuredCriterion } from '@/engine/preprocess/schema';
 import type { ProtocolCriterion } from '@/lib/protocols';
 import type { TrialArm, TrialDetail, TrialLocation } from '@/lib/trials';
-import type { PrescreenCounts } from '@/lib/trials/prescreen';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { fetchJson, getErrorMessage } from '@/lib/utils/api';
 import { cn } from '@/lib/utils/cn';
@@ -356,22 +355,6 @@ function AtAGlance({ trial }: { trial: TrialDetail }) {
   );
 }
 
-/** The doctor's yes, above the facts. Loaded fresh each time (not cached): it changes once accepted. */
-function AcceptPanel({ nctId, counts }: { nctId: string; counts: PrescreenCounts | null }) {
-  const [outreach, setOutreach] = useState<{ id: string; data: TrialOutreach } | null>(null);
-  useEffect(() => {
-    let live = true;
-    fetchJson<TrialOutreach>(`/api/trials/${nctId}/outreach`)
-      .then((data) => live && setOutreach({ id: nctId, data }))
-      .catch(() => {});
-    return () => {
-      live = false;
-    };
-  }, [nctId]);
-  if (outreach?.id !== nctId) return <div className="h-40 animate-pulse rounded-2xl bg-surface-2" />;
-  return <AcceptCard key={nctId} nctId={nctId} initial={outreach.data} counts={counts} />;
-}
-
 function Skeleton() {
   return (
     <div className="animate-pulse px-8 pt-2">
@@ -395,13 +378,15 @@ function Skeleton() {
 interface TrialModalProps {
   /** NCT ids of the cards on the page, in order, for previous / next. */
   order: string[];
+  /** Ava's status per callable trial, loaded with the page so the accept card shows instantly. Null: caller not running. */
+  prescreen: Record<string, TrialOutreach> | null;
 }
 
 /**
  * Trial detail over the trial grid. Lives in the URL as ?trial=NCT…, using shallow routing
  * so the grid isn't reloaded and keeps its scroll position.
  */
-export function TrialModal({ order }: TrialModalProps) {
+export function TrialModal({ order, prescreen }: TrialModalProps) {
   const router = useRouter();
   const nctId = typeof router.query.trial === 'string' ? router.query.trial : null;
   const state = useTrial(nctId);
@@ -630,7 +615,15 @@ export function TrialModal({ order }: TrialModalProps) {
                 </div>
 
                 <aside className="flex flex-col gap-4 lg:sticky lg:top-16 lg:self-start">
-                  <AcceptPanel nctId={trial.nctId} counts={trial.prescreen} />
+                  {prescreen?.[trial.nctId] ? (
+                    <AcceptCard key={trial.nctId} nctId={trial.nctId} initial={prescreen[trial.nctId]} />
+                  ) : (
+                    !prescreen && (
+                      <p className="rounded-2xl border border-line-2 p-5 text-[13px] leading-relaxed text-ink-3">
+                        Ava&apos;s caller isn&apos;t running, so this trial can&apos;t be accepted from here right now.
+                      </p>
+                    )
+                  )}
                   <AtAGlance trial={trial} />
                 </aside>
               </div>

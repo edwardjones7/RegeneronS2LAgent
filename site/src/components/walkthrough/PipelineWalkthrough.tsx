@@ -315,11 +315,15 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
   const [leaving, setLeaving] = useState(false);
   const started = useRef<number | null>(null);
 
+  // There are no buttons to leave by, so a failed load closes itself.
   useEffect(() => {
-    fetchJson<WalkthroughData>('/api/walkthrough').then(setData, () => setError(true));
-  }, []);
+    fetchJson<WalkthroughData>('/api/walkthrough').then(setData, () => {
+      setError(true);
+      setTimeout(onClose, 1500);
+    });
+  }, [onClose]);
 
-  /** End of the run (or Skip): land on the dashboard and dissolve into it. */
+  /** End of the run: land on the dashboard and dissolve into it. */
   const finish = useCallback(() => {
     setLeaving(true);
     window.scrollTo({ top: 0 });
@@ -379,22 +383,6 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
       aria-label="Pipeline walkthrough"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-[radial-gradient(700px_280px_at_10%_0%,#FFD9C7,transparent),radial-gradient(700px_260px_at_50%_0%,#D4E9FB,transparent),radial-gradient(640px_240px_at_90%_0%,#E0F2D3,transparent)] [mask-image:linear-gradient(to_bottom,black_30%,transparent)]" />
-
-      <div className="relative flex justify-end gap-2 px-8 pt-6">
-        <button type="button" onClick={finish} className="h-8 rounded-full px-3 text-[12.5px] font-medium text-ink-2 ring-1 ring-line hover:text-ink">
-          Skip to dashboard
-        </button>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close (Esc)"
-          className="flex size-8 items-center justify-center rounded-full text-ink-2 ring-1 ring-line hover:text-ink"
-        >
-          <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
-            <path d="M6 6l12 12M18 6L6 18" />
-          </svg>
-        </button>
-      </div>
 
       <div className="relative flex flex-1 flex-col justify-center overflow-hidden px-8 pb-16">
         {error && <p className="text-center text-[14px] text-ink-3">Couldn&apos;t load the walkthrough.</p>}

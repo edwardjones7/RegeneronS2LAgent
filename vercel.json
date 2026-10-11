@@ -11,6 +11,7 @@
     "caller": {
       "root": "voice-agent",
       "entrypoint": "app.main:app",
+      "buildCommand": "rm -rf protocols data && cp -R ../protocols protocols && mkdir data && cp ../data/synthea-nj.json data/",
       "functions": {
         "app/main.py": {
           "maxDuration": 300,

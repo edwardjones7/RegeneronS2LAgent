@@ -6,7 +6,7 @@ import { DEMO_PRACTICE } from '@/lib/practice';
 import { cn } from '@/lib/utils/cn';
 import { TrialistLogo } from './TrialistLogo';
 
-export type NavKey = 'trials' | 'outreach' | 'calendar' | 'patients';
+export type NavKey = 'trials' | 'campaigns' | 'calendar' | 'patients';
 
 interface AppShellProps {
   title: string;
@@ -37,9 +37,9 @@ const NAV: { key: NavKey; label: string; href: string; icon: ReactNode }[] = [
     ),
   },
   {
-    key: 'outreach',
-    label: 'Outreach',
-    href: '/outreach',
+    key: 'campaigns',
+    label: 'Campaigns',
+    href: '/campaigns',
     icon: (
       <svg {...ICON_PROPS}>
         <path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" />

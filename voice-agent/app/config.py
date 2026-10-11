@@ -58,10 +58,11 @@ class Settings(BaseSettings):
 
     # ---- Practice outreach
     # The EHR stand-in. Without these, patients come from data/synthea-nj.json (tests, offline demo).
+    # On Vercel the bundle holds only voice-agent/, so the build copies ../data and ../protocols in (see vercel.json).
     supabase_url: str = ""
     supabase_secret_key: str = ""
-    patients_file: Path = REPO / "data" / "synthea-nj.json"
-    protocols_dir: Path = REPO / "protocols"
+    patients_file: Path = ROOT / "data" / "synthea-nj.json" if (ROOT / "data").is_dir() else REPO / "data" / "synthea-nj.json"
+    protocols_dir: Path = ROOT / "protocols" if (ROOT / "protocols").is_dir() else REPO / "protocols"
     # How many calls may be in progress at once across all practices.
     batch_size: int = 10
     # Real, verified phone numbers (comma-separated) given to the first candidates of each accepted

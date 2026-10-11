@@ -1,6 +1,6 @@
 import type { GetServerSideProps } from 'next';
 import { type CalendarTrial, WeekCalendar } from '@/components/outreach/WeekCalendar';
-import { AppShell, PageHeader } from '@/components/ui';
+import { AppShell, PageIntro } from '@/components/ui';
 import { calendarWeekStart, getCalendar, getOutreachOverview, type PracticeCalendar } from '@/lib/caller';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { getTrialAreas } from '@/lib/trialAreas';
@@ -30,7 +30,10 @@ export const getServerSideProps: GetServerSideProps<CalendarPageProps> = async (
 export default function CalendarPage({ calendar, trials, areas, today }: CalendarPageProps) {
   return (
     <AppShell title="Calendar" active="calendar">
-      <PageHeader title="Calendar" description={`Screening visits at ${DEMO_PRACTICE.name}. Ava books straight into it.`} />
+      <PageIntro
+        title={`Here’s your week, ${DEMO_PRACTICE.doctor}.`}
+        description="Screening visits Ava has booked for the trials you’ve accepted."
+      />
       <div className="mt-6">
         <WeekCalendar initial={calendar} today={today} trials={trials} areas={areas} />
       </div>

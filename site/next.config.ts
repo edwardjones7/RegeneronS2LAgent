@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     '/**': ['../protocols/*.json', '../data/synthea-nj.json'],
   },
+  // Outreach was renamed Campaigns; keep old links working.
+  async redirects() {
+    return [{ source: '/outreach', destination: '/campaigns', permanent: false }];
+  },
 };
 
 export default nextConfig;
