@@ -11,3 +11,16 @@ node_modules/
 /data/synthea/
 # Brainstorming companion mockups
 .superpowers/
+
+# Never commit: runtime logs, local databases, agent state, build caches,
+# and the old product's leftover root folders (it now lives in voice-agent/).
+*.log
+*.db
+.elevenlabs.json
+__pycache__/
+.next/
+tsconfig.tsbuildinfo
+next-env.d.ts
+/web/
+/app/
+/tests/
