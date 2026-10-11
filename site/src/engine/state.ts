@@ -82,9 +82,3 @@ export function buildState(patient: Patient, codes: CodeBook, asOf: Date): JevSt
   }
   return state;
 }
-
-/** A small state for the condition prefilter: only age, sex and diagnoses. */
-export function buildConditionState(patient: Patient, codes: CodeBook, asOf: Date): JevState {
-  const { note, age, sex, conditions } = buildState(patient, codes, asOf);
-  return { note, age, sex, conditions };
-}

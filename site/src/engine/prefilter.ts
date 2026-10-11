@@ -11,8 +11,3 @@ export function passesDemographics(patient: Patient, trial: Trial, asOf: Date): 
   if (trial.sex === 'FEMALE' && patient.sex !== 'F') return false;
   return true;
 }
-
-/** Healthy-volunteer trials have no condition to look for, so they skip the condition prefilter. */
-export function needsConditionCheck(trial: Trial): boolean {
-  return !trial.healthy_volunteers && trial.conditions.length > 0;
-}

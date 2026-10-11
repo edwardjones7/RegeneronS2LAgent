@@ -4,8 +4,8 @@
 //
 // Steps:
 //   1. Code prefilter on age and sex (free).
-//   2. Condition prefilter: one Jev call per patient, one question per trial
-//      ("does the patient have this trial's condition?"). Skip with --no-condition-jev.
+//   2. Condition prefilter (free): does the patient have the trial's disease? A lookup in
+//      data/conditions/trial_condition_codes.json. No model involved.
 //   3. Eligibility: one Jev call per surviving (patient, trial), every criterion as a question.
 //   4. Code turns the answers into buckets and writes a JSON report.
 //
@@ -21,9 +21,10 @@ import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { bucketOf, toResult } from '../src/engine/decide.ts';
 import { splitEligibility } from '../src/engine/eligibility.ts';
-import { needsConditionCheck, passesDemographics } from '../src/engine/prefilter.ts';
-import { conditionQuestion, criteriaQuestions, DEFAULT_ORDER } from '../src/engine/questions.ts';
-import { buildConditionState, buildState } from '../src/engine/state.ts';
+import { conditionMatch, type TrialConditionMap } from '../src/engine/conditions.ts';
+import { passesDemographics } from '../src/engine/prefilter.ts';
+import { criteriaQuestions, DEFAULT_ORDER } from '../src/engine/questions.ts';
+import { buildState } from '../src/engine/state.ts';
 import type { Answer, CodeBook, MatchResult, Patient, Trial } from '../src/engine/types.ts';
 import { askJev, JEV_MODEL, type JevResponse } from '../src/lib/jev.ts';
 
@@ -37,7 +38,6 @@ const { values: args } = parseArgs({
     limit: { type: 'string' },
     concurrency: { type: 'string', default: '16' },
     order: { type: 'string', default: DEFAULT_ORDER.join(',') },
-    'no-condition-jev': { type: 'boolean', default: false },
     'dry-run': { type: 'boolean', default: false },
     'max-cost': { type: 'string', default: '0.25' },
     'as-of': { type: 'string', default: '2026-10-10' },
@@ -164,34 +164,25 @@ const concurrency = Number(args.concurrency);
 const tLoad = performance.now();
 
 const criteriaByTrial = new Map(trials.map((t) => [t.nct_id, splitEligibility(t.eligibility_criteria)]));
+const conditionMap: TrialConditionMap = JSON.parse(readFileSync(resolve(REPO, 'data/conditions/trial_condition_codes.json'), 'utf8'));
 
 // 1. Demographics.
-let pairs = patients.flatMap((p) => trials.filter((t) => passesDemographics(p, t, asOf)).map((t) => ({ p, t })));
+const pairs = patients.flatMap((p) => trials.filter((t) => passesDemographics(p, t, asOf)).map((t) => ({ p, t })));
 const afterDemographics = pairs.length;
 
-// 2. Condition prefilter, one call per patient covering every trial.
-const conditionAnswers = new Map<string, Record<string, string>>(); // patient → nct → answer
-if (!args['no-condition-jev']) {
-  const byPatient = Map.groupBy(pairs.filter(({ t }) => needsConditionCheck(t)), ({ p }) => p);
-  await pool([...byPatient], concurrency, async ([p, ps]) => {
-    const questions = Object.fromEntries(ps.map(({ t }) => [t.nct_id, conditionQuestion(t, order)]));
-    const res = await jev(buildConditionState(p, codes, asOf), questions);
-    const answers: Record<string, string> = {};
-    for (const { t } of ps) {
-      const probs = res?.answers[t.nct_id]?.probabilities ?? { accept: 1 };
-      answers[t.nct_id] = Object.entries(probs).sort((a, b) => b[1] - a[1])[0][0];
-    }
-    conditionAnswers.set(p.id, answers);
-  });
-  pairs = pairs.filter(({ p, t }) => !needsConditionCheck(t) || conditionAnswers.get(p.id)?.[t.nct_id] !== 'reject');
-}
-const afterCondition = pairs.length;
-const conditionCalls = calls;
+// 2. Condition prefilter: a lookup, no Jev calls.
+const unmapped = trials.filter((t) => !conditionMap[t.nct_id]).map((t) => t.nct_id);
+if (unmapped.length) console.warn(`Not in the condition map, so not prefiltered: ${unmapped.join(', ')}`);
+const matched = pairs.flatMap(({ p, t }) => {
+  const why = conditionMatch(p, conditionMap[t.nct_id]);
+  return why ? [{ p, t, why }] : [];
+});
+const afterCondition = matched.length;
 const tCondition = performance.now();
 
 // 3. Eligibility, one call per (patient, trial) with every criterion.
 const results: MatchResult[] = [];
-await pool(pairs, concurrency, async ({ p, t }) => {
+await pool(matched, concurrency, async ({ p, t, why }) => {
   const criteria = criteriaByTrial.get(t.nct_id)!;
   if (!criteria.length) return;
   const res = await jev(buildState(p, codes, asOf), criteriaQuestions(criteria, order));
@@ -201,6 +192,7 @@ await pool(pairs, concurrency, async ({ p, t }) => {
     patient_id: p.id,
     practice_id: p.practice_id,
     nct_id: t.nct_id,
+    condition_match: why,
     ...bucketOf(criteriaResults),
     criteria: criteriaResults,
   });
@@ -218,7 +210,7 @@ const meta = {
   patients: patients.length,
   trials: trials.map((t) => ({ nct_id: t.nct_id, title: t.brief_title, criteria: criteriaByTrial.get(t.nct_id)!.length })),
   pairs: { total: patients.length * trials.length, afterDemographics, afterCondition },
-  calls: { condition: conditionCalls, eligibility: calls - conditionCalls, total: calls },
+  calls,
   estimatedInputTokens: estTokens,
   estimatedCostUsd: +(estTokens * JEV_PRICE_PER_TOKEN).toFixed(4),
   reportedCostUsd: +spent.toFixed(4),
@@ -245,6 +237,6 @@ const out = resolve(args.out ?? resolve(REPO, `data/matches/run-${Date.now()}.js
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(
   out,
-  JSON.stringify({ meta, summary, criteria: Object.fromEntries(criteriaByTrial), conditionAnswers: Object.fromEntries(conditionAnswers), results }, null, 1),
+  JSON.stringify({ meta, summary, criteria: Object.fromEntries(criteriaByTrial), results }, null, 1),
 );
 console.log(`Wrote ${out}`);

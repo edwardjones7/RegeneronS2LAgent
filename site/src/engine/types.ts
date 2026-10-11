@@ -68,6 +68,8 @@ export type MatchResult = {
   patient_id: string;
   practice_id: string;
   nct_id: string;
+  /** Why the patient passed the condition prefilter, e.g. "Pulmonary emphysema (disorder)" or "bmi ≥ 30". */
+  condition_match: string;
   bucket: Bucket;
   accepts: number;
   rejects: number;

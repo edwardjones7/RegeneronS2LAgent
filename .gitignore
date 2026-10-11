@@ -15,3 +15,4 @@ node_modules/
 # Matcher run output (patient-level results)
 /data/matches/
 .claude/worktrees/
+/data/conditions/build/dl_*/

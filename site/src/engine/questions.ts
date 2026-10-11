@@ -1,4 +1,4 @@
-import type { Answer, Criterion, Trial } from './types.ts';
+import type { Answer, Criterion } from './types.ts';
 
 // Turns criteria into Jev `choice` questions. Every question offers the same
 // three options (accept, reject, unknown); the descriptions change with the
@@ -57,24 +57,4 @@ export function criterionQuestion(c: Criterion, order: Answer[] = DEFAULT_ORDER)
 
 export function criteriaQuestions(criteria: Criterion[], order: Answer[] = DEFAULT_ORDER) {
   return Object.fromEntries(criteria.map((c) => [c.id, criterionQuestion(c, order)]));
-}
-
-/** One question per trial for the condition prefilter: does the patient have the studied condition? */
-export function conditionQuestion(trial: Trial, order: Answer[] = DEFAULT_ORDER): JevChoiceQuestion {
-  const terms = [...new Set([...trial.conditions, ...trial.condition_meshes.map((m) => m.term)])];
-  return {
-    type: 'choice',
-    instructions:
-      `A clinical trial studies: ${terms.join('; ')}.\n` +
-      "Does the patient's diagnosis list include this condition, a closely related form of it, or a " +
-      'condition that directly implies it?',
-    criteria: ordered(
-      {
-        accept: 'Yes, a matching or directly implying diagnosis is on the list.',
-        reject: 'No, nothing on the diagnosis list matches.',
-        unknown: 'Possibly: a related or partial match that a clinician should look at.',
-      },
-      order,
-    ),
-  };
 }

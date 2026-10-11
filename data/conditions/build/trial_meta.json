@@ -1,0 +1,9973 @@
+[
+{
+"nct_id": "NCT06293053",
+"brief_title": "A Study to Investigate the Pharmacokinetics and Safety of Dupilumab in Participants \u22656 Months to <18 Years of Age With Prurigo Nodularis",
+"sex": "ALL",
+"minimum_age_years": 0.5,
+"maximum_age_years": 17,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Prurigo Nodularis"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT07154745",
+"brief_title": "A Study to Evaluate How Pozelimab + Cemdisiran Combination Therapy Works in Adult Patients With Paroxysmal Nocturnal Hemoglobinuria (PNH) Whose Current Treatment is Not Working Efficiently",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"PNH"
+],
+"conditions": [
+"Paroxysmal Nocturnal Hemoglobinuria"
+],
+"condition_meshes": [
+{
+"id": "D006457",
+"term": "Hemoglobinuria, Paroxysmal"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D000743",
+"term": "Anemia, Hemolytic"
+},
+{
+"id": "D000740",
+"term": "Anemia"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D009190",
+"term": "Myelodysplastic Syndromes"
+},
+{
+"id": "D001855",
+"term": "Bone Marrow Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07234058",
+"brief_title": "Trial Assessing Fianlimab Plus Cemiplimab Plus Chemotherapy or Cemiplimab Plus Chemotherapy in Patients With Pleural Mesothelioma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 75,
+"healthy_volunteers": false,
+"keywords": [
+"pleural mesothelioma",
+"cemiplimab",
+"fianlimab",
+"anti-LAG3",
+"anti-PD-1"
+],
+"conditions": [
+"Pleural Mesotheliomas"
+],
+"condition_meshes": [
+{
+"id": "D000086002",
+"term": "Mesothelioma, Malignant"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008654",
+"term": "Mesothelioma"
+},
+{
+"id": "D000236",
+"term": "Adenoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D018301",
+"term": "Neoplasms, Mesothelial"
+},
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+},
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D010997",
+"term": "Pleural Neoplasms"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07526116",
+"brief_title": "A First in Human Study to Assess Safety, Tolerability and Pharmacokinetics of a Single Dose of REGN22044 in Healthy Adults",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 65,
+"healthy_volunteers": true,
+"keywords": [],
+"conditions": [
+"Healthy Volunteer"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT06479863",
+"brief_title": "Efficacy and Safety of Pozelimab and Cemdisiran Combination Therapy in Patients With Sporadic Inclusion Body Myositis",
+"sex": "ALL",
+"minimum_age_years": 45,
+"maximum_age_years": 75,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Sporadic Inclusion Body Myositis (sIBM)",
+"Idiopathic Inflammatory Myopathies"
+],
+"condition_meshes": [
+{
+"id": "D018979",
+"term": "Myositis, Inclusion Body"
+},
+{
+"id": "D009220",
+"term": "Myositis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009135",
+"term": "Muscular Diseases"
+},
+{
+"id": "D009140",
+"term": "Musculoskeletal Diseases"
+},
+{
+"id": "D009468",
+"term": "Neuromuscular Diseases"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07393282",
+"brief_title": "A Study to Compare Linvoseltamab and Daratumumab Treatment in High-Risk Smoldering Multiple Myeloma (HR-SMM)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Linvoseltamab",
+"Multiple Myeloma (MM)",
+"B Cell Maturation Antigen (BCMA)",
+"Bispecific antibody",
+"Smoldering Multiple Myeloma (SMM)",
+"Smoldering Myeloma",
+"HR-SMM",
+"Linozyfic",
+"Darzalex"
+],
+"conditions": [
+"High Risk Smoldering Multiple Myeloma (HR-SMM)"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+},
+{
+"id": "D000075122",
+"term": "Smoldering Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+},
+{
+"id": "D011230",
+"term": "Precancerous Conditions"
+},
+{
+"id": "D006942",
+"term": "Hypergammaglobulinemia"
+}
+]
+},
+{
+"nct_id": "NCT06449313",
+"brief_title": "Neoadjuvant Chemo-Immunotherapy and Surgical Resection in Locally Advanced Non-small Cell Lung Cancer With N3 Lymph Node or Other High Risk Features",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"non-small cell lung cancer"
+],
+"conditions": [
+"Non-small Cell Lung Cancer Stage III"
+],
+"condition_meshes": [
+{
+"id": "D002289",
+"term": "Carcinoma, Non-Small-Cell Lung"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002283",
+"term": "Carcinoma, Bronchogenic"
+},
+{
+"id": "D001984",
+"term": "Bronchial Neoplasms"
+},
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+},
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07631637",
+"brief_title": "Study to Evaluate ALN-CIDEB in Adults With Fibrotic Metabolic Dysfunction-Associated Steatohepatitis (MASH)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 75,
+"healthy_volunteers": false,
+"keywords": [
+"F2 or F3 MASH",
+"Fibrotic MASH",
+"Nonalcoholic Fatty Liver Disease (NAFLD)",
+"Metabolic dysfunction-Associated Steatotic Liver Disease (MASLD)",
+"Liver Inflammation",
+"Liver Fibrosis",
+"Cirrhosis"
+],
+"conditions": [
+"Metabolic Dysfunction-Associated Steatohepatitis (MASH)"
+],
+"condition_meshes": [
+{
+"id": "D065626",
+"term": "Non-alcoholic Fatty Liver Disease"
+},
+{
+"id": "D006505",
+"term": "Hepatitis"
+},
+{
+"id": "D008103",
+"term": "Liver Cirrhosis"
+},
+{
+"id": "D005355",
+"term": "Fibrosis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D005234",
+"term": "Fatty Liver"
+},
+{
+"id": "D008107",
+"term": "Liver Diseases"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT06585410",
+"brief_title": "Study of Intralesional Cemiplimab in Adult Patients With Early Stage Cutaneous Squamous Cell Carcinoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Dermato-Oncology",
+"Cemiplimab",
+"Early Stage",
+"Skin Cancer",
+"Non-Melanoma Skin Cancer",
+"UV Skin Damage",
+"Chronic Sun Exposure"
+],
+"conditions": [
+"Cutaneous Squamous Cell Carcinoma (CSCC)"
+],
+"condition_meshes": [
+{
+"id": "D012878",
+"term": "Skin Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06413680",
+"brief_title": "A First-In Human (FIH) Study to Find Out How Well REGN10597 Medicine Given Alone or in Combination With Cemiplimab Works in Adult Participants Who Have Cancer With Tumors That Have Spread in Their Body",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Advanced solid organ malignancies",
+"Locally advanced",
+"Metastatic",
+"Non-uveal",
+"Unresectable",
+"Primary or secondary resistance to programmed cell death protein 1 (PD-1)/ programmed cell death ligand 1 (PD-L1)"
+],
+"conditions": [
+"Melanoma",
+"Clear-Cell Renal-Cell Carcinoma (ccRCC)",
+"Advanced Solid Tumors"
+],
+"condition_meshes": [
+{
+"id": "D008545",
+"term": "Melanoma"
+},
+{
+"id": "D002292",
+"term": "Carcinoma, Renal Cell"
+},
+{
+"id": "D009362",
+"term": "Neoplasm Metastasis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D018358",
+"term": "Neuroendocrine Tumors"
+},
+{
+"id": "D017599",
+"term": "Neuroectodermal Tumors"
+},
+{
+"id": "D009373",
+"term": "Neoplasms, Germ Cell and Embryonal"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D009380",
+"term": "Neoplasms, Nerve Tissue"
+},
+{
+"id": "D018326",
+"term": "Nevi and Melanomas"
+},
+{
+"id": "D012878",
+"term": "Skin Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D000230",
+"term": "Adenocarcinoma"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D007680",
+"term": "Kidney Neoplasms"
+},
+{
+"id": "D014571",
+"term": "Urologic Neoplasms"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D007674",
+"term": "Kidney Diseases"
+},
+{
+"id": "D014570",
+"term": "Urologic Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+},
+{
+"id": "D009385",
+"term": "Neoplastic Processes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT06790602",
+"brief_title": "Cemiplimab Plus Gemcitabine in Patients With Metastatic Pancreatic Adenocarcinoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"cemiplimab",
+"gemcitabine",
+"immune checkpoint inhibitors",
+"pancreatic ductal adenocarcinoma",
+"SWI/SNF",
+"combination therapy",
+"PDAC",
+"Phase 2",
+"metastatic"
+],
+"conditions": [
+"Pancreatic Ductal Adenocarcinoma (mPDAC)"
+],
+"condition_meshes": [
+{
+"id": "D009362",
+"term": "Neoplasm Metastasis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009385",
+"term": "Neoplastic Processes"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07230834",
+"brief_title": "Intravitreal (IVT) Pozelimab for Geographic Atrophy (GA) in Adult Participants",
+"sex": "ALL",
+"minimum_age_years": 50,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Age-related Macular Degeneration (AMD)",
+"GA secondary to AMD"
+],
+"conditions": [
+"Geographic Atrophy (GA)"
+],
+"condition_meshes": [
+{
+"id": "D057092",
+"term": "Geographic Atrophy"
+},
+{
+"id": "D008268",
+"term": "Macular Degeneration"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D012162",
+"term": "Retinal Degeneration"
+},
+{
+"id": "D012164",
+"term": "Retinal Diseases"
+},
+{
+"id": "D005128",
+"term": "Eye Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06665971",
+"brief_title": "Effect of Dupilumab on the Muscle Function of the Esophagus (food Pipe) in Participants with Eosinophilic Esophagitis (EoE)",
+"sex": "ALL",
+"minimum_age_years": 22,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Dupilumab",
+"Dupixent",
+"EoE",
+"Eosinophilic esophagitis",
+"Esophagitis",
+"inflammation",
+"Esophagus",
+"Dysphagia",
+"Difficulty swallowing",
+"food stuck in throat",
+"Motility",
+"Gastroenterology"
+],
+"conditions": [
+"Eosinophilic Esophagitis (EoE)"
+],
+"condition_meshes": [
+{
+"id": "D057765",
+"term": "Eosinophilic Esophagitis"
+},
+{
+"id": "D004941",
+"term": "Esophagitis"
+},
+{
+"id": "D007249",
+"term": "Inflammation"
+},
+{
+"id": "D003680",
+"term": "Deglutition Disorders"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D004935",
+"term": "Esophageal Diseases"
+},
+{
+"id": "D005767",
+"term": "Gastrointestinal Diseases"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D005759",
+"term": "Gastroenteritis"
+},
+{
+"id": "D004802",
+"term": "Eosinophilia"
+},
+{
+"id": "D007960",
+"term": "Leukocyte Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006969",
+"term": "Hypersensitivity, Immediate"
+},
+{
+"id": "D006967",
+"term": "Hypersensitivity"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D010608",
+"term": "Pharyngeal Diseases"
+},
+{
+"id": "D010038",
+"term": "Otorhinolaryngologic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07836101",
+"brief_title": "Study of Sarilumab With Immune Checkpoint Inhibitor Rechallenge in Patients With Clinically Significant Immune Related Adverse Events",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Any Advanced Solid Tumors"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT07715734",
+"brief_title": "Cemiplimab for Kidney Transplant Recipients With Advanced Cutaneous Squamous Cell Carcinoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Cutaneous squamous cell carcinoma",
+"Advanced cancer",
+"Kidney transplant"
+],
+"conditions": [
+"Kidney Transplant Recipient",
+"Cutaneous Squamous Cell Carcinoma (CSCC)",
+"Advanced Cutaneous Squamous Cell Carcinoma",
+"Kidney Transplant"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT07493304",
+"brief_title": "Treatment and Secondary Prevention of Venous Thromboembolism (VTE) in Adult Participants With Solid and Hematologic Cancers",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Cancer-Associated Thrombosis (CAT)",
+"Deep Vein Thrombosis (DVT)",
+"Pulmonary Embolism (PE)",
+"Cancer"
+],
+"conditions": [
+"Venous Thromboembolism (VTE)"
+],
+"condition_meshes": [
+{
+"id": "D054556",
+"term": "Venous Thromboembolism"
+},
+{
+"id": "D020246",
+"term": "Venous Thrombosis"
+},
+{
+"id": "D011655",
+"term": "Pulmonary Embolism"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D013923",
+"term": "Thromboembolism"
+},
+{
+"id": "D016769",
+"term": "Embolism and Thrombosis"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D013927",
+"term": "Thrombosis"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D004617",
+"term": "Embolism"
+}
+]
+},
+{
+"nct_id": "NCT07188896",
+"brief_title": "A Randomized Trial of Fianlimab and Cemiplimab +/- Ipilimumab or Ipilimumab Plus Nivolumab in First-line Advanced Renal Cell Carcinoma (RCC)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Advanced Renal Cell Carcinoma (aRCC)",
+"Metastatic Renal Cell Carcinoma ( mRCC)",
+"Clear Cell Renal Cell Carcinoma (ccRCC)"
+],
+"condition_meshes": [
+{
+"id": "D002292",
+"term": "Carcinoma, Renal Cell"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D000230",
+"term": "Adenocarcinoma"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D007680",
+"term": "Kidney Neoplasms"
+},
+{
+"id": "D014571",
+"term": "Urologic Neoplasms"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D007674",
+"term": "Kidney Diseases"
+},
+{
+"id": "D014570",
+"term": "Urologic Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07587658",
+"brief_title": "This After Market Study is Seeing if Dupilumab Plus Usual Standard of Care (SOC) is Better Than Usual Care Alone for Adult Participants After a Severe Chronic Obstructive Pulmonary Disease (COPD) Flare-Up Requiring Hospitalization",
+"sex": "ALL",
+"minimum_age_years": 40,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Moderate and/or Severe Exacerbation",
+"Eosinophilic phenotype",
+"Elevated blood eosinophil counts",
+"Type 2 inflammation",
+"dupilumab"
+],
+"conditions": [
+"Chronic Obstructive Pulmonary Disease (COPD)"
+],
+"condition_meshes": [
+{
+"id": "D029424",
+"term": "Pulmonary Disease, Chronic Obstructive"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008173",
+"term": "Lung Diseases, Obstructive"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D002908",
+"term": "Chronic Disease"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07142343",
+"brief_title": "A Study to Test the Safety of Pozelimab in Pediatric Participants 1 to 5 Years of Age With a Rare Disease Called CHAPLE (Complement Hyperactivation, Angiopathic Thrombosis, Protein-losing Enteropathy) Disease",
+"sex": "ALL",
+"minimum_age_years": 1,
+"maximum_age_years": 5,
+"healthy_volunteers": false,
+"keywords": [
+"CD55-deficient PLE (CHAPLE disease)",
+"CD55 loss-of-function mutation",
+"Complement hyperactivation",
+"Angiopathic thrombosis",
+"Protein-losing enteropathy",
+"Total Complement Hemolytic Activity Assay (CH50)"
+],
+"conditions": [
+"CHAPLE Disease"
+],
+"condition_meshes": [
+{
+"id": "D011504",
+"term": "Protein-Losing Enteropathies"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D007410",
+"term": "Intestinal Diseases"
+},
+{
+"id": "D005767",
+"term": "Gastrointestinal Diseases"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07001618",
+"brief_title": "Oral Pooled Fecal Microbiotherapy (MaaT033) Concomitant to Cemiplimab Versus Best Investigator's Choice in Patients With Resistance to Treatment Due to Antibiotics Uptake With Advanced Non-small Cell Lung Cancer",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"MAAT033",
+"ORAL POOLED FECAL MICROBIOTHERAPY",
+"ADVANCED NON SMALL CELL LUNG CANCER",
+"ANTIBIOTICS INDUCED RESISTANCE"
+],
+"conditions": [
+"NSCLC (Advanced Non-small Cell Lung Cancer)"
+],
+"condition_meshes": [
+{
+"id": "D002289",
+"term": "Carcinoma, Non-Small-Cell Lung"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002283",
+"term": "Carcinoma, Bronchogenic"
+},
+{
+"id": "D001984",
+"term": "Bronchial Neoplasms"
+},
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+},
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07220772",
+"brief_title": "A Study Evaluating Mibavademab Treatment of Obesity Due to Leptin (LEP) Gene Mutations in Children, Adolescents and Adults",
+"sex": "ALL",
+"minimum_age_years": 2,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Biallelic loss of function variants of the LEP gene mutations",
+"Leptin deficiency"
+],
+"conditions": [
+"Monogenic Obesity"
+],
+"condition_meshes": [
+{
+"id": "D009767",
+"term": "Obesity, Morbid"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009765",
+"term": "Obesity"
+},
+{
+"id": "D050177",
+"term": "Overweight"
+},
+{
+"id": "D044343",
+"term": "Overnutrition"
+},
+{
+"id": "D009748",
+"term": "Nutrition Disorders"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D001835",
+"term": "Body Weight"
+},
+{
+"id": "D012816",
+"term": "Signs and Symptoms"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07281768",
+"brief_title": "Capecitabine/Oxaliplatin Chemotherapy and Cemiplimab With or Without Fianlimab or REGN7075 in Locally Advanced Rectal Cancer",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Rectal Cancer",
+"Cemiplimab",
+"Fianlimab",
+"REGEN7075",
+"Oxaliplatin",
+"Capecitabine",
+"Immunotherapy",
+"Anti-PD-1 (Programmed Death-Ligand 1)(protein immune checkpoint)",
+"PD-L1 (Programmed Death-Ligand 1)(protein immune checkpoint)",
+"Adenocarcinoma",
+"Carcinoma",
+"CAPOX",
+"Chemotherapy"
+],
+"conditions": [
+"Colorectal Cancer"
+],
+"condition_meshes": [
+{
+"id": "D015179",
+"term": "Colorectal Neoplasms"
+},
+{
+"id": "D012004",
+"term": "Rectal Neoplasms"
+},
+{
+"id": "D000230",
+"term": "Adenocarcinoma"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D007414",
+"term": "Intestinal Neoplasms"
+},
+{
+"id": "D005770",
+"term": "Gastrointestinal Neoplasms"
+},
+{
+"id": "D004067",
+"term": "Digestive System Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D005767",
+"term": "Gastrointestinal Diseases"
+},
+{
+"id": "D003108",
+"term": "Colonic Diseases"
+},
+{
+"id": "D007410",
+"term": "Intestinal Diseases"
+},
+{
+"id": "D012002",
+"term": "Rectal Diseases"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+}
+]
+},
+{
+"nct_id": "NCT04975152",
+"brief_title": "Neoadjuvant Cemiplimab in Newly Diagnosed or Recurrent Stage I-II Merkel Cell Carcinoma and Locoregionally Advanced Cutaneous Squamous Cell Carcinoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Skin Cancer"
+],
+"conditions": [
+"Merkel Cell Carcinoma",
+"Cutaneous Squamous Cell Carcinoma"
+],
+"condition_meshes": [
+{
+"id": "D015266",
+"term": "Carcinoma, Merkel Cell"
+},
+{
+"id": "D012878",
+"term": "Skin Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D027601",
+"term": "Polyomavirus Infections"
+},
+{
+"id": "D004266",
+"term": "DNA Virus Infections"
+},
+{
+"id": "D014777",
+"term": "Virus Diseases"
+},
+{
+"id": "D007239",
+"term": "Infections"
+},
+{
+"id": "D014412",
+"term": "Tumor Virus Infections"
+},
+{
+"id": "D018278",
+"term": "Carcinoma, Neuroendocrine"
+},
+{
+"id": "D018358",
+"term": "Neuroendocrine Tumors"
+},
+{
+"id": "D017599",
+"term": "Neuroectodermal Tumors"
+},
+{
+"id": "D009373",
+"term": "Neoplasms, Germ Cell and Embryonal"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D000230",
+"term": "Adenocarcinoma"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009380",
+"term": "Neoplasms, Nerve Tissue"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+}
+]
+},
+{
+"nct_id": "NCT03564340",
+"brief_title": "Study of REGN4018 (Ubamatamab) Administered Alone or in Combination With Cemiplimab in Adult Patients With Recurrent Ovarian Cancer or Other Recurrent Mucin-16 Expressing (MUC16+) Cancers",
+"sex": "FEMALE",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Recurrent Ovarian Cancer",
+"Recurrent Fallopian Tube Cancer",
+"Recurrent Primary Peritoneal Cancer",
+"Recurrent Endometrial Cancer",
+"Endometrial Cancer",
+"Low-grade Serous Ovarian Cancer"
+],
+"condition_meshes": [
+{
+"id": "D010051",
+"term": "Ovarian Neoplasms"
+},
+{
+"id": "D005185",
+"term": "Fallopian Tube Neoplasms"
+},
+{
+"id": "D016889",
+"term": "Endometrial Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D004701",
+"term": "Endocrine Gland Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D010049",
+"term": "Ovarian Diseases"
+},
+{
+"id": "D000291",
+"term": "Adnexal Diseases"
+},
+{
+"id": "D005831",
+"term": "Genital Diseases, Female"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D005833",
+"term": "Genital Neoplasms, Female"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D000091662",
+"term": "Genital Diseases"
+},
+{
+"id": "D004700",
+"term": "Endocrine System Diseases"
+},
+{
+"id": "D006058",
+"term": "Gonadal Disorders"
+},
+{
+"id": "D005184",
+"term": "Fallopian Tube Diseases"
+},
+{
+"id": "D014594",
+"term": "Uterine Neoplasms"
+},
+{
+"id": "D014591",
+"term": "Uterine Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06662994",
+"brief_title": "High Dose Aflibercept in Diabetic Macular Edema in Patients With Previous Vitrectomy",
+"sex": "ALL",
+"minimum_age_years": 21,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"diabetic macular edema",
+"diabetes",
+"type 1 diabetes",
+"type 2 diabetes",
+"Diabetic Retinopathy",
+"anti-VEGF",
+"aflibercept",
+"aflibercept 8 mg",
+"vitrectomy",
+"proliferative diabetic retinopathy",
+"non-proliferative diabetic retinopathy"
+],
+"conditions": [
+"Diabetic Macular Edema (DME)"
+],
+"condition_meshes": [
+{
+"id": "D003920",
+"term": "Diabetes Mellitus"
+},
+{
+"id": "D003922",
+"term": "Diabetes Mellitus, Type 1"
+},
+{
+"id": "D003924",
+"term": "Diabetes Mellitus, Type 2"
+},
+{
+"id": "D003930",
+"term": "Diabetic Retinopathy"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D044882",
+"term": "Glucose Metabolism Disorders"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D004700",
+"term": "Endocrine System Diseases"
+},
+{
+"id": "D001327",
+"term": "Autoimmune Diseases"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+},
+{
+"id": "D012164",
+"term": "Retinal Diseases"
+},
+{
+"id": "D005128",
+"term": "Eye Diseases"
+},
+{
+"id": "D003925",
+"term": "Diabetic Angiopathies"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D048909",
+"term": "Diabetes Complications"
+}
+]
+},
+{
+"nct_id": "NCT05730036",
+"brief_title": "A Trial to Learn How Well Linvoseltamab Works Compared to the Combination of Elotuzumab, Pomalidomide and Dexamethasone for Adult Participants With Relapsed/Refractory Multiple Myeloma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"BCMA X CD3 Bispecific Monoclonal Antibody",
+"CD38 antibody",
+"Proteasome inhibitor",
+"Lenalidomide"
+],
+"conditions": [
+"Relapsed Refractory Multiple Myeloma (RRMM)"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT03972657",
+"brief_title": "A Trial to Find Out if REGN5678 (Nezastomig) is Safe and How Well it Works Alone or in Combination With Cemiplimab for Adult Participants With Metastatic Castration-Resistant Prostate Cancer and Other Tumors",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Metastatic Castration-Resistant Prostate Cancer (mCRPC)",
+"Clear Cell Renal Cell Carcinoma (ccRCC)"
+],
+"condition_meshes": [
+{
+"id": "D002292",
+"term": "Carcinoma, Renal Cell"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D000230",
+"term": "Adenocarcinoma"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D007680",
+"term": "Kidney Neoplasms"
+},
+{
+"id": "D014571",
+"term": "Urologic Neoplasms"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D007674",
+"term": "Kidney Diseases"
+},
+{
+"id": "D014570",
+"term": "Urologic Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07410117",
+"brief_title": "REGN7508 in Adult Participants for Prevention of Cancer-Associated Thrombosis",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Venous Thromboembolism (VTE)",
+"Deep Vein Thrombosis (DVT)",
+"Pulmonary Embolism (PE)",
+"Arterial Thromboembolism (ATE)",
+"Solid tumors (cancers)",
+"Clinically Relevant Non-Major (CRNM) bleeding",
+"International Society of Thrombosis and Hemostasis (ISTH)"
+],
+"conditions": [
+"Cancer-Associated Thrombosis (CAT)"
+],
+"condition_meshes": [
+{
+"id": "D054556",
+"term": "Venous Thromboembolism"
+},
+{
+"id": "D020246",
+"term": "Venous Thrombosis"
+},
+{
+"id": "D011655",
+"term": "Pulmonary Embolism"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D006470",
+"term": "Hemorrhage"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D013923",
+"term": "Thromboembolism"
+},
+{
+"id": "D016769",
+"term": "Embolism and Thrombosis"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D013927",
+"term": "Thrombosis"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D004617",
+"term": "Embolism"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07808138",
+"brief_title": "RADICAL-IO: thRee Cycles of immunotherApy Without raDical Therapy In mediCALly InOperable Stage I Non-small Cell Lung Cancer",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"early stage non small cell lung cancer",
+"Immunotherapy"
+],
+"conditions": [
+"Non Small Cell Lung Cancer",
+"Immunotherapy"
+],
+"condition_meshes": [
+{
+"id": "D002289",
+"term": "Carcinoma, Non-Small-Cell Lung"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002283",
+"term": "Carcinoma, Bronchogenic"
+},
+{
+"id": "D001984",
+"term": "Bronchial Neoplasms"
+},
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+},
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+}
+]
+},
+{
+"nct_id": "NCT04590326",
+"brief_title": "A Study to Find Out How Safe REGN5668 is and How Well it Works In Adult Women When Given With Either Cemiplimab, or Cemiplimab + Fianlimab, or Ubamatamab",
+"sex": "FEMALE",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Progressive",
+"Recurrent",
+"Refractory",
+"Serum CA-125 levels >= 2x ULN"
+],
+"conditions": [
+"Ovarian Cancer",
+"Fallopian Tube Cancer",
+"Primary Peritoneal Cancer",
+"Endometrial Cancer"
+],
+"condition_meshes": [
+{
+"id": "D010051",
+"term": "Ovarian Neoplasms"
+},
+{
+"id": "D005185",
+"term": "Fallopian Tube Neoplasms"
+},
+{
+"id": "D016889",
+"term": "Endometrial Neoplasms"
+},
+{
+"id": "D012008",
+"term": "Recurrence"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D004701",
+"term": "Endocrine Gland Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D010049",
+"term": "Ovarian Diseases"
+},
+{
+"id": "D000291",
+"term": "Adnexal Diseases"
+},
+{
+"id": "D005831",
+"term": "Genital Diseases, Female"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D005833",
+"term": "Genital Neoplasms, Female"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D000091662",
+"term": "Genital Diseases"
+},
+{
+"id": "D004700",
+"term": "Endocrine System Diseases"
+},
+{
+"id": "D006058",
+"term": "Gonadal Disorders"
+},
+{
+"id": "D005184",
+"term": "Fallopian Tube Diseases"
+},
+{
+"id": "D014594",
+"term": "Uterine Neoplasms"
+},
+{
+"id": "D014591",
+"term": "Uterine Diseases"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07753148",
+"brief_title": "Safety and Tolerability of REGN17235 in Adult Participants With Clonal Cytopenia of Undetermined Significance and Low-Risk Myelodysplastic Syndrome With SF3B1 Mutation",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Blood cancer",
+"First in human",
+"Selective elimination of SF3B1-mutant cells"
+],
+"conditions": [
+"Clonal Cytopenia of Undetermined Significance (CCUS)",
+"Low-Risk Myelodysplastic Syndrome (LR-MDS)"
+],
+"condition_meshes": [
+{
+"id": "D019337",
+"term": "Hematologic Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07697599",
+"brief_title": "Venous Thromboembolism (VTE) Prophylaxis With REGN7508 and REGN9933 in Adult and Adolescent Participants With a Peripherally Inserted Central Catheter (PICC)",
+"sex": "ALL",
+"minimum_age_years": 15,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Peripherally Inserted Central Catheter (PICC)",
+"Blood clots"
+],
+"conditions": [
+"Venous Thromboembolism (VTE)"
+],
+"condition_meshes": [
+{
+"id": "D054556",
+"term": "Venous Thromboembolism"
+},
+{
+"id": "D013927",
+"term": "Thrombosis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D013923",
+"term": "Thromboembolism"
+},
+{
+"id": "D016769",
+"term": "Embolism and Thrombosis"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05828511",
+"brief_title": "A Window of Opportunity Trial to Learn if Linvoseltamab is Safe and Well Tolerated, and How Well it Works in Adult Participants With Recently Diagnosed Multiple Myeloma Who Have Not Already Received Treatment",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Newly Diagnosed Multiple Myeloma (NDMM)",
+"Autologous Stem Cell Transplantation (ASCT)",
+"Cluster of Differentiation 3 (CD3)",
+"BCMA",
+"High Dose chemoTherapy (HDT)",
+"International Myeloma Working Group (IMWG)"
+],
+"conditions": [
+"Multiple Myeloma"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06669247",
+"brief_title": "A Study to Assess the Safety and Anti-Tumor Activity of REGN7945 in Combination With Linvoseltamab in Adult Participants With Relapsed/Refractory Multiple Myeloma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"R/RMM"
+],
+"conditions": [
+"Relapsed/Refractory Multiple Myeloma"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT04988074",
+"brief_title": "Trial of Cemiplimab, or Cemip-Chemo Followed by Biomarker-guided Treatment for Pts w/HPV H&N Ca",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"HPV-Related Squamous Cell Carcinoma"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT06836609",
+"brief_title": "A Study to Evaluate ALN-CIDEB in Adult Participants With Metabolic Dysfunction-Associated Steatotic Liver Disease or With Metabolic Dysfunction-Associated Steatohepatitis (MASLD/MASH)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 65,
+"healthy_volunteers": false,
+"keywords": [
+"Obese",
+"MASLD",
+"MASH"
+],
+"conditions": [
+"Metabolic Dysfunction-Associated Steatotic Liver Disease",
+"Metabolic Dysfunction-Associated Steatohepatitis"
+],
+"condition_meshes": [
+{
+"id": "D009765",
+"term": "Obesity"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D050177",
+"term": "Overweight"
+},
+{
+"id": "D044343",
+"term": "Overnutrition"
+},
+{
+"id": "D009748",
+"term": "Nutrition Disorders"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D001835",
+"term": "Body Weight"
+},
+{
+"id": "D012816",
+"term": "Signs and Symptoms"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07675811",
+"brief_title": "A Study to Evaluate the Efficacy and Safety of Fel d 1 Monoclonal Antibodies in Adult and Pediatric Participants With Allergic Conjunctivitis Due to Cat Allergy",
+"sex": "ALL",
+"minimum_age_years": 8,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Cat allergy",
+"Eye allergy",
+"Cat-induced eye allergy",
+"Ocular allergy signs/symptoms",
+"Allergic conjunctivitis signs/symptoms"
+],
+"conditions": [
+"Allergic Conjunctivitis"
+],
+"condition_meshes": [
+{
+"id": "D003233",
+"term": "Conjunctivitis, Allergic"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D003231",
+"term": "Conjunctivitis"
+},
+{
+"id": "D003229",
+"term": "Conjunctival Diseases"
+},
+{
+"id": "D005128",
+"term": "Eye Diseases"
+},
+{
+"id": "D006969",
+"term": "Hypersensitivity, Immediate"
+},
+{
+"id": "D006967",
+"term": "Hypersensitivity"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07214727",
+"brief_title": "A Study to Evaluate ALN-5288 in Patients With Alzheimer's Disease",
+"sex": "ALL",
+"minimum_age_years": 40,
+"maximum_age_years": 80,
+"healthy_volunteers": false,
+"keywords": [
+"AD",
+"Dementia"
+],
+"conditions": [
+"Alzheimer's Disease"
+],
+"condition_meshes": [
+{
+"id": "D000544",
+"term": "Alzheimer Disease"
+},
+{
+"id": "D003704",
+"term": "Dementia"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D001927",
+"term": "Brain Diseases"
+},
+{
+"id": "D002493",
+"term": "Central Nervous System Diseases"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+},
+{
+"id": "D024801",
+"term": "Tauopathies"
+},
+{
+"id": "D019636",
+"term": "Neurodegenerative Diseases"
+},
+{
+"id": "D019965",
+"term": "Neurocognitive Disorders"
+},
+{
+"id": "D001523",
+"term": "Mental Disorders"
+}
+]
+},
+{
+"nct_id": "NCT07015905",
+"brief_title": "REGN7508 Versus Apixaban and Enoxaparin for Thromboprophylaxis After Total Knee Arthroplasty in Adults",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Unilateral Total Knee Arthroplasty (TKA)",
+"Factor XI (FXI)"
+],
+"conditions": [
+"Venous Thromboembolism (VTE)"
+],
+"condition_meshes": [
+{
+"id": "D054556",
+"term": "Venous Thromboembolism"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D013923",
+"term": "Thromboembolism"
+},
+{
+"id": "D016769",
+"term": "Embolism and Thrombosis"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07746388",
+"brief_title": "Adaptive Chemotherapy for Pd-l1 High REsEctablE NSCLC: A Chemo-PHREE Trial",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Nsclc",
+"NSCLC Stage II",
+"NSCLC, Stage III",
+"NSCLC Stage IIIB",
+"Resectable Lung Non-Small Cell Carcinoma"
+],
+"condition_meshes": [
+{
+"id": "D002289",
+"term": "Carcinoma, Non-Small-Cell Lung"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002283",
+"term": "Carcinoma, Bronchogenic"
+},
+{
+"id": "D001984",
+"term": "Bronchial Neoplasms"
+},
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+},
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05094570",
+"brief_title": "Interleukin-4Ra Blockade by Dupilumab Decreases Staphylococcus Colonization and Increases Microbial Diversity in CRSwNP",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 65,
+"healthy_volunteers": false,
+"keywords": [
+"Nasal polyps",
+"Staph aureus",
+"Interleukin-4/-13"
+],
+"conditions": [
+"Nasal Polyps",
+"Staphylococcus Aureus"
+],
+"condition_meshes": [
+{
+"id": "D009298",
+"term": "Nasal Polyps"
+},
+{
+"id": "D013203",
+"term": "Staphylococcal Infections"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009668",
+"term": "Nose Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D010038",
+"term": "Otorhinolaryngologic Diseases"
+},
+{
+"id": "D011127",
+"term": "Polyps"
+},
+{
+"id": "D020763",
+"term": "Pathological Conditions, Anatomical"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D016908",
+"term": "Gram-Positive Bacterial Infections"
+},
+{
+"id": "D001424",
+"term": "Bacterial Infections"
+},
+{
+"id": "D001423",
+"term": "Bacterial Infections and Mycoses"
+},
+{
+"id": "D007239",
+"term": "Infections"
+}
+]
+},
+{
+"nct_id": "NCT07850921",
+"brief_title": "REGN21353 Alone or in Combination With Nezastomig for Metastatic Castration-Resistant Prostate Cancer in Adult Participants",
+"sex": "MALE",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Prostate cancer",
+"Metastatic prostate cancer",
+"Castration resistant prostate cancer",
+"Advanced prostate cancer",
+"Stage 4 prostate cancer",
+"Prostate cancer that has spread",
+"Hormone refractory prostate cancer",
+"Androgen-resistant prostate cancer",
+"Androgen-independent prostate cancer",
+"PSA progression",
+"Androgen receptor pathway inhibitor (ARPI)",
+"Luteinizing hormone-releasing hormone (LHRH)",
+"Androgen deprivation therapy (ADT)"
+],
+"conditions": [
+"Metastatic Castration-Resistant Prostate Cancer",
+"mCRPC"
+],
+"condition_meshes": [
+{
+"id": "D011471",
+"term": "Prostatic Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D005834",
+"term": "Genital Neoplasms, Male"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D005832",
+"term": "Genital Diseases, Male"
+},
+{
+"id": "D000091662",
+"term": "Genital Diseases"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D011469",
+"term": "Prostatic Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07527910",
+"brief_title": "A Phase 2a Study of ALN-PNP With and Without a GLP1R Agonist in Adult Patients With Homozygous PNPLA3-Related MASLD",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 75,
+"healthy_volunteers": false,
+"keywords": [
+"Homozygous PNPLA3-Related MASLD",
+"Fatty Liver Disease",
+"Metabolic Dysfunction-Associated Steatohepatitis (MASH)",
+"Non-Alcoholic Fatty Liver Disease (NAFLD)",
+"Nonalcoholic Steatohepatitis (NASH)"
+],
+"conditions": [
+"Metabolic Dysfunction-Associated Steatotic Liver Disease (MASLD)"
+],
+"condition_meshes": [
+{
+"id": "D065626",
+"term": "Non-alcoholic Fatty Liver Disease"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D005234",
+"term": "Fatty Liver"
+},
+{
+"id": "D008107",
+"term": "Liver Diseases"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07154290",
+"brief_title": "A Study to Investigate Ubamatamab With and Without Marlotamig (REGN7075) in Adult Participants With Advanced/Metastatic Non-Small Cell Lung Cancer (NSCLC)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Mucin-16 (MUC16)",
+"Ubamatamab",
+"Epidermal Growth Factor Receptor (EGFR)",
+"REGN7075",
+"Stage IIIB, IIIC or IV",
+"Marlotamig",
+"NSCLC",
+"Advanced NSCLC",
+"Metastatic NSCLC",
+"Lung Cancer",
+"Advanced Lung Cancer",
+"Metastatic Lung Cancer",
+"Stage IV NSCLC",
+"Recurrent NSCLC",
+"Unresectable NSCLC"
+],
+"conditions": [
+"Non Small Cell Lung Cancer",
+"Advanced Non Small Cell Lung Cancer",
+"Metastatic Non Small Cell Lung Cancer",
+"Carcinoma Non Small Cell Lung"
+],
+"condition_meshes": [
+{
+"id": "D002289",
+"term": "Carcinoma, Non-Small-Cell Lung"
+},
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002283",
+"term": "Carcinoma, Bronchogenic"
+},
+{
+"id": "D001984",
+"term": "Bronchial Neoplasms"
+},
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07271186",
+"brief_title": "Study to Assess the Effects of ALN-ANG3 in Adult Participants With Diabetic Kidney Disease",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 80,
+"healthy_volunteers": false,
+"keywords": [
+"Diabetic Nephropathy",
+"Chronic Kidney Disease (CKD)",
+"Type 2 Diabetes",
+"Lipid Management",
+"Renal Impairment",
+"Gene Silencing",
+"siRNA",
+"small-interfering RNA"
+],
+"conditions": [
+"Diabetic Kidney Disease (DKD)"
+],
+"condition_meshes": [
+{
+"id": "D003928",
+"term": "Diabetic Nephropathies"
+},
+{
+"id": "D051436",
+"term": "Renal Insufficiency, Chronic"
+},
+{
+"id": "D003924",
+"term": "Diabetes Mellitus, Type 2"
+},
+{
+"id": "D051437",
+"term": "Renal Insufficiency"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D007674",
+"term": "Kidney Diseases"
+},
+{
+"id": "D014570",
+"term": "Urologic Diseases"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+},
+{
+"id": "D048909",
+"term": "Diabetes Complications"
+},
+{
+"id": "D003920",
+"term": "Diabetes Mellitus"
+},
+{
+"id": "D004700",
+"term": "Endocrine System Diseases"
+},
+{
+"id": "D002908",
+"term": "Chronic Disease"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D044882",
+"term": "Glucose Metabolism Disorders"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT04380038",
+"brief_title": "Viral Infection in Asthma (VIA) Study",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 40,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Asthma"
+],
+"condition_meshes": [
+{
+"id": "D001249",
+"term": "Asthma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D001982",
+"term": "Bronchial Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D008173",
+"term": "Lung Diseases, Obstructive"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012130",
+"term": "Respiratory Hypersensitivity"
+},
+{
+"id": "D006969",
+"term": "Hypersensitivity, Immediate"
+},
+{
+"id": "D006967",
+"term": "Hypersensitivity"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07309614",
+"brief_title": "A Study Assessing the Effect of Dupilumab on Inducing Clinical Remission in Asthma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 79,
+"healthy_volunteers": false,
+"keywords": [
+"Asthma",
+"Asthma control",
+"moderate asthma",
+"dupilumab",
+"remission",
+"type-2 inflammation",
+"blood eosinophils",
+"feno",
+"exacerbations",
+"trial",
+"RCT"
+],
+"conditions": [
+"Asthma Control"
+],
+"condition_meshes": [
+{
+"id": "D001249",
+"term": "Asthma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D001982",
+"term": "Bronchial Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D008173",
+"term": "Lung Diseases, Obstructive"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012130",
+"term": "Respiratory Hypersensitivity"
+},
+{
+"id": "D006969",
+"term": "Hypersensitivity, Immediate"
+},
+{
+"id": "D006967",
+"term": "Hypersensitivity"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05042258",
+"brief_title": "Using Dupilumab to Improve Circadian Function, Sleep and Pruritus in Children With Moderate/Severe Atopic Dermatitis",
+"sex": "ALL",
+"minimum_age_years": 6,
+"maximum_age_years": 17,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Atopic Dermatitis",
+"Sleep Disturbance"
+],
+"condition_meshes": [
+{
+"id": "D003876",
+"term": "Dermatitis, Atopic"
+},
+{
+"id": "D020447",
+"term": "Parasomnias"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D012873",
+"term": "Skin Diseases, Genetic"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+},
+{
+"id": "D003872",
+"term": "Dermatitis"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D017443",
+"term": "Skin Diseases, Eczematous"
+},
+{
+"id": "D006969",
+"term": "Hypersensitivity, Immediate"
+},
+{
+"id": "D006967",
+"term": "Hypersensitivity"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+},
+{
+"id": "D012893",
+"term": "Sleep Wake Disorders"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+},
+{
+"id": "D001523",
+"term": "Mental Disorders"
+}
+]
+},
+{
+"nct_id": "NCT07477704",
+"brief_title": "A Study to See How Safe and Effective Alirocumab is When Given Weekly to Adult Participants Who Have Hypercholesterolemia",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 80,
+"healthy_volunteers": false,
+"keywords": [
+"Obesity",
+"Elevated Low-Density Lipoprotein Cholesterol (LDL-C) Levels"
+],
+"conditions": [
+"Hypercholesterolemia"
+],
+"condition_meshes": [
+{
+"id": "D006937",
+"term": "Hypercholesterolemia"
+},
+{
+"id": "D009765",
+"term": "Obesity"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D006949",
+"term": "Hyperlipidemias"
+},
+{
+"id": "D050171",
+"term": "Dyslipidemias"
+},
+{
+"id": "D052439",
+"term": "Lipid Metabolism Disorders"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D050177",
+"term": "Overweight"
+},
+{
+"id": "D044343",
+"term": "Overnutrition"
+},
+{
+"id": "D009748",
+"term": "Nutrition Disorders"
+},
+{
+"id": "D001835",
+"term": "Body Weight"
+},
+{
+"id": "D012816",
+"term": "Signs and Symptoms"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07235917",
+"brief_title": "A Study to Investigate Mibavademab in Adult Women With Functional Hypothalamic Amenorrhea",
+"sex": "FEMALE",
+"minimum_age_years": 18,
+"maximum_age_years": 40,
+"healthy_volunteers": false,
+"keywords": [
+"Secondary amenorrhea",
+"Hypothalamic Pituitary Ovarian axis",
+"HPO",
+"Group I ovulation disorder",
+"Hypogonadotropic hypogonadal anovulation",
+"Gonadotropin Releasing Hormone Deficiency",
+"GnRH Suppression",
+"Amenorrhea",
+"Female Infertility",
+"Hypoestrogenism",
+"Estrogen Deficiency",
+"Menstrual Dysfunction",
+"Menstrual Cycle Disturbance"
+],
+"conditions": [
+"Functional Hypothalamic Amenorrhea",
+"FHA"
+],
+"condition_meshes": [
+{
+"id": "D000568",
+"term": "Amenorrhea"
+},
+{
+"id": "D007247",
+"term": "Infertility, Female"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008599",
+"term": "Menstruation Disturbances"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D005831",
+"term": "Genital Diseases, Female"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D000091662",
+"term": "Genital Diseases"
+},
+{
+"id": "D007246",
+"term": "Infertility"
+}
+]
+},
+{
+"nct_id": "NCT07053423",
+"brief_title": "A Study to Investigate Airway Inflammation With Dupilumab Subcutaneously in Participants Aged \u226540 to \u226485 Years With Chronic Obstructive Pulmonary Disease.",
+"sex": "ALL",
+"minimum_age_years": 40,
+"maximum_age_years": 85,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Chronic Obstructive Pulmonary Disease"
+],
+"condition_meshes": [
+{
+"id": "D029424",
+"term": "Pulmonary Disease, Chronic Obstructive"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008173",
+"term": "Lung Diseases, Obstructive"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D002908",
+"term": "Chronic Disease"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT06902376",
+"brief_title": "XL092 and Cemiplimab in BRAF WT Thyroid Cancer",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"neoadjuvant chemotherapy",
+"neoadjuvant immunotherapy",
+"standard of care",
+"BRAF V600E-WT ATC",
+"XL092",
+"cemiplimab",
+"receptor tyrosine kinase inhibitor"
+],
+"conditions": [
+"Anaplastic Thyroid Cancer",
+"Thyroid Cancer",
+"BRAF Mutation-Related Tumors"
+],
+"condition_meshes": [
+{
+"id": "D065646",
+"term": "Thyroid Carcinoma, Anaplastic"
+},
+{
+"id": "D013964",
+"term": "Thyroid Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D004701",
+"term": "Endocrine Gland Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D006258",
+"term": "Head and Neck Neoplasms"
+},
+{
+"id": "D004700",
+"term": "Endocrine System Diseases"
+},
+{
+"id": "D013959",
+"term": "Thyroid Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06826768",
+"brief_title": "A Ph Ib Study of REGN5678 Plus Cemiplimab in Patients With mCRPC",
+"sex": "MALE",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Prostate Cancer"
+],
+"condition_meshes": [
+{
+"id": "D011471",
+"term": "Prostatic Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D005834",
+"term": "Genital Neoplasms, Male"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D005832",
+"term": "Genital Diseases, Male"
+},
+{
+"id": "D000091662",
+"term": "Genital Diseases"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D011469",
+"term": "Prostatic Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07543055",
+"brief_title": "A Phase 1 Study of BPX-601 CAR T-Cell Therapy in Adult Participants With Prostate Cancer That Has Returned, is Resistant to Treatment and Has Spread",
+"sex": "MALE",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Relapsed/Refractory (R/R)",
+"Metastatic",
+"Castration-Resistant"
+],
+"conditions": [
+"Prostate Cancer"
+],
+"condition_meshes": [
+{
+"id": "D011471",
+"term": "Prostatic Neoplasms"
+},
+{
+"id": "D012008",
+"term": "Recurrence"
+},
+{
+"id": "D009362",
+"term": "Neoplasm Metastasis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D005834",
+"term": "Genital Neoplasms, Male"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D005832",
+"term": "Genital Diseases, Male"
+},
+{
+"id": "D000091662",
+"term": "Genital Diseases"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D011469",
+"term": "Prostatic Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D009385",
+"term": "Neoplastic Processes"
+}
+]
+},
+{
+"nct_id": "NCT05202288",
+"brief_title": "Impact of Delay Between Administration of Inmazeb Administration and Vaccination by Ervebo on Vaccine Immune Response on Healthy Volunteers",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": true,
+"keywords": [
+"Post Exposure Prophylaxis",
+"Ebola vaccine"
+],
+"conditions": [
+"Ebola Virus Disease"
+],
+"condition_meshes": [
+{
+"id": "D019142",
+"term": "Hemorrhagic Fever, Ebola"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D006482",
+"term": "Hemorrhagic Fevers, Viral"
+},
+{
+"id": "D012327",
+"term": "RNA Virus Infections"
+},
+{
+"id": "D014777",
+"term": "Virus Diseases"
+},
+{
+"id": "D007239",
+"term": "Infections"
+},
+{
+"id": "D018702",
+"term": "Filoviridae Infections"
+},
+{
+"id": "D018701",
+"term": "Mononegavirales Infections"
+}
+]
+},
+{
+"nct_id": "NCT06887088",
+"brief_title": "Encorafenib and biNimetinib Followed by CEmiplimab and FiAnLimab in Patients With BRAF Mutant melanOma and Symptomatic Brain Metastases",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Melanoma",
+"Encorafenib",
+"Binimetinib",
+"Cemiplimab",
+"Fianlimab",
+"BRAF mutant"
+],
+"conditions": [
+"Melanoma BRAF V600E/K Mutated",
+"Melanoma and Brain Metastases"
+],
+"condition_meshes": [
+{
+"id": "D008545",
+"term": "Melanoma"
+},
+{
+"id": "D001932",
+"term": "Brain Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D018358",
+"term": "Neuroendocrine Tumors"
+},
+{
+"id": "D017599",
+"term": "Neuroectodermal Tumors"
+},
+{
+"id": "D009373",
+"term": "Neoplasms, Germ Cell and Embryonal"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D009380",
+"term": "Neoplasms, Nerve Tissue"
+},
+{
+"id": "D018326",
+"term": "Nevi and Melanomas"
+},
+{
+"id": "D012878",
+"term": "Skin Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D016543",
+"term": "Central Nervous System Neoplasms"
+},
+{
+"id": "D009423",
+"term": "Nervous System Neoplasms"
+},
+{
+"id": "D001927",
+"term": "Brain Diseases"
+},
+{
+"id": "D002493",
+"term": "Central Nervous System Diseases"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07863024",
+"brief_title": "Safety and Efficacy Study in Adults With Advanced Solid Tumors Receiving REGN13089-M404-M2980, an Antibody-drug Conjugate That Targets MET Protein on Tumors",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"ADC",
+"Antibody-drug conjugate",
+"Advanced cancer",
+"Advanced solid malignancy",
+"Clear cell renal cell carcinoma",
+"Colorectal cancer",
+"First-in-human",
+"FIH",
+"Gastric cancer",
+"Gastroesophageal junction cancer",
+"MET",
+"METxMET antibody-drug conjugate",
+"Metastatic",
+"Metastatic solid tumor",
+"Non-small cell lung cancer",
+"NSCLC",
+"Papillary renal cell carcinoma",
+"Solid neoplasm",
+"Unresectable",
+"Unresectable solid tumor",
+"Uveal melanoma"
+],
+"conditions": [
+"Advanced Solid Tumors"
+],
+"condition_meshes": [
+{
+"id": "D002292",
+"term": "Carcinoma, Renal Cell"
+},
+{
+"id": "D015179",
+"term": "Colorectal Neoplasms"
+},
+{
+"id": "D013274",
+"term": "Stomach Neoplasms"
+},
+{
+"id": "D009362",
+"term": "Neoplasm Metastasis"
+},
+{
+"id": "D002289",
+"term": "Carcinoma, Non-Small-Cell Lung"
+},
+{
+"id": "D000098943",
+"term": "Uveal Melanoma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D000230",
+"term": "Adenocarcinoma"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D007680",
+"term": "Kidney Neoplasms"
+},
+{
+"id": "D014571",
+"term": "Urologic Neoplasms"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D007674",
+"term": "Kidney Diseases"
+},
+{
+"id": "D014570",
+"term": "Urologic Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+},
+{
+"id": "D007414",
+"term": "Intestinal Neoplasms"
+},
+{
+"id": "D005770",
+"term": "Gastrointestinal Neoplasms"
+},
+{
+"id": "D004067",
+"term": "Digestive System Neoplasms"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D005767",
+"term": "Gastrointestinal Diseases"
+},
+{
+"id": "D003108",
+"term": "Colonic Diseases"
+},
+{
+"id": "D007410",
+"term": "Intestinal Diseases"
+},
+{
+"id": "D012002",
+"term": "Rectal Diseases"
+},
+{
+"id": "D013272",
+"term": "Stomach Diseases"
+},
+{
+"id": "D009385",
+"term": "Neoplastic Processes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D002283",
+"term": "Carcinoma, Bronchogenic"
+},
+{
+"id": "D001984",
+"term": "Bronchial Neoplasms"
+},
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+},
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D008545",
+"term": "Melanoma"
+},
+{
+"id": "D018358",
+"term": "Neuroendocrine Tumors"
+},
+{
+"id": "D017599",
+"term": "Neuroectodermal Tumors"
+},
+{
+"id": "D009373",
+"term": "Neoplasms, Germ Cell and Embryonal"
+},
+{
+"id": "D009380",
+"term": "Neoplasms, Nerve Tissue"
+},
+{
+"id": "D018326",
+"term": "Nevi and Melanomas"
+},
+{
+"id": "D014604",
+"term": "Uveal Neoplasms"
+},
+{
+"id": "D005134",
+"term": "Eye Neoplasms"
+},
+{
+"id": "D005128",
+"term": "Eye Diseases"
+},
+{
+"id": "D014603",
+"term": "Uveal Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05744921",
+"brief_title": "A Study in Adult Patients With Paroxysmal Nocturnal Hemoglobinuria (PNH) to Evaluate How Safe Long-term Treatment With Pozelimab + Cemdisiran Combination Therapy is and How Well it Works",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"PNH"
+],
+"conditions": [
+"Paroxysmal Nocturnal Hemoglobinuria"
+],
+"condition_meshes": [
+{
+"id": "D006457",
+"term": "Hemoglobinuria, Paroxysmal"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D000743",
+"term": "Anemia, Hemolytic"
+},
+{
+"id": "D000740",
+"term": "Anemia"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D009190",
+"term": "Myelodysplastic Syndromes"
+},
+{
+"id": "D001855",
+"term": "Bone Marrow Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06784726",
+"brief_title": "Odronextamab for Relapsed and Refractory Large B-cell Lymphomas Before CAR-T",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Recurrent Diffuse Large B-Cell Lymphoma",
+"Recurrent Diffuse Large B-Cell Lymphoma, Not Otherwise Specified",
+"Recurrent Grade 3b Follicular Lymphoma",
+"Recurrent High Grade B-Cell Lymphoma",
+"Recurrent Primary Mediastinal Large B-Cell Lymphoma",
+"Recurrent Transformed Indolent B-Cell Non-Hodgkin Lymphoma to Diffuse Large B-Cell Lymphoma",
+"Refractory Diffuse Large B-Cell Lymphoma",
+"Refractory Diffuse Large B-Cell Lymphoma, Not Otherwise Specified",
+"Refractory Grade 3b Follicular Lymphoma",
+"Refractory High Grade B-Cell Lymphoma",
+"Refractory Primary Mediastinal Large B-Cell Lymphoma",
+"Refractory Transformed Indolent B-Cell Non-Hodgkin Lymphoma to Diffuse Large B-Cell Lymphoma"
+],
+"condition_meshes": [
+{
+"id": "D016403",
+"term": "Lymphoma, Large B-Cell, Diffuse"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D016393",
+"term": "Lymphoma, B-Cell"
+},
+{
+"id": "D008228",
+"term": "Lymphoma, Non-Hodgkin"
+},
+{
+"id": "D008223",
+"term": "Lymphoma"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D008206",
+"term": "Lymphatic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06975787",
+"brief_title": "Dose Escalation Study With Bispecific Antibodies in Adult Participants With Lupus Nephritis",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 60,
+"healthy_volunteers": false,
+"keywords": [
+"Bispecific Antibodies (bsAb)",
+"Double-stranded DNA (dsDNA)",
+"LN class III or IV",
+"Systemic Lupus Erythematosus (SLE)"
+],
+"conditions": [
+"Lupus Nephritis (LN)"
+],
+"condition_meshes": [
+{
+"id": "D008181",
+"term": "Lupus Nephritis"
+},
+{
+"id": "D008180",
+"term": "Lupus Erythematosus, Systemic"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D005921",
+"term": "Glomerulonephritis"
+},
+{
+"id": "D009393",
+"term": "Nephritis"
+},
+{
+"id": "D007674",
+"term": "Kidney Diseases"
+},
+{
+"id": "D014570",
+"term": "Urologic Diseases"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+},
+{
+"id": "D003240",
+"term": "Connective Tissue Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D001327",
+"term": "Autoimmune Diseases"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07861152",
+"brief_title": "Thyroid-Stimulating Hormone Receptor (TSHR) Blockade With REGN24493 in Adult Participants With Graves' Disease (GD)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Autoimmune hyperthyroidism",
+"Autoimmune thyroid disease",
+"Graves' disease",
+"Graves' hyperthyroidism",
+"Thyroid stimulating hormone receptor",
+"Thyroid stimulating immunoglobulin (TSI)",
+"TRAb (TSH receptor antibody)",
+"TSHR",
+"TSHR autoantibody"
+],
+"conditions": [
+"Graves' Disease"
+],
+"condition_meshes": [
+{
+"id": "D006111",
+"term": "Graves Disease"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D005094",
+"term": "Exophthalmos"
+},
+{
+"id": "D009916",
+"term": "Orbital Diseases"
+},
+{
+"id": "D005128",
+"term": "Eye Diseases"
+},
+{
+"id": "D006042",
+"term": "Goiter"
+},
+{
+"id": "D013959",
+"term": "Thyroid Diseases"
+},
+{
+"id": "D004700",
+"term": "Endocrine System Diseases"
+},
+{
+"id": "D006980",
+"term": "Hyperthyroidism"
+},
+{
+"id": "D001327",
+"term": "Autoimmune Diseases"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05685173",
+"brief_title": "A Trial to Study if REGN5837 in Combination With Odronextamab is Safe for Adult Participants With Aggressive B-cell Non-Hodgkin Lymphomas",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Aggressive B-Cell Non-Hodgkin Lymphomas",
+"Relapsed or Refractory"
+],
+"conditions": [
+"B-cell Non-Hodgkins Lymphoma (B-NHL)"
+],
+"condition_meshes": [
+{
+"id": "D012008",
+"term": "Recurrence"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07216066",
+"brief_title": "First-in-Human Study of ALN-SNCA in Adult Participants With Early Parkinson's Disease (PD)",
+"sex": "ALL",
+"minimum_age_years": 50,
+"maximum_age_years": 80,
+"healthy_volunteers": false,
+"keywords": [
+"Early Parkinsons disease",
+"Motor and non-motor brain systems",
+"Bradykinesia plus",
+"Resting tremor",
+"Rigidity",
+"Postural instability",
+"Cognitive impairment",
+"Mood disorders",
+"Sleep disturbances",
+"Autonomic dysfunction"
+],
+"conditions": [
+"Parkinsons Disease"
+],
+"condition_meshes": [
+{
+"id": "D010300",
+"term": "Parkinson Disease"
+},
+{
+"id": "D014202",
+"term": "Tremor"
+},
+{
+"id": "D009127",
+"term": "Muscle Rigidity"
+},
+{
+"id": "D060825",
+"term": "Cognitive Dysfunction"
+},
+{
+"id": "D019964",
+"term": "Mood Disorders"
+},
+{
+"id": "D020447",
+"term": "Parasomnias"
+},
+{
+"id": "D054969",
+"term": "Primary Dysautonomias"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D020734",
+"term": "Parkinsonian Disorders"
+},
+{
+"id": "D001480",
+"term": "Basal Ganglia Diseases"
+},
+{
+"id": "D001927",
+"term": "Brain Diseases"
+},
+{
+"id": "D002493",
+"term": "Central Nervous System Diseases"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+},
+{
+"id": "D009069",
+"term": "Movement Disorders"
+},
+{
+"id": "D000080874",
+"term": "Synucleinopathies"
+},
+{
+"id": "D019636",
+"term": "Neurodegenerative Diseases"
+},
+{
+"id": "D020820",
+"term": "Dyskinesias"
+},
+{
+"id": "D009461",
+"term": "Neurologic Manifestations"
+},
+{
+"id": "D012816",
+"term": "Signs and Symptoms"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D009135",
+"term": "Muscular Diseases"
+},
+{
+"id": "D009140",
+"term": "Musculoskeletal Diseases"
+},
+{
+"id": "D009122",
+"term": "Muscle Hypertonia"
+},
+{
+"id": "D020879",
+"term": "Neuromuscular Manifestations"
+},
+{
+"id": "D003072",
+"term": "Cognition Disorders"
+},
+{
+"id": "D019965",
+"term": "Neurocognitive Disorders"
+},
+{
+"id": "D001523",
+"term": "Mental Disorders"
+},
+{
+"id": "D012893",
+"term": "Sleep Wake Disorders"
+},
+{
+"id": "D001342",
+"term": "Autonomic Nervous System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT04722523",
+"brief_title": "A Study of Cemiplimab With Chemotherapy and Immunotherapy in People With Head and Neck Cancer",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Cemiplimab",
+"Platinum-Doublet Chemotherapy",
+"Cetuximab",
+"Head and Neck Cancer",
+"Head Cancer",
+"Neck Cancer",
+"Head and Neck Squamous Cell Carcinoma",
+"Memorial Sloan Kettering Cancer Center",
+"20-445",
+"HNSCC)"
+],
+"conditions": [
+"Head and Neck Cancer",
+"Head Cancer",
+"Head Cancer Neck",
+"Neck Cancer",
+"Head and Neck Squamous Cell Carcinoma",
+"HNSCC"
+],
+"condition_meshes": [
+{
+"id": "D006258",
+"term": "Head and Neck Neoplasms"
+},
+{
+"id": "D000077195",
+"term": "Squamous Cell Carcinoma of Head and Neck"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D002294",
+"term": "Carcinoma, Squamous Cell"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+}
+]
+},
+{
+"nct_id": "NCT07430956",
+"brief_title": "Stroke and Systemic Embolism Prevention in Adult Participants With Atrial Fibrillation for Whom Oral Anticoagulation is Unsuitable",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Blood clots",
+"Ischemic stroke",
+"Systemic embolism",
+"Pulmonary embolism",
+"Venous Thromboembolism (VTE)"
+],
+"conditions": [
+"Atrial Fibrillation (AF)"
+],
+"condition_meshes": [
+{
+"id": "D001281",
+"term": "Atrial Fibrillation"
+},
+{
+"id": "D013927",
+"term": "Thrombosis"
+},
+{
+"id": "D000083242",
+"term": "Ischemic Stroke"
+},
+{
+"id": "D011655",
+"term": "Pulmonary Embolism"
+},
+{
+"id": "D054556",
+"term": "Venous Thromboembolism"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D001145",
+"term": "Arrhythmias, Cardiac"
+},
+{
+"id": "D006331",
+"term": "Heart Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D016769",
+"term": "Embolism and Thrombosis"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D020521",
+"term": "Stroke"
+},
+{
+"id": "D002561",
+"term": "Cerebrovascular Disorders"
+},
+{
+"id": "D001927",
+"term": "Brain Diseases"
+},
+{
+"id": "D002493",
+"term": "Central Nervous System Diseases"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D004617",
+"term": "Embolism"
+},
+{
+"id": "D013923",
+"term": "Thromboembolism"
+}
+]
+},
+{
+"nct_id": "NCT06439654",
+"brief_title": "Atlantic Lipid Lowering Treatment Optimization Program",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 120,
+"healthy_volunteers": false,
+"keywords": [
+"LDL-C",
+"FH",
+"complex dyslipidemia"
+],
+"conditions": [
+"Familial Hypercholesterolemia",
+"Lipoprotein Types--Lp System Lp(A) Hyperlipoproteinemia",
+"Apolipoprotein B 100, Familial Defective",
+"High Density Lipoprotein Deficiency",
+"Low-Density-Lipoid-Type Hyperlipoproteinemia"
+],
+"condition_meshes": [
+{
+"id": "D006938",
+"term": "Hyperlipoproteinemia Type II"
+},
+{
+"id": "C563617",
+"term": "Lipoprotein Types--Lp System Lp(A) Hyperlipoproteinemia"
+},
+{
+"id": "D052456",
+"term": "Hypoalphalipoproteinemias"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008052",
+"term": "Lipid Metabolism, Inborn Errors"
+},
+{
+"id": "D008661",
+"term": "Metabolism, Inborn Errors"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+},
+{
+"id": "D006951",
+"term": "Hyperlipoproteinemias"
+},
+{
+"id": "D006949",
+"term": "Hyperlipidemias"
+},
+{
+"id": "D050171",
+"term": "Dyslipidemias"
+},
+{
+"id": "D052439",
+"term": "Lipid Metabolism Disorders"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D007009",
+"term": "Hypolipoproteinemias"
+}
+]
+},
+{
+"nct_id": "NCT07637851",
+"brief_title": "Safety and Efficacy of Ubamatamab With First-line Chemotherapy in Ovarian Cancer",
+"sex": "FEMALE",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"chemotherapy",
+"poor prognostic",
+"unfavorable primary chemosensitivity",
+"incomplete debulking surgery",
+"KELIM"
+],
+"conditions": [
+"Ovarian Cancer"
+],
+"condition_meshes": [
+{
+"id": "D010051",
+"term": "Ovarian Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D004701",
+"term": "Endocrine Gland Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D010049",
+"term": "Ovarian Diseases"
+},
+{
+"id": "D000291",
+"term": "Adnexal Diseases"
+},
+{
+"id": "D005831",
+"term": "Genital Diseases, Female"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D005833",
+"term": "Genital Neoplasms, Female"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D000091662",
+"term": "Genital Diseases"
+},
+{
+"id": "D004700",
+"term": "Endocrine System Diseases"
+},
+{
+"id": "D006058",
+"term": "Gonadal Disorders"
+}
+]
+},
+{
+"nct_id": "NCT07455851",
+"brief_title": "A Trial to Study if REGN17372 in Combination With Linvoseltamab is Tolerable for Adult Participants With Relapsed/Refractory Multiple Myeloma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"B-cell maturation antigen (BCMA)",
+"Anti-CD3 monoclonal antibodies (mAbs)",
+"G-protein-coupled receptor class C group 5 member D (GPRC5D)"
+],
+"conditions": [
+"Relapsed Refractory Multiple Myeloma (RRMM)"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06672237",
+"brief_title": "A Phase 3 Study of NTLA-2001 in ATTRv-PN",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 85,
+"healthy_volunteers": false,
+"keywords": [
+"TTR",
+"Amyloidosis",
+"Polyneuropathy",
+"NTLA-2001",
+"ATTR",
+"ATTR-PN",
+"ATTRv-PN",
+"Transthyretin",
+"TTR-mediated amyloidosis",
+"Amyloidosis, hereditary",
+"Amyloidosis, hereditary, transthyretin-related amyloidosis",
+"Transthretin amyloid polyneuropathy",
+"TTR PN",
+"TTR polyneuropathy",
+"nexiguran ziclumeran",
+"nex-z",
+"CRISPR"
+],
+"conditions": [
+"Neuromuscular Disease",
+"Neuromuscular Diseases (NMD)",
+"Neurodegenerative Disease",
+"Neurodegenerative Disease, Hereditary",
+"Neurodegenerative Diseases",
+"Neuromuscular Diseases",
+"Nerve Disorders",
+"Nervous System Disease",
+"Nervous System Diseases",
+"Genetic Disease, Inborn",
+"Amyloidosis, Familial",
+"Amyloidosis, Hereditary",
+"Amyloidosis",
+"Polyneuropathies",
+"Amyloid Neuropathies",
+"Amyloid Neuropathies, Familial",
+"Peripheral Nervous System Disease",
+"Peripheral Nervous System Diseases",
+"Metabolism, Inborn Errors",
+"Metabolic Diseases"
+],
+"condition_meshes": [
+{
+"id": "D009468",
+"term": "Neuromuscular Diseases"
+},
+{
+"id": "D019636",
+"term": "Neurodegenerative Diseases"
+},
+{
+"id": "D020271",
+"term": "Heredodegenerative Disorders, Nervous System"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D028226",
+"term": "Amyloidosis, Familial"
+},
+{
+"id": "D000686",
+"term": "Amyloidosis"
+},
+{
+"id": "D011115",
+"term": "Polyneuropathies"
+},
+{
+"id": "D017772",
+"term": "Amyloid Neuropathies"
+},
+{
+"id": "D028227",
+"term": "Amyloid Neuropathies, Familial"
+},
+{
+"id": "D010523",
+"term": "Peripheral Nervous System Diseases"
+},
+{
+"id": "D008661",
+"term": "Metabolism, Inborn Errors"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "C567782",
+"term": "Amyloidosis, Hereditary, Transthyretin-Related"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D057165",
+"term": "Proteostasis Deficiencies"
+}
+]
+},
+{
+"nct_id": "NCT06931717",
+"brief_title": "A Clinical Study to Assess the Efficacy of Adjuvant Immunotherapy With Cemiplimab in Patients With Surgically Removed Non-small Cell Lung Cancer Who Have Not Received Prior Chemotherapy",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"NSCLC",
+"Stage II-IIIA NSCLC"
+],
+"conditions": [
+"Non-Small Cell Lung Cancer"
+],
+"condition_meshes": [
+{
+"id": "D002289",
+"term": "Carcinoma, Non-Small-Cell Lung"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002283",
+"term": "Carcinoma, Bronchogenic"
+},
+{
+"id": "D001984",
+"term": "Bronchial Neoplasms"
+},
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+},
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07624513",
+"brief_title": "D2 - Isa-Iber-VD Induction, Followed by Risk & Response Adapted Consolidation & Maintenance, in Transplant-Eligible NDMM",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 75,
+"healthy_volunteers": false,
+"keywords": [
+"Multiple Myeloma"
+],
+"conditions": [
+"Multiple Myeloma"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07527923",
+"brief_title": "First-in-Human Trial to Assess REGN20423 in Healthy Adult Participants and Adult Participants With Atopic Dermatitis",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 65,
+"healthy_volunteers": true,
+"keywords": [
+"Eczema",
+"Inflammatory skin disease"
+],
+"conditions": [
+"Healthy Volunteer",
+"Atopic Dermatitis"
+],
+"condition_meshes": [
+{
+"id": "D003876",
+"term": "Dermatitis, Atopic"
+},
+{
+"id": "D004485",
+"term": "Eczema"
+},
+{
+"id": "D003872",
+"term": "Dermatitis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D012873",
+"term": "Skin Diseases, Genetic"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D017443",
+"term": "Skin Diseases, Eczematous"
+},
+{
+"id": "D006969",
+"term": "Hypersensitivity, Immediate"
+},
+{
+"id": "D006967",
+"term": "Hypersensitivity"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07220785",
+"brief_title": "Efficacy and Safety of Mibavademab in Adult and Pediatric Patients With Generalized Lipodystrophy",
+"sex": "ALL",
+"minimum_age_years": 2,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Subcutaneous (SC) adipose tissue",
+"GLD",
+"Berardinelli-Seip Syndrome",
+"Congenital Generalized Lipodystrophy",
+"CGL",
+"Lawrence Syndrome",
+"Acquired Generalized Lipodystrophy",
+"AGL"
+],
+"conditions": [
+"Generalized Lipodystrophy"
+],
+"condition_meshes": [
+{
+"id": "D052497",
+"term": "Lipodystrophy, Congenital Generalized"
+},
+{
+"id": "D052496",
+"term": "Lipodystrophy, Familial Partial"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008052",
+"term": "Lipid Metabolism, Inborn Errors"
+},
+{
+"id": "D008661",
+"term": "Metabolism, Inborn Errors"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+},
+{
+"id": "D008060",
+"term": "Lipodystrophy"
+},
+{
+"id": "D012875",
+"term": "Skin Diseases, Metabolic"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D052439",
+"term": "Lipid Metabolism Disorders"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D000083083",
+"term": "Laminopathies"
+}
+]
+},
+{
+"nct_id": "NCT07832370",
+"brief_title": "A Trial of ALN-6457 in Adult Participants With Symptomatic Prion Disease (PrD)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"PrD",
+"Symptomatic Prion Disease",
+"Sporadic Prion Disease",
+"Genetic Prion Disease",
+"Inherited Prion Disease",
+"Familial Prion Disease",
+"Gerstmann-Straussler-Scheinker syndrome (GSS)",
+"Fatal familial insomnia (FFI)",
+"Rapidly-Progressive Dementia",
+"Creutzfeldt-Jakob Disease (CJD)",
+"Fatal Familial Insomnia",
+"Prion-Associated Disorder",
+"Prion-Induced Disorder",
+"Dementia",
+"Neurodegenerative Disease",
+"Neurological Decline",
+"Central Nervous System Disease",
+"Central Nervous System Infections",
+"Protein Misfolding Disorder",
+"Transmissible Spongiform Encephalopathy"
+],
+"conditions": [
+"Prion Disease"
+],
+"condition_meshes": [
+{
+"id": "D017096",
+"term": "Prion Diseases"
+},
+{
+"id": "D016098",
+"term": "Gerstmann-Straussler-Scheinker Disease"
+},
+{
+"id": "D034062",
+"term": "Insomnia, Fatal Familial"
+},
+{
+"id": "D007562",
+"term": "Creutzfeldt-Jakob Syndrome"
+},
+{
+"id": "D003704",
+"term": "Dementia"
+},
+{
+"id": "D019636",
+"term": "Neurodegenerative Diseases"
+},
+{
+"id": "D002493",
+"term": "Central Nervous System Diseases"
+},
+{
+"id": "D002494",
+"term": "Central Nervous System Infections"
+},
+{
+"id": "D057165",
+"term": "Proteostasis Deficiencies"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D007239",
+"term": "Infections"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+},
+{
+"id": "D020271",
+"term": "Heredodegenerative Disorders, Nervous System"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+},
+{
+"id": "D007319",
+"term": "Sleep Initiation and Maintenance Disorders"
+},
+{
+"id": "D020919",
+"term": "Sleep Disorders, Intrinsic"
+},
+{
+"id": "D020920",
+"term": "Dyssomnias"
+},
+{
+"id": "D012893",
+"term": "Sleep Wake Disorders"
+},
+{
+"id": "D001927",
+"term": "Brain Diseases"
+},
+{
+"id": "D019965",
+"term": "Neurocognitive Disorders"
+},
+{
+"id": "D001523",
+"term": "Mental Disorders"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07251413",
+"brief_title": "Cemiplimab Plus Imiquimod and Laser Therapy As Neoadjuvant Treatment In Cutaneous Basal Cell Carcinoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Cutaneous Carcinoma",
+"Cemiplimab",
+"Imiquimod",
+"Laser Therapy"
+],
+"conditions": [
+"Cutaneous Basal Cell Carcinoma"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT07181941",
+"brief_title": "Response-Based Dose Reduction of Linvoseltamab in the Treatment of Relapsed, Refractory, or Triple-Class Relapsed/Refractory Multiple Myeloma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Recurrent Multiple Myeloma",
+"Refractory Multiple Myeloma"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07223541",
+"brief_title": "Cemiplimab or Cemiplimab and Fianlimab After Stereotactic Body Radiotherapy in Clear Cell Renal Cell Carcinoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Stereotactic body radiation therapy (SBRT)",
+"Oligo metastatic",
+"ctDNA"
+],
+"conditions": [
+"Clear Cell Renal Cell Carcinoma"
+],
+"condition_meshes": [
+{
+"id": "D002292",
+"term": "Carcinoma, Renal Cell"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D000230",
+"term": "Adenocarcinoma"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D007680",
+"term": "Kidney Neoplasms"
+},
+{
+"id": "D014571",
+"term": "Urologic Neoplasms"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D007674",
+"term": "Kidney Diseases"
+},
+{
+"id": "D014570",
+"term": "Urologic Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05519475",
+"brief_title": "A Precision Medicine Approach Using Gene Silencing to Treat a Chronic Liver Disease Called Metabolic Dysfunction-Associated Steatohepatitis (MASH) in Adult Participants at Increased Genetic Risk for This Condition",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 75,
+"healthy_volunteers": false,
+"keywords": [
+"Metabolic dysfunction-Associated Steatotic Liver Disease (MASLD)",
+"Histologically confirmed MASH",
+"Genetic risk alleles for MASH at the HSD17B13 locus",
+"Non-Alcoholic SteatoHepatitis (NASH)"
+],
+"conditions": [
+"Metabolic Dysfunction-Associated SteatoHepatitis (MASH)"
+],
+"condition_meshes": [
+{
+"id": "D065626",
+"term": "Non-alcoholic Fatty Liver Disease"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D005234",
+"term": "Fatty Liver"
+},
+{
+"id": "D008107",
+"term": "Liver Diseases"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07609940",
+"brief_title": "Adult Outpatient Linvoseltamab With Tocilizumab Prophylaxis to Mitigate the Risk of Cytokine Release Syndrome (CRS)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Cytokine Release Syndrome (CRS)",
+"Linvoseltamab",
+"Tocilizumab",
+"Bispecific antibodies"
+],
+"conditions": [
+"Relapsed/Refractory Multiple Myeloma (RRMM)"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+},
+{
+"id": "D000080424",
+"term": "Cytokine Release Syndrome"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+},
+{
+"id": "D018746",
+"term": "Systemic Inflammatory Response Syndrome"
+},
+{
+"id": "D007249",
+"term": "Inflammation"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D012769",
+"term": "Shock"
+}
+]
+},
+{
+"nct_id": "NCT06226610",
+"brief_title": "Dupixent in Adults With Refractory Post-Burn Pruritus in an Ambulatory Clinic",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 60,
+"healthy_volunteers": false,
+"keywords": [
+"Itching, itch"
+],
+"conditions": [
+"Pruritis"
+],
+"condition_meshes": [
+{
+"id": "D011537",
+"term": "Pruritus"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D012877",
+"term": "Skin Manifestations"
+},
+{
+"id": "D012816",
+"term": "Signs and Symptoms"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT06932562",
+"brief_title": "A Study to Learn How Safe and How Well Linvoseltamab Works Compared to Standard Treatment in Adult Patients With Multiple Myeloma Who Are Not Eligible for Transplant",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Multiple Myeloma (MM)",
+"Transplant ineligible",
+"Newly diagnosed",
+"Linvoseltamab",
+"BCMA X CD3 bispecific antibody",
+"CD38 antibody",
+"Lenalidomide"
+],
+"conditions": [
+"Multiple Myeloma"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07286214",
+"brief_title": "Sarilumab Efficacy and Safety in Adults With Early Polymyalgia Rheumatica",
+"sex": "ALL",
+"minimum_age_years": 50,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Polymyalgia Rheumatica"
+],
+"condition_meshes": [
+{
+"id": "D011111",
+"term": "Polymyalgia Rheumatica"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009135",
+"term": "Muscular Diseases"
+},
+{
+"id": "D009140",
+"term": "Musculoskeletal Diseases"
+},
+{
+"id": "D012216",
+"term": "Rheumatic Diseases"
+},
+{
+"id": "D003240",
+"term": "Connective Tissue Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06448026",
+"brief_title": "Cemiplimab and Cetuximab Prior Salvage Surgery in Patients With Recurrent Oral Cavity and HPV-negative Oropharyngeal Squamous Cell Carcinoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"local recurrence",
+"oral cavity cancer"
+],
+"conditions": [
+"Locally Recurrent Oral Cavity Squamous Cell Carcinoma"
+],
+"condition_meshes": [
+{
+"id": "D009062",
+"term": "Mouth Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D006258",
+"term": "Head and Neck Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D009059",
+"term": "Mouth Diseases"
+},
+{
+"id": "D009057",
+"term": "Stomatognathic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06246916",
+"brief_title": "A Study With Combinations of Anti-LAG-3 and Anti-PD-1 Antibodies in Adult Participants With Advanced or Metastatic Melanoma (Harmony Head-to-Head)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Unresectable Melanoma",
+"Metastatic Melanoma",
+"Advanced Melanoma",
+"Stage III",
+"Stage IV"
+],
+"conditions": [
+"Melanoma"
+],
+"condition_meshes": [
+{
+"id": "D008545",
+"term": "Melanoma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D018358",
+"term": "Neuroendocrine Tumors"
+},
+{
+"id": "D017599",
+"term": "Neuroectodermal Tumors"
+},
+{
+"id": "D009373",
+"term": "Neoplasms, Germ Cell and Embryonal"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D009380",
+"term": "Neoplasms, Nerve Tissue"
+},
+{
+"id": "D018326",
+"term": "Nevi and Melanomas"
+},
+{
+"id": "D012878",
+"term": "Skin Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07626411",
+"brief_title": "Stroke and Systemic Embolism Prevention in Adult Participants With Atrial Fibrillation",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Bleeding",
+"Stroke",
+"Systemic embolism",
+"Blood clots"
+],
+"conditions": [
+"Atrial Fibrillation (AF)"
+],
+"condition_meshes": [
+{
+"id": "D001281",
+"term": "Atrial Fibrillation"
+},
+{
+"id": "D006470",
+"term": "Hemorrhage"
+},
+{
+"id": "D020521",
+"term": "Stroke"
+},
+{
+"id": "D013927",
+"term": "Thrombosis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D001145",
+"term": "Arrhythmias, Cardiac"
+},
+{
+"id": "D006331",
+"term": "Heart Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D002561",
+"term": "Cerebrovascular Disorders"
+},
+{
+"id": "D001927",
+"term": "Brain Diseases"
+},
+{
+"id": "D002493",
+"term": "Central Nervous System Diseases"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D016769",
+"term": "Embolism and Thrombosis"
+}
+]
+},
+{
+"nct_id": "NCT06571708",
+"brief_title": "Gemcitabine/Cisplatin Plus Cemiplimab With or Without Fianlimab in Localized Muscle-invasive Bladder Cancer (NeoSTOP-IT)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Urothelial Predominant Histology"
+],
+"conditions": [
+"Bladder Cancer",
+"Muscle-Invasive Bladder Carcinoma"
+],
+"condition_meshes": [
+{
+"id": "D001749",
+"term": "Urinary Bladder Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D014571",
+"term": "Urologic Neoplasms"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D001745",
+"term": "Urinary Bladder Diseases"
+},
+{
+"id": "D014570",
+"term": "Urologic Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06981325",
+"brief_title": "Evaluation of Efficacy and Safety of Cemiplimab as First Line Treatment for Advanced Basal Cell Carcinoma (BCC) Patients",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"BCC",
+"Skin Cancer",
+"Basal Cell Carcinoma",
+"anti-PD-1 monoclonal antibody",
+"HHI na\u00efve",
+"Cemiplimab"
+],
+"conditions": [
+"Basal Cell Carcinoma (BCC)",
+"First Line Treatment"
+],
+"condition_meshes": [
+{
+"id": "D002280",
+"term": "Carcinoma, Basal Cell"
+},
+{
+"id": "D012878",
+"term": "Skin Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D018295",
+"term": "Neoplasms, Basal Cell"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07685808",
+"brief_title": "Study of Olatorepatide in Adult Participants Living With Overweight or Obesity Without Diabetes",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Body weight",
+"Glucagon-Like Peptide-1 (GLP-1)/Gastric inhibitory polypeptide (GIP) receptor agonist",
+"Dose-finding",
+"Control appetite"
+],
+"conditions": [
+"Overweight or Obesity"
+],
+"condition_meshes": [
+{
+"id": "D050177",
+"term": "Overweight"
+},
+{
+"id": "D009765",
+"term": "Obesity"
+},
+{
+"id": "D001835",
+"term": "Body Weight"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D044343",
+"term": "Overnutrition"
+},
+{
+"id": "D009748",
+"term": "Nutrition Disorders"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D012816",
+"term": "Signs and Symptoms"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT06140524",
+"brief_title": "A Proof-of-Concept Study to Learn Whether Linvoseltamab Can Eliminate Abnormal Plasma Cells That May Lead to Multiple Myeloma in Adult Patients With High-Risk Monoclonal Gammopathy of Undetermined Significance or Non-High-Risk Smoldering Multiple Myeloma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"linvoseltamab",
+"monoclonal immunoglobulin (M-protein)",
+"cancer interception",
+"immunotherapy",
+"plasma cell disorders"
+],
+"conditions": [
+"Monoclonal Gammopathy of Undetermined Significance (MGUS)",
+"Smoldering Multiple Myeloma (SMM)"
+],
+"condition_meshes": [
+{
+"id": "D008998",
+"term": "Monoclonal Gammopathy of Undetermined Significance"
+},
+{
+"id": "D000075122",
+"term": "Smoldering Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D006942",
+"term": "Hypergammaglobulinemia"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+},
+{
+"id": "D011230",
+"term": "Precancerous Conditions"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+}
+]
+},
+{
+"nct_id": "NCT07854782",
+"brief_title": "Trial to Evaluate ALN-CIDEB in Adults With Metabolic Dysfunction-Associated Steatotic Liver Disease (MASLD)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 75,
+"healthy_volunteers": false,
+"keywords": [
+"NAFLD",
+"NASH",
+"Metabolic Dysfunction-Associated Steatohepatitis",
+"MASH",
+"Fatty Liver Disease",
+"Non-alcoholic Fatty Liver Disease",
+"Liver Fibrosis",
+"Steatotic Liver Disease",
+"SLD",
+"Metabolic Fatty Liver Disease",
+"Hepatic Steatosis",
+"Fatty Liver",
+"Liver Fat",
+"Excess Liver Fat",
+"Obesity",
+"Insulin Resistance"
+],
+"conditions": [
+"Metabolic Dysfunction-Associated Steatotic Liver Disease",
+"MASLD"
+],
+"condition_meshes": [
+{
+"id": "D065626",
+"term": "Non-alcoholic Fatty Liver Disease"
+},
+{
+"id": "D008103",
+"term": "Liver Cirrhosis"
+},
+{
+"id": "D005234",
+"term": "Fatty Liver"
+},
+{
+"id": "D009765",
+"term": "Obesity"
+},
+{
+"id": "D007333",
+"term": "Insulin Resistance"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008107",
+"term": "Liver Diseases"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D005355",
+"term": "Fibrosis"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D050177",
+"term": "Overweight"
+},
+{
+"id": "D044343",
+"term": "Overnutrition"
+},
+{
+"id": "D009748",
+"term": "Nutrition Disorders"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D001835",
+"term": "Body Weight"
+},
+{
+"id": "D012816",
+"term": "Signs and Symptoms"
+},
+{
+"id": "D006946",
+"term": "Hyperinsulinism"
+},
+{
+"id": "D044882",
+"term": "Glucose Metabolism Disorders"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07128641",
+"brief_title": "Odronextamab in Low Tumor Volume Advanced FL",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Follicular Lymphoma",
+"Lymphoma",
+"Treatment-naive Follicular lymphoma",
+"Advanced Stage Follicular Lymphoma"
+],
+"conditions": [
+"Follicular Lymphoma",
+"Lymphoma"
+],
+"condition_meshes": [
+{
+"id": "D008224",
+"term": "Lymphoma, Follicular"
+},
+{
+"id": "D008223",
+"term": "Lymphoma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008228",
+"term": "Lymphoma, Non-Hodgkin"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D008206",
+"term": "Lymphatic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07559513",
+"brief_title": "A Study to Investigate the Safety, Pharmacokinetics (PK), and Efficacy of Garetosmab in Children and Adolescents With Fibrodysplasia Ossificans Progressiva (FOP)",
+"sex": "ALL",
+"minimum_age_years": 2,
+"maximum_age_years": 18,
+"healthy_volunteers": false,
+"keywords": [
+"ACVR1",
+"ACVR1 Mutation",
+"Activin A Receptor Type 1",
+"ALK2 Mutation",
+"Fibrodysplasia Ossificans Congenita",
+"FOP-causing Mutation",
+"Heterotopic Ossification",
+"M\u00fcnchmeyer Disease",
+"Myositis Ossificans Progressiva",
+"Progressive Heterotopic Ossification",
+"Progressive Myositis Ossificans",
+"Skeletal Dysplasia",
+"Stone Man Disease"
+],
+"conditions": [
+"Fibrodysplasia Ossificans Progressiva",
+"FOP"
+],
+"condition_meshes": [
+{
+"id": "D009221",
+"term": "Myositis Ossificans"
+},
+{
+"id": "D009999",
+"term": "Ossification, Heterotopic"
+},
+{
+"id": "D009085",
+"term": "Mucopolysaccharidosis IV"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009220",
+"term": "Myositis"
+},
+{
+"id": "D009135",
+"term": "Muscular Diseases"
+},
+{
+"id": "D009140",
+"term": "Musculoskeletal Diseases"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D009083",
+"term": "Mucopolysaccharidoses"
+},
+{
+"id": "D002239",
+"term": "Carbohydrate Metabolism, Inborn Errors"
+},
+{
+"id": "D008661",
+"term": "Metabolism, Inborn Errors"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+},
+{
+"id": "D016464",
+"term": "Lysosomal Storage Diseases"
+},
+{
+"id": "D017520",
+"term": "Mucinoses"
+},
+{
+"id": "D003240",
+"term": "Connective Tissue Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07450183",
+"brief_title": "Perioperative Cemiplimab for Resectable Non-Small Cell Lung Cancer With High PD-L1",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Cemiplimab",
+"Stage II lung cancer",
+"Stage IIIA lung cancer"
+],
+"conditions": [
+"Lung Cancer (NSCLC)"
+],
+"condition_meshes": [
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+},
+{
+"id": "D002289",
+"term": "Carcinoma, Non-Small-Cell Lung"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D002283",
+"term": "Carcinoma, Bronchogenic"
+},
+{
+"id": "D001984",
+"term": "Bronchial Neoplasms"
+}
+]
+},
+{
+"nct_id": "NCT06379789",
+"brief_title": "A Study to Investigate the Safety and Effectiveness of a Coagulation Factor IX Gene Insertion Therapy (REGV131-LNP1265) in Pediatric, Adolescent and Adult Participants With Hemophilia B",
+"sex": "MALE",
+"minimum_age_years": 2,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Severe and moderately severe congenital hemophilia B",
+"FIX functional activity"
+],
+"conditions": [
+"Hemophilia B"
+],
+"condition_meshes": [
+{
+"id": "D002836",
+"term": "Hemophilia B"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D025861",
+"term": "Blood Coagulation Disorders, Inherited"
+},
+{
+"id": "D001778",
+"term": "Blood Coagulation Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D020147",
+"term": "Coagulation Protein Disorders"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+},
+{
+"id": "D040181",
+"term": "Genetic Diseases, X-Linked"
+}
+]
+},
+{
+"nct_id": "NCT06376526",
+"brief_title": "IMMUNOPLANT for Newly Diagnosed Multiple Myeloma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Multiple Myeloma"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06651593",
+"brief_title": "Phase II Biomarker Study of BND-22 in Combination With Cemiplimab in Solid Tumors",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Solid Tumors"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT05105152",
+"brief_title": "PLAT-08: A Study Of SC-DARIC33 CAR T Cells In Pediatric And Young Adults With Relapsed Or Refractory CD33+ AML",
+"sex": "ALL",
+"minimum_age_years": null,
+"maximum_age_years": 30,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Acute Myeloid Leukemia",
+"Acute Myeloid Leukemia Refractory",
+"Acute Myeloid Leukemia, in Relapse"
+],
+"condition_meshes": [
+{
+"id": "D015470",
+"term": "Leukemia, Myeloid, Acute"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D007951",
+"term": "Leukemia, Myeloid"
+},
+{
+"id": "D007938",
+"term": "Leukemia"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05125016",
+"brief_title": "A Trial to Find Out if REGN4336 is Safe and How Well it Works Alone and in Combination With REGN5678 for Adult Participants With Advanced Prostate Cancer",
+"sex": "MALE",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Treatment-experienced metastatic Castration-Resistant Prostate Cancer (mCRPC)"
+],
+"conditions": [
+"Metastatic Castration-resistant Prostate Cancer"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT06541704",
+"brief_title": "A Study Investigating Subcutaneously Administered Pozelimab in Combination With Cemdisiran or Cemdisiran Alone in Adult Participants With Geographic Atrophy",
+"sex": "ALL",
+"minimum_age_years": 50,
+"maximum_age_years": 85,
+"healthy_volunteers": false,
+"keywords": [
+"GA secondary to AMD"
+],
+"conditions": [
+"Age-related Macular Degeneration (AMD)",
+"Geographic Atrophy (GA)"
+],
+"condition_meshes": [
+{
+"id": "D008268",
+"term": "Macular Degeneration"
+},
+{
+"id": "D057092",
+"term": "Geographic Atrophy"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D012162",
+"term": "Retinal Degeneration"
+},
+{
+"id": "D012164",
+"term": "Retinal Diseases"
+},
+{
+"id": "D005128",
+"term": "Eye Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07830329",
+"brief_title": "Efficacy and Safety of Olatorepatide Versus Placebo in Adults With Moderate to Severe Hidradenitis Suppurativa Living With Overweight or Obesity",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Acne inversa",
+"Skin problems",
+"Inflammatory skin lesions",
+"Painful nodules and abscesses",
+"HS inflammatory nodules",
+"Abscesses",
+"Overweight or obesity",
+"Weight loss"
+],
+"conditions": [
+"Hidradenitis Suppurativa"
+],
+"condition_meshes": [
+{
+"id": "D017497",
+"term": "Hidradenitis Suppurativa"
+},
+{
+"id": "D000038",
+"term": "Abscess"
+},
+{
+"id": "D050177",
+"term": "Overweight"
+},
+{
+"id": "D009765",
+"term": "Obesity"
+},
+{
+"id": "D015431",
+"term": "Weight Loss"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D017192",
+"term": "Skin Diseases, Bacterial"
+},
+{
+"id": "D001424",
+"term": "Bacterial Infections"
+},
+{
+"id": "D001423",
+"term": "Bacterial Infections and Mycoses"
+},
+{
+"id": "D007239",
+"term": "Infections"
+},
+{
+"id": "D012874",
+"term": "Skin Diseases, Infectious"
+},
+{
+"id": "D013492",
+"term": "Suppuration"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D016575",
+"term": "Hidradenitis"
+},
+{
+"id": "D013543",
+"term": "Sweat Gland Diseases"
+},
+{
+"id": "D007249",
+"term": "Inflammation"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D044343",
+"term": "Overnutrition"
+},
+{
+"id": "D009748",
+"term": "Nutrition Disorders"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D001835",
+"term": "Body Weight"
+},
+{
+"id": "D012816",
+"term": "Signs and Symptoms"
+},
+{
+"id": "D001836",
+"term": "Body Weight Changes"
+}
+]
+},
+{
+"nct_id": "NCT07187401",
+"brief_title": "A First-in-Human Safety and Efficacy Study of ALN-CFB, a Small Interfering RNA (siRNA) Targeting Complement Factor B, in Adult Participants With Paroxysmal Nocturnal Hemoglobinuria With Persistent Anemia on a C5 Inhibitor",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"C5 inhibitor",
+"Complement Factor B (CFB) protein",
+"Red Blood Cells"
+],
+"conditions": [
+"Paroxysmal Nocturnal Hemoglobinuria (PNH)",
+"Persistent Anemia"
+],
+"condition_meshes": [
+{
+"id": "D006457",
+"term": "Hemoglobinuria, Paroxysmal"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D000743",
+"term": "Anemia, Hemolytic"
+},
+{
+"id": "D000740",
+"term": "Anemia"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D009190",
+"term": "Myelodysplastic Syndromes"
+},
+{
+"id": "D001855",
+"term": "Bone Marrow Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06351592",
+"brief_title": "First in Human (FIH) Study of ALN-SOD in Adult Participants With Amyotrophic Lateral Sclerosis Associated With Mutation in the SOD1 Gene (SOD1-ALS)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Symptomatic",
+"Known pathogenic mutation",
+"Predicted pathogenic mutation"
+],
+"conditions": [
+"Amyotrophic Lateral Sclerosis (ALS)",
+"Mutation in the Superoxide Dismutase-1 (SOD1) Gene"
+],
+"condition_meshes": [
+{
+"id": "D000690",
+"term": "Amyotrophic Lateral Sclerosis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D013118",
+"term": "Spinal Cord Diseases"
+},
+{
+"id": "D002493",
+"term": "Central Nervous System Diseases"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+},
+{
+"id": "D016472",
+"term": "Motor Neuron Disease"
+},
+{
+"id": "D019636",
+"term": "Neurodegenerative Diseases"
+},
+{
+"id": "D057177",
+"term": "TDP-43 Proteinopathies"
+},
+{
+"id": "D009468",
+"term": "Neuromuscular Diseases"
+},
+{
+"id": "D057165",
+"term": "Proteostasis Deficiencies"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06205836",
+"brief_title": "Cemiplimab With or Without Fianlimab to Treat Older Patients With Localized or Locally Advanced MSI-H Colorectal Cancer",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Colorectal Cancer",
+"Cemiplimab",
+"Fianlimab",
+"Immunotherapy",
+"Anti-PD-1 therapy",
+"Anti-Lag-3",
+"Adenocarcinoma",
+"Carcinoma"
+],
+"conditions": [
+"Colorectal Cancer"
+],
+"condition_meshes": [
+{
+"id": "D015179",
+"term": "Colorectal Neoplasms"
+},
+{
+"id": "D000230",
+"term": "Adenocarcinoma"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D007414",
+"term": "Intestinal Neoplasms"
+},
+{
+"id": "D005770",
+"term": "Gastrointestinal Neoplasms"
+},
+{
+"id": "D004067",
+"term": "Digestive System Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D005767",
+"term": "Gastrointestinal Diseases"
+},
+{
+"id": "D003108",
+"term": "Colonic Diseases"
+},
+{
+"id": "D007410",
+"term": "Intestinal Diseases"
+},
+{
+"id": "D012002",
+"term": "Rectal Diseases"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+}
+]
+},
+{
+"nct_id": "NCT07594106",
+"brief_title": "REGN15505 (PSMAx4-1BB) Alone or in Combination With Cemiplimab or REGN4336 (PSMAxCD3) in Adult Patients With Metastatic Castration-Resistant Prostate Cancer and Clear Cell Renal Cell Carcinoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Cemiplimab",
+"PSMA",
+"REGN4336",
+"REGN15505",
+"4-1BB"
+],
+"conditions": [
+"Metastatic Castration-Resistant Prostate Cancer (mCRPC)",
+"Clear Cell Renal Cell Carcinoma (ccRCC)"
+],
+"condition_meshes": [
+{
+"id": "D002292",
+"term": "Carcinoma, Renal Cell"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D000230",
+"term": "Adenocarcinoma"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D007680",
+"term": "Kidney Neoplasms"
+},
+{
+"id": "D014571",
+"term": "Urologic Neoplasms"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D007674",
+"term": "Kidney Diseases"
+},
+{
+"id": "D014570",
+"term": "Urologic Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07222761",
+"brief_title": "A Study to Compare Linvoseltamab Monotherapy and Linvoseltamab + Carfilzomib Combination Therapy With Standard-of-Care Combination Regimens in Adult Participants With Relapsed/Refractory Multiple Myeloma (RRMM)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"BCMA X CD3 Bispecific Monoclonal Antibody",
+"Bispecific combination therapy",
+"Linvoseltamab",
+"Carfilzomib",
+"Proteasome inhibitor"
+],
+"conditions": [
+"Relapsed and/or Refractory Multiple Myeloma (RRMM)"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT06091254",
+"brief_title": "A Trial to Learn if Odronextamab is Safe and Well-Tolerated and How Well it Works Compared to Rituximab Combined With Different Types of Chemotherapy for Adult Participants With Previously Untreated Follicular Lymphoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Non-Hodgkin lymphomas (NHLs)",
+"Indolent NHL",
+"B-cells NHL (B-NHL)",
+"Follicular lymphoma",
+"Odronextamab"
+],
+"conditions": [
+"Follicular Lymphoma (FL)"
+],
+"condition_meshes": [
+{
+"id": "D008224",
+"term": "Lymphoma, Follicular"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008228",
+"term": "Lymphoma, Non-Hodgkin"
+},
+{
+"id": "D008223",
+"term": "Lymphoma"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D008206",
+"term": "Lymphatic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06616584",
+"brief_title": "Adding the Immunotherapy Drug Cemiplimab to Usual Treatment for People With Advanced Non-Small Cell Lung Cancer Who Had Previous Treatment With Platinum Chemotherapy and Immunotherapy (An Expanded Lung-MAP Treatment Trial)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Recurrent Lung Non-Small Cell Carcinoma",
+"Stage IV Lung Cancer AJCC v8"
+],
+"condition_meshes": [
+{
+"id": "D002289",
+"term": "Carcinoma, Non-Small-Cell Lung"
+},
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002283",
+"term": "Carcinoma, Bronchogenic"
+},
+{
+"id": "D001984",
+"term": "Bronchial Neoplasms"
+},
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06769698",
+"brief_title": "A Study to See if Giving Fianlimab and Cemiplimab Together is Better Than Cemiplimab Alone at Treating Recurrent or Metastatic Head and Neck Squamous Cell Carcinoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Recurrent or Metastatic (R/M)",
+"Positive for Programmed Death Ligand 1 (PD-L1) Expression",
+"Human Papillomavirus (HPV)"
+],
+"conditions": [
+"Head and Neck Squamous Cell Carcinoma (HNSCC)"
+],
+"condition_meshes": [
+{
+"id": "D000077195",
+"term": "Squamous Cell Carcinoma of Head and Neck"
+},
+{
+"id": "D012008",
+"term": "Recurrence"
+},
+{
+"id": "D009362",
+"term": "Neoplasm Metastasis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002294",
+"term": "Carcinoma, Squamous Cell"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D006258",
+"term": "Head and Neck Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D009385",
+"term": "Neoplastic Processes"
+}
+]
+},
+{
+"nct_id": "NCT05648214",
+"brief_title": "A Trial to Learn if ALN-PNP is Safe and Well Tolerated in Healthy Adults and Adult Participants With Metabolic Dysfunction-Associated Steatotic Liver Disease (MASLD)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 75,
+"healthy_volunteers": true,
+"keywords": [
+"Liver steatosis",
+"Fibrosis",
+"Hepatocytes",
+"Non-Alcoholic Steatohepatitis (NASH)",
+"Non-Alcoholic Fatty Liver Disease (NAFLD)",
+"Metabolic dysfunction-Associated Steatohepatitis (MASH)"
+],
+"conditions": [
+"Healthy Volunteers",
+"Metabolic Dysfunction-Associated Steatotic Liver Disease (MASLD)"
+],
+"condition_meshes": [
+{
+"id": "D005234",
+"term": "Fatty Liver"
+},
+{
+"id": "D005355",
+"term": "Fibrosis"
+},
+{
+"id": "D065626",
+"term": "Non-alcoholic Fatty Liver Disease"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008107",
+"term": "Liver Diseases"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07175428",
+"brief_title": "Safety in Adult Participants With Atrial Fibrillation Who Are Treated With Anticoagulation",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Bleeding",
+"Stroke",
+"Systemic embolism",
+"Blood clots"
+],
+"conditions": [
+"Atrial Fibrillation (AF)"
+],
+"condition_meshes": [
+{
+"id": "D001281",
+"term": "Atrial Fibrillation"
+},
+{
+"id": "D006470",
+"term": "Hemorrhage"
+},
+{
+"id": "D020521",
+"term": "Stroke"
+},
+{
+"id": "D013927",
+"term": "Thrombosis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D001145",
+"term": "Arrhythmias, Cardiac"
+},
+{
+"id": "D006331",
+"term": "Heart Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D002561",
+"term": "Cerebrovascular Disorders"
+},
+{
+"id": "D001927",
+"term": "Brain Diseases"
+},
+{
+"id": "D002493",
+"term": "Central Nervous System Diseases"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D016769",
+"term": "Embolism and Thrombosis"
+}
+]
+},
+{
+"nct_id": "NCT06865339",
+"brief_title": "Thoracic Radiotherapy and Inhibition of PD-1 and LAG-3 for Locally Advanced Non-Small Cell Lung Cancer",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Human Immunoglobulin G (IgG) anti-PD-1 monoclonal antibody",
+"Human IgG anti-lymphocyte activation gene",
+"Tumor Proportion Score"
+],
+"conditions": [
+"NSCLC",
+"Locally Advanced"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT05285839",
+"brief_title": "Dupixent and Narrowband UVB for Atopic Dermatitis",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Atopic Dermatitis"
+],
+"condition_meshes": [
+{
+"id": "D003876",
+"term": "Dermatitis, Atopic"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D012873",
+"term": "Skin Diseases, Genetic"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+},
+{
+"id": "D003872",
+"term": "Dermatitis"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D017443",
+"term": "Skin Diseases, Eczematous"
+},
+{
+"id": "D006969",
+"term": "Hypersensitivity, Immediate"
+},
+{
+"id": "D006967",
+"term": "Hypersensitivity"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07620548",
+"brief_title": "Laser Interstitial Thermal Therapy (LiTT) With Cemiplimab or Other Chemotherapy in Recurrent Glioblastomas",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"GBM",
+"Recurrent",
+"IDH-wt",
+"IDH-wildtype",
+"Glioblastoma",
+"Immunotherapy",
+"LiTT"
+],
+"conditions": [
+"Glioblastoma",
+"Glioblastoma, IDH-wildtype",
+"Glioblastoma IDH (Isocitrate Dehydrogenase) Wildtype"
+],
+"condition_meshes": [
+{
+"id": "D005909",
+"term": "Glioblastoma"
+},
+{
+"id": "D012008",
+"term": "Recurrence"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D001254",
+"term": "Astrocytoma"
+},
+{
+"id": "D005910",
+"term": "Glioma"
+},
+{
+"id": "D018302",
+"term": "Neoplasms, Neuroepithelial"
+},
+{
+"id": "D017599",
+"term": "Neuroectodermal Tumors"
+},
+{
+"id": "D009373",
+"term": "Neoplasms, Germ Cell and Embryonal"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009380",
+"term": "Neoplasms, Nerve Tissue"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07675824",
+"brief_title": "REGN22530 for Adults With Primary Open Angle Glaucoma or Ocular Hypertension",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Intraocular Pressure (IOP)",
+"First in Human (FIH)",
+"Open Angle Glaucoma (OAG)"
+],
+"conditions": [
+"Primary Open Angle Glaucoma (POAG)",
+"Ocular Hypertension (OHT)"
+],
+"condition_meshes": [
+{
+"id": "D005902",
+"term": "Glaucoma, Open-Angle"
+},
+{
+"id": "D009798",
+"term": "Ocular Hypertension"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D005901",
+"term": "Glaucoma"
+},
+{
+"id": "D005128",
+"term": "Eye Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07433673",
+"brief_title": "Gemcitabine, Cisplatin, Nab-paclitaxel (GAP) and Cemiplimab for Locally Advanced Biliary Tract Cancer (BTC)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"locally advanced, unresectable biliary tract cancer",
+"Colon and Rectal Cancer"
+],
+"conditions": [
+"Colon and Rectal Cancer"
+],
+"condition_meshes": [
+{
+"id": "D012004",
+"term": "Rectal Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D015179",
+"term": "Colorectal Neoplasms"
+},
+{
+"id": "D007414",
+"term": "Intestinal Neoplasms"
+},
+{
+"id": "D005770",
+"term": "Gastrointestinal Neoplasms"
+},
+{
+"id": "D004067",
+"term": "Digestive System Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D005767",
+"term": "Gastrointestinal Diseases"
+},
+{
+"id": "D007410",
+"term": "Intestinal Diseases"
+},
+{
+"id": "D012002",
+"term": "Rectal Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05268107",
+"brief_title": "Ethnic Differences in Mechanisms of Action of Dupilumab",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Asian patients",
+"African American patients",
+"Caucasian patients",
+"Inflammatory responses",
+"Dupixent",
+"Dupilumab"
+],
+"conditions": [
+"Atopic Dermatitis"
+],
+"condition_meshes": [
+{
+"id": "D003876",
+"term": "Dermatitis, Atopic"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D012873",
+"term": "Skin Diseases, Genetic"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+},
+{
+"id": "D003872",
+"term": "Dermatitis"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D017443",
+"term": "Skin Diseases, Eczematous"
+},
+{
+"id": "D006969",
+"term": "Hypersensitivity, Immediate"
+},
+{
+"id": "D006967",
+"term": "Hypersensitivity"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07318597",
+"brief_title": "Study of REGN13335 in Adult Participants With Pulmonary Arterial Hypertension (PAH)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Pulmonary Arterial Hypertension (PAH)",
+"Pulmonary Hypertension (PH)",
+"Elevated Pulmonary Vascular Resistance (PVR)",
+"World Health Organization (WHO) functional class II or III",
+"Platelet-Derived Growth Factor-B (PDGF-B)",
+"REGN13335"
+],
+"conditions": [
+"Pulmonary Arterial Hypertension (PAH)"
+],
+"condition_meshes": [
+{
+"id": "D000081029",
+"term": "Pulmonary Arterial Hypertension"
+},
+{
+"id": "D006976",
+"term": "Hypertension, Pulmonary"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D006973",
+"term": "Hypertension"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07112378",
+"brief_title": "A Study of Dupilumab in Small Children With an Allergic Condition of the Esophagus (Food Pipe): Eosinophilic Esophagitis",
+"sex": "ALL",
+"minimum_age_years": 0.5,
+"maximum_age_years": 6,
+"healthy_volunteers": false,
+"keywords": [
+"Type 2 Inflammatory",
+"Allergic/immune-mediated",
+"Esophageal dysfunction"
+],
+"conditions": [
+"Eosinophilic Esophagitis (EoE)"
+],
+"condition_meshes": [
+{
+"id": "D057765",
+"term": "Eosinophilic Esophagitis"
+},
+{
+"id": "D004935",
+"term": "Esophageal Diseases"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D004941",
+"term": "Esophagitis"
+},
+{
+"id": "D005767",
+"term": "Gastrointestinal Diseases"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D005759",
+"term": "Gastroenteritis"
+},
+{
+"id": "D004802",
+"term": "Eosinophilia"
+},
+{
+"id": "D007960",
+"term": "Leukocyte Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006969",
+"term": "Hypersensitivity, Immediate"
+},
+{
+"id": "D006967",
+"term": "Hypersensitivity"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06623656",
+"brief_title": "Preoperative Radioimmunotherapy Versus Chemoimmunotherapy in NSCLC",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Lung neoplasms",
+"Bronchial Neoplasms",
+"Carcinoma, bronchogenic",
+"Neoplasms"
+],
+"conditions": [
+"Carcinoma, Non-Small-Cell Lung"
+],
+"condition_meshes": [
+{
+"id": "D002289",
+"term": "Carcinoma, Non-Small-Cell Lung"
+},
+{
+"id": "D008175",
+"term": "Lung Neoplasms"
+},
+{
+"id": "D001984",
+"term": "Bronchial Neoplasms"
+},
+{
+"id": "D002283",
+"term": "Carcinoma, Bronchogenic"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D012142",
+"term": "Respiratory Tract Neoplasms"
+},
+{
+"id": "D013899",
+"term": "Thoracic Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D001982",
+"term": "Bronchial Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07759167",
+"brief_title": "Study of 3 Monoclonal Antibodies (REGN9933, REGN7508, and REGN9533) in Adult Participants With End-Stage Kidney Disease on Hemodialysis",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Hemodialysis (HD)",
+"Thrombosis",
+"Bleeding",
+"Blood clots",
+"Chronic Kidney Disease (CKD)"
+],
+"conditions": [
+"End-Stage Kidney Disease (ESKD)"
+],
+"condition_meshes": [
+{
+"id": "D007676",
+"term": "Kidney Failure, Chronic"
+},
+{
+"id": "D013927",
+"term": "Thrombosis"
+},
+{
+"id": "D006470",
+"term": "Hemorrhage"
+},
+{
+"id": "D051436",
+"term": "Renal Insufficiency, Chronic"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D051437",
+"term": "Renal Insufficiency"
+},
+{
+"id": "D007674",
+"term": "Kidney Diseases"
+},
+{
+"id": "D014570",
+"term": "Urologic Diseases"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D052801",
+"term": "Male Urogenital Diseases"
+},
+{
+"id": "D002908",
+"term": "Chronic Disease"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D016769",
+"term": "Embolism and Thrombosis"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06091865",
+"brief_title": "A Study to Compare How Well Odronextamab Combined With Chemotherapy Works and How Safe it is Against Rituximab Combined With Chemotherapy, in Adult Patients With Previously Untreated Diffuse Large B-cell Lymphoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Non-Hodgkin Lymphomas (NHL)",
+"B-cell Non-Hodgkin Lymphomas (B-NHL)",
+"Diffuse Large B-cell Lymphoma",
+"Odronextamab",
+"Anti-CD20 \u00d7 anti-CD3 bispecific antibody"
+],
+"conditions": [
+"Diffuse Large B-cell Lymphoma (DLBCL)"
+],
+"condition_meshes": [
+{
+"id": "D016403",
+"term": "Lymphoma, Large B-Cell, Diffuse"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D016393",
+"term": "Lymphoma, B-Cell"
+},
+{
+"id": "D008228",
+"term": "Lymphoma, Non-Hodgkin"
+},
+{
+"id": "D008223",
+"term": "Lymphoma"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D008206",
+"term": "Lymphatic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06469281",
+"brief_title": "A Study to Learn if 27T51, a Mucin-16 (MUC16) Protein Targeting Immune Cell Therapy, Administered Alone or in Combination is Safe and How Well it Works for Adult Participants With Recurrent or Treatment Resistant Ovarian Cancers",
+"sex": "FEMALE",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Ovarian Cancer",
+"CAR T",
+"Peritoneal",
+"Fallopian Tube",
+"MUC16",
+"Immunotherapy"
+],
+"conditions": [
+"Epithelial Ovarian Cancer",
+"Primary Peritoneal Carcinoma",
+"Fallopian Tube Cancer"
+],
+"condition_meshes": [
+{
+"id": "D000077216",
+"term": "Carcinoma, Ovarian Epithelial"
+},
+{
+"id": "D005185",
+"term": "Fallopian Tube Neoplasms"
+},
+{
+"id": "D010051",
+"term": "Ovarian Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D004701",
+"term": "Endocrine Gland Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D010049",
+"term": "Ovarian Diseases"
+},
+{
+"id": "D000291",
+"term": "Adnexal Diseases"
+},
+{
+"id": "D005831",
+"term": "Genital Diseases, Female"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D005833",
+"term": "Genital Neoplasms, Female"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D000091662",
+"term": "Genital Diseases"
+},
+{
+"id": "D004700",
+"term": "Endocrine System Diseases"
+},
+{
+"id": "D006058",
+"term": "Gonadal Disorders"
+},
+{
+"id": "D005184",
+"term": "Fallopian Tube Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05137054",
+"brief_title": "A Study to Examine the Effects of Novel Therapy Linvoseltamab in Combination With Other Cancer Treatments for Adult Participants With Multiple Myeloma That is Resistant to Current Standard of Care Treatments",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Relapsed/Refractory Multiple Myeloma (RRMM)",
+"B-cell maturation antigen (BCMA)",
+"Anti-CD3 monoclonal antibodies (mAbs)"
+],
+"conditions": [
+"Multiple Myeloma"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06128629",
+"brief_title": "MAGNITUDE: A Phase 3 Study of NTLA-2001 in Participants With Transthyretin Amyloidosis With Cardiomyopathy (ATTR-CM)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 90,
+"healthy_volunteers": false,
+"keywords": [
+"TTR",
+"Amyloidosis",
+"Cardiomyopathy",
+"NTLA-2001",
+"ATTR-CM",
+"Transthyretin",
+"ATTR",
+"TTR-mediated amyloidosis",
+"Amyloidosis, Hereditary",
+"Amyloidosis, Hereditary, Transthyretin-Related Amyloidosis",
+"Transthyretin amyloid cardiomyopathy",
+"TTR cardiomyopathy",
+"Wild-type TTR",
+"V122I",
+"Amyloidosis, Wild Type",
+"CRISPR/Cas9"
+],
+"conditions": [
+"Transthyretin Amyloidosis (ATTR) With Cardiomyopathy"
+],
+"condition_meshes": [
+{
+"id": "C567782",
+"term": "Amyloidosis, Hereditary, Transthyretin-Related"
+},
+{
+"id": "D000686",
+"term": "Amyloidosis"
+},
+{
+"id": "D009202",
+"term": "Cardiomyopathies"
+},
+{
+"id": "D028226",
+"term": "Amyloidosis, Familial"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D057165",
+"term": "Proteostasis Deficiencies"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D006331",
+"term": "Heart Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D008661",
+"term": "Metabolism, Inborn Errors"
+},
+{
+"id": "D030342",
+"term": "Genetic Diseases, Inborn"
+},
+{
+"id": "D009358",
+"term": "Congenital, Hereditary, and Neonatal Diseases and Abnormalities"
+}
+]
+},
+{
+"nct_id": "NCT07650266",
+"brief_title": "A Study of Cemiplimab and Fianlimab in People With Nasopharyngeal Carcinoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Nasopharyngeal Carcinoma",
+"Nasopharyngeal Cancer",
+"Nasopharynx Carcinoma",
+"Nasopharynx Cancer",
+"Locoregionally Advanced Non-Metastatic Nasopharyngeal Carcinoma",
+"Memorial Sloan Kettering Cancer Center",
+"26-172"
+],
+"conditions": [
+"Nasopharyngeal Carcinoma",
+"Nasopharyngeal Cancer",
+"Nasopharynx Carcinoma",
+"Nasopharynx Cancer"
+],
+"condition_meshes": [
+{
+"id": "D000077274",
+"term": "Nasopharyngeal Carcinoma"
+},
+{
+"id": "D009303",
+"term": "Nasopharyngeal Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D010610",
+"term": "Pharyngeal Neoplasms"
+},
+{
+"id": "D010039",
+"term": "Otorhinolaryngologic Neoplasms"
+},
+{
+"id": "D006258",
+"term": "Head and Neck Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009302",
+"term": "Nasopharyngeal Diseases"
+},
+{
+"id": "D010608",
+"term": "Pharyngeal Diseases"
+},
+{
+"id": "D009057",
+"term": "Stomatognathic Diseases"
+},
+{
+"id": "D010038",
+"term": "Otorhinolaryngologic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07318610",
+"brief_title": "Reducing Adverse Vascular Outcomes With Factor XI Inhibition in Adult Participants With Peripheral Artery Disease",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Blood clots",
+"Lower Extremity Revascularization (LER)"
+],
+"conditions": [
+"Peripheral Artery Disease (PAD)"
+],
+"condition_meshes": [
+{
+"id": "D058729",
+"term": "Peripheral Arterial Disease"
+},
+{
+"id": "D013927",
+"term": "Thrombosis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D050197",
+"term": "Atherosclerosis"
+},
+{
+"id": "D001161",
+"term": "Arteriosclerosis"
+},
+{
+"id": "D001157",
+"term": "Arterial Occlusive Diseases"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D016491",
+"term": "Peripheral Vascular Diseases"
+},
+{
+"id": "D016769",
+"term": "Embolism and Thrombosis"
+}
+]
+},
+{
+"nct_id": "NCT03761108",
+"brief_title": "Phase 1/2 Study of Linvoseltamab in Adult Patients With Relapsed or Refractory Multiple Myeloma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Relapsed, Refractory"
+],
+"conditions": [
+"Multiple Myeloma"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+},
+{
+"id": "D012008",
+"term": "Recurrence"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT06149286",
+"brief_title": "A Trial to Find Out if Odronextamab Combined With Lenalidomide is Safe and Works Better Than Rituximab Combined With Lenalidomide in Adult Participants With Follicular Lymphoma and Marginal Zone Lymphoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Relapsed/Refractory Follicular Lymphoma",
+"Relapsed/Refractory Marginal Zone Lymphoma",
+"Non-Hodgkin lymphomas",
+"Indolent lymphomas",
+"Odronextamab"
+],
+"conditions": [
+"Relapsed/Refractory Follicular Lymphoma",
+"Relapsed/Refractory Marginal Zone Lymphoma (R/R MZL)"
+],
+"condition_meshes": [
+{
+"id": "D008224",
+"term": "Lymphoma, Follicular"
+},
+{
+"id": "D012008",
+"term": "Recurrence"
+},
+{
+"id": "D018442",
+"term": "Lymphoma, B-Cell, Marginal Zone"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008228",
+"term": "Lymphoma, Non-Hodgkin"
+},
+{
+"id": "D008223",
+"term": "Lymphoma"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D008206",
+"term": "Lymphatic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D016393",
+"term": "Lymphoma, B-Cell"
+}
+]
+},
+{
+"nct_id": "NCT02991469",
+"brief_title": "A Repeated Dose-finding Study of Sarilumab in Children and Adolescents With Systemic Juvenile Idiopathic Arthritis (SKYPS)",
+"sex": "ALL",
+"minimum_age_years": 1,
+"maximum_age_years": 17,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Juvenile Idiopathic Arthritis"
+],
+"condition_meshes": [
+{
+"id": "D001171",
+"term": "Arthritis, Juvenile"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D001168",
+"term": "Arthritis"
+},
+{
+"id": "D007592",
+"term": "Joint Diseases"
+},
+{
+"id": "D009140",
+"term": "Musculoskeletal Diseases"
+},
+{
+"id": "D012216",
+"term": "Rheumatic Diseases"
+},
+{
+"id": "D003240",
+"term": "Connective Tissue Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D001327",
+"term": "Autoimmune Diseases"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05259709",
+"brief_title": "A Study of ImmunoPet Imaging Using 89Zr-DFO-REGN5054 in Adult Participants With Solid Cancers Treated With Cemiplimab",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Positron Emission Tomography (PET) scan",
+"Immuno-PET"
+],
+"conditions": [
+"Advanced Solid Tumor",
+"Metastatic Solid Tumor"
+],
+"condition_meshes": [
+{
+"id": "D009362",
+"term": "Neoplasm Metastasis"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009385",
+"term": "Neoplastic Processes"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT05788536",
+"brief_title": "A Study of DB-OTO, an Adeno-Associated Virus (AAV) Based Gene Therapy, in Children/Infants, Adolescents and Adults With Hearing Loss Due to Otoferlin Mutations",
+"sex": "ALL",
+"minimum_age_years": null,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"DB-OTO",
+"Gene Therapy",
+"Congenital Hearing Loss",
+"Sensorineural Hearing Loss",
+"Auditory Neuropathy",
+"Pediatric",
+"Cochlear Implant",
+"Otoferlin",
+"Deaf",
+"Hard of hearing",
+"Hearing impaired",
+"Hearing disorder",
+"Fully implantable hearing aid",
+"Child",
+"Infant",
+"Adolescents",
+"Young Adults",
+"Adults",
+"CHORD"
+],
+"conditions": [
+"Congenital Hearing Loss Secondary to Biallelic Mutations of the Otoferlin Gene (OTOF)"
+],
+"condition_meshes": [
+{
+"id": "D006319",
+"term": "Hearing Loss, Sensorineural"
+},
+{
+"id": "C538268",
+"term": "Auditory neuropathy"
+},
+{
+"id": "C563396",
+"term": "Deafness, Autosomal Recessive 9"
+},
+{
+"id": "D034381",
+"term": "Hearing Loss"
+},
+{
+"id": "D006311",
+"term": "Hearing Disorders"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D004427",
+"term": "Ear Diseases"
+},
+{
+"id": "D010038",
+"term": "Otorhinolaryngologic Diseases"
+},
+{
+"id": "D012678",
+"term": "Sensation Disorders"
+},
+{
+"id": "D009461",
+"term": "Neurologic Manifestations"
+},
+{
+"id": "D009422",
+"term": "Nervous System Diseases"
+},
+{
+"id": "D012816",
+"term": "Signs and Symptoms"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07594093",
+"brief_title": "Safety and Drug Concentrations of REGN20934 in Adults With Overweight or Obesity",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 65,
+"healthy_volunteers": true,
+"keywords": [
+"Overweight",
+"Obesity or without diabetes"
+],
+"conditions": [
+"Overweight or Obesity"
+],
+"condition_meshes": [
+{
+"id": "D050177",
+"term": "Overweight"
+},
+{
+"id": "D009765",
+"term": "Obesity"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D044343",
+"term": "Overnutrition"
+},
+{
+"id": "D009748",
+"term": "Nutrition Disorders"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+},
+{
+"id": "D001835",
+"term": "Body Weight"
+},
+{
+"id": "D012816",
+"term": "Signs and Symptoms"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT07213778",
+"brief_title": "REGN7508 Versus Acetylsalicylic Acid (ASA) for Venous Thromboprophylaxis After Total Knee Arthroplasty in Adult Participants",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Total Knee Arthroplasty (TKA)",
+"Elective Unilateral TKA",
+"Deep Vein Thrombosis (DVT)",
+"Pulmonary Embolism (PE)"
+],
+"conditions": [
+"Symptomatic Venous Thromboembolism (VTE)"
+],
+"condition_meshes": [
+{
+"id": "D020246",
+"term": "Venous Thrombosis"
+},
+{
+"id": "D011655",
+"term": "Pulmonary Embolism"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D013927",
+"term": "Thrombosis"
+},
+{
+"id": "D016769",
+"term": "Embolism and Thrombosis"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D008171",
+"term": "Lung Diseases"
+},
+{
+"id": "D012140",
+"term": "Respiratory Tract Diseases"
+},
+{
+"id": "D004617",
+"term": "Embolism"
+}
+]
+},
+{
+"nct_id": "NCT06292780",
+"brief_title": "A Trial to Learn if Linvoseltamab is Safe and Works in Adults With Relapsed or Refractory Systemic Light Chain Amyloidosis (AL Amyloidosis)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Amyloid light-chain (AL)",
+"Multiple Myeloma (MM)",
+"Pathogenic light chains"
+],
+"conditions": [
+"Relapsed/Refractory Systemic Light Chain Amyloidosis"
+],
+"condition_meshes": [
+{
+"id": "D012008",
+"term": "Recurrence"
+},
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+},
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT05991388",
+"brief_title": "A Global Study of Novel Agents in Paediatric and Adolescent Relapsed and Refractory B-cell Non-Hodgkin Lymphoma",
+"sex": "ALL",
+"minimum_age_years": null,
+"maximum_age_years": 25,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"B-cell Non Hodgkin Lymphoma"
+],
+"condition_meshes": [
+{
+"id": "D016393",
+"term": "Lymphoma, B-Cell"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008228",
+"term": "Lymphoma, Non-Hodgkin"
+},
+{
+"id": "D008223",
+"term": "Lymphoma"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D008206",
+"term": "Lymphatic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06787612",
+"brief_title": "Investigation of Ubamatamab Combination Therapy in Adult Participants With Platinum-Resistant Ovarian Cancer",
+"sex": "FEMALE",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Platinum Resistance"
+],
+"conditions": [
+"Ovarian Cancer",
+"Fallopian Tube Cancer",
+"Primary Peritoneal Cancer"
+],
+"condition_meshes": [
+{
+"id": "D010051",
+"term": "Ovarian Neoplasms"
+},
+{
+"id": "D005185",
+"term": "Fallopian Tube Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D004701",
+"term": "Endocrine Gland Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D010049",
+"term": "Ovarian Diseases"
+},
+{
+"id": "D000291",
+"term": "Adnexal Diseases"
+},
+{
+"id": "D005831",
+"term": "Genital Diseases, Female"
+},
+{
+"id": "D052776",
+"term": "Female Urogenital Diseases"
+},
+{
+"id": "D005261",
+"term": "Female Urogenital Diseases and Pregnancy Complications"
+},
+{
+"id": "D000091642",
+"term": "Urogenital Diseases"
+},
+{
+"id": "D005833",
+"term": "Genital Neoplasms, Female"
+},
+{
+"id": "D014565",
+"term": "Urogenital Neoplasms"
+},
+{
+"id": "D000091662",
+"term": "Genital Diseases"
+},
+{
+"id": "D004700",
+"term": "Endocrine System Diseases"
+},
+{
+"id": "D006058",
+"term": "Gonadal Disorders"
+},
+{
+"id": "D005184",
+"term": "Fallopian Tube Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06121180",
+"brief_title": "Study of Cemiplimab Plus Ziv-Aflibercept for Subjects With Metastatic Uveal Melanoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Metastatic Uveal Melanoma"
+],
+"condition_meshes": [
+{
+"id": "D000098943",
+"term": "Uveal Melanoma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D008545",
+"term": "Melanoma"
+},
+{
+"id": "D018358",
+"term": "Neuroendocrine Tumors"
+},
+{
+"id": "D017599",
+"term": "Neuroectodermal Tumors"
+},
+{
+"id": "D009373",
+"term": "Neoplasms, Germ Cell and Embryonal"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D009380",
+"term": "Neoplasms, Nerve Tissue"
+},
+{
+"id": "D018326",
+"term": "Nevi and Melanomas"
+},
+{
+"id": "D014604",
+"term": "Uveal Neoplasms"
+},
+{
+"id": "D005134",
+"term": "Eye Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D005128",
+"term": "Eye Diseases"
+},
+{
+"id": "D014603",
+"term": "Uveal Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07224022",
+"brief_title": "Cemiplimab With Fianlimab for Resectable Non-Metastatic Colon Cancer",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Previously untreated",
+"pMMR",
+"MSS",
+"Neoadjuvant",
+"Resectable",
+"Non-metastatic",
+"previously untreated T4N0 or stage III pMMR/MSS colon cancer"
+],
+"conditions": [
+"Colon Cancer"
+],
+"condition_meshes": [
+{
+"id": "D003110",
+"term": "Colonic Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D015179",
+"term": "Colorectal Neoplasms"
+},
+{
+"id": "D007414",
+"term": "Intestinal Neoplasms"
+},
+{
+"id": "D005770",
+"term": "Gastrointestinal Neoplasms"
+},
+{
+"id": "D004067",
+"term": "Digestive System Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D005767",
+"term": "Gastrointestinal Diseases"
+},
+{
+"id": "D003108",
+"term": "Colonic Diseases"
+},
+{
+"id": "D007410",
+"term": "Intestinal Diseases"
+}
+]
+},
+{
+"nct_id": "NCT06910124",
+"brief_title": "Linvoseltamab in Addition to Lenalidomide (L2) During Maintenance Therapy of NDMM to Deepen Responses or Redrive MRD Negativity After Relapse",
+"sex": "ALL",
+"minimum_age_years": null,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Newly Diagnosed Multiple Myeloma"
+],
+"conditions": [
+"Multiple Myeloma"
+],
+"condition_meshes": [
+{
+"id": "D009101",
+"term": "Multiple Myeloma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D054219",
+"term": "Neoplasms, Plasma Cell"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D020141",
+"term": "Hemostatic Disorders"
+},
+{
+"id": "D014652",
+"term": "Vascular Diseases"
+},
+{
+"id": "D002318",
+"term": "Cardiovascular Diseases"
+},
+{
+"id": "D010265",
+"term": "Paraproteinemias"
+},
+{
+"id": "D001796",
+"term": "Blood Protein Disorders"
+},
+{
+"id": "D006402",
+"term": "Hematologic Diseases"
+},
+{
+"id": "D006425",
+"term": "Hemic and Lymphatic Diseases"
+},
+{
+"id": "D006474",
+"term": "Hemorrhagic Disorders"
+},
+{
+"id": "D008232",
+"term": "Lymphoproliferative Disorders"
+},
+{
+"id": "D007160",
+"term": "Immunoproliferative Disorders"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07704580",
+"brief_title": "Phase 1b/2 Study of IV Sarilumab in Adult With RA",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Rheumatoid Arthritis"
+],
+"condition_meshes": [
+{
+"id": "D001172",
+"term": "Arthritis, Rheumatoid"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D001168",
+"term": "Arthritis"
+},
+{
+"id": "D007592",
+"term": "Joint Diseases"
+},
+{
+"id": "D009140",
+"term": "Musculoskeletal Diseases"
+},
+{
+"id": "D012216",
+"term": "Rheumatic Diseases"
+},
+{
+"id": "D003240",
+"term": "Connective Tissue Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D001327",
+"term": "Autoimmune Diseases"
+},
+{
+"id": "D007154",
+"term": "Immune System Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07567469",
+"brief_title": "A Safety and Efficacy Study of Combined Fianlimab + Cemiplimab in Children and Young Adults With Recurrent or Progressive High-Grade Glioma or Posterior Fossa-A Ependymoma",
+"sex": "ALL",
+"minimum_age_years": 0,
+"maximum_age_years": 39,
+"healthy_volunteers": false,
+"keywords": [
+"Recurrent",
+"Progressive",
+"Pediatric Central Nervous System (CNS) tumors",
+"Posterior Fossa A (PF-A)",
+"Ependymoma"
+],
+"conditions": [
+"High-Grade Glioma (HGG)",
+"Posterior Fossa-A Ependymoma"
+],
+"condition_meshes": [
+{
+"id": "D005910",
+"term": "Glioma"
+},
+{
+"id": "D012008",
+"term": "Recurrence"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D004806",
+"term": "Ependymoma"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D018302",
+"term": "Neoplasms, Neuroepithelial"
+},
+{
+"id": "D017599",
+"term": "Neuroectodermal Tumors"
+},
+{
+"id": "D009373",
+"term": "Neoplasms, Germ Cell and Embryonal"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009380",
+"term": "Neoplasms, Nerve Tissue"
+},
+{
+"id": "D020969",
+"term": "Disease Attributes"
+},
+{
+"id": "D010335",
+"term": "Pathologic Processes"
+},
+{
+"id": "D013568",
+"term": "Pathological Conditions, Signs and Symptoms"
+}
+]
+},
+{
+"nct_id": "NCT05551793",
+"brief_title": "Regeneron AA Multicenter (Dupilumab)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Alopecia Areata"
+],
+"condition_meshes": [
+{
+"id": "D000506",
+"term": "Alopecia Areata"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D000505",
+"term": "Alopecia"
+},
+{
+"id": "D007039",
+"term": "Hypotrichosis"
+},
+{
+"id": "D006201",
+"term": "Hair Diseases"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07058012",
+"brief_title": "A Phase II Platform Study to Evaluate Treatment With Cemiplimab Monotherapy or Cemiplimab Plus Fianlimab or Other Novel Combinations in Patients With Colorectal Cancer With Minimal Residual Disease Following Definitive Surgery and Chemotherapy (EMPIRE)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [],
+"conditions": [
+"Colo-rectal Cancer"
+],
+"condition_meshes": [
+{
+"id": "D003110",
+"term": "Colonic Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D015179",
+"term": "Colorectal Neoplasms"
+},
+{
+"id": "D007414",
+"term": "Intestinal Neoplasms"
+},
+{
+"id": "D005770",
+"term": "Gastrointestinal Neoplasms"
+},
+{
+"id": "D004067",
+"term": "Digestive System Neoplasms"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D004066",
+"term": "Digestive System Diseases"
+},
+{
+"id": "D005767",
+"term": "Gastrointestinal Diseases"
+},
+{
+"id": "D003108",
+"term": "Colonic Diseases"
+},
+{
+"id": "D007410",
+"term": "Intestinal Diseases"
+}
+]
+},
+{
+"nct_id": "NCT03480568",
+"brief_title": "Alirocumab in Patients on a Stable Dialysis Regimen",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": 80,
+"healthy_volunteers": false,
+"keywords": [
+"Alirocumab"
+],
+"conditions": [
+"Hemodialysis",
+"Peritoneal Dialysis",
+"Hypercholesterolemia",
+"Atherosclerotic Disease"
+],
+"condition_meshes": [
+{
+"id": "D006937",
+"term": "Hypercholesterolemia"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D006949",
+"term": "Hyperlipidemias"
+},
+{
+"id": "D050171",
+"term": "Dyslipidemias"
+},
+{
+"id": "D052439",
+"term": "Lipid Metabolism Disorders"
+},
+{
+"id": "D008659",
+"term": "Metabolic Diseases"
+},
+{
+"id": "D009750",
+"term": "Nutritional and Metabolic Diseases"
+}
+]
+},
+{
+"nct_id": "NCT07808515",
+"brief_title": "A Study Comparing Cemiplimab-based Treatments for Adult Participants With Locally Advanced Basal Cell Skin Cancer (laBCC)",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"BCC",
+"laBCC",
+"Skin Cancer",
+"Non-melanoma skin cancer",
+"Surgically unresectable",
+"Unsuitable for radiotherapy",
+"Inoperable Basal Cell Carcinoma",
+"Recurrent Basal Cell Carcinoma",
+"Cutaneous Basal Cell Carcinoma",
+"Keratinocyte Carcinoma",
+"High-Risk Basal Cell Carcinoma"
+],
+"conditions": [
+"Locally Advanced Basal Cell Carcinoma"
+],
+"condition_meshes": [
+{
+"id": "D012878",
+"term": "Skin Neoplasms"
+},
+{
+"id": "D002280",
+"term": "Carcinoma, Basal Cell"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D018295",
+"term": "Neoplasms, Basal Cell"
+}
+]
+},
+{
+"nct_id": "NCT06594991",
+"brief_title": "A Study of Fianlimab, Cemiplimab, and Ipilimumab in People With Melanoma",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"Fianlimab",
+"Cemiplimab",
+"Ipilimumab",
+"anti-PD-1 refractory melanoma",
+"unresectable Stage III/IV melanoma",
+"24-166"
+],
+"conditions": [
+"Advanced Melanoma"
+],
+"condition_meshes": [],
+"condition_mesh_ancestors": []
+},
+{
+"nct_id": "NCT07387198",
+"brief_title": "Neoadjuvant Merkel Cell Carcinoma Therapy (Tx) With the PD-1 Inhibitor Cemiplimab",
+"sex": "ALL",
+"minimum_age_years": 18,
+"maximum_age_years": null,
+"healthy_volunteers": false,
+"keywords": [
+"merkel cell carcinoma",
+"sentinel lymph node",
+"PD-1 antibody",
+"skin cancer",
+"Cemiplimab",
+"MCC"
+],
+"conditions": [
+"Merkel Cell Carcinoma, Stage I",
+"Merkel Cell Carcinoma, Stage II",
+"Neoadjuvant Immunotherapy"
+],
+"condition_meshes": [
+{
+"id": "D015266",
+"term": "Carcinoma, Merkel Cell"
+},
+{
+"id": "D012878",
+"term": "Skin Neoplasms"
+}
+],
+"condition_mesh_ancestors": [
+{
+"id": "D027601",
+"term": "Polyomavirus Infections"
+},
+{
+"id": "D004266",
+"term": "DNA Virus Infections"
+},
+{
+"id": "D014777",
+"term": "Virus Diseases"
+},
+{
+"id": "D007239",
+"term": "Infections"
+},
+{
+"id": "D014412",
+"term": "Tumor Virus Infections"
+},
+{
+"id": "D018278",
+"term": "Carcinoma, Neuroendocrine"
+},
+{
+"id": "D018358",
+"term": "Neuroendocrine Tumors"
+},
+{
+"id": "D017599",
+"term": "Neuroectodermal Tumors"
+},
+{
+"id": "D009373",
+"term": "Neoplasms, Germ Cell and Embryonal"
+},
+{
+"id": "D009370",
+"term": "Neoplasms by Histologic Type"
+},
+{
+"id": "D009369",
+"term": "Neoplasms"
+},
+{
+"id": "D000230",
+"term": "Adenocarcinoma"
+},
+{
+"id": "D002277",
+"term": "Carcinoma"
+},
+{
+"id": "D009375",
+"term": "Neoplasms, Glandular and Epithelial"
+},
+{
+"id": "D009380",
+"term": "Neoplasms, Nerve Tissue"
+},
+{
+"id": "D009371",
+"term": "Neoplasms by Site"
+},
+{
+"id": "D012871",
+"term": "Skin Diseases"
+},
+{
+"id": "D017437",
+"term": "Skin and Connective Tissue Diseases"
+}
+]
+}
+]
