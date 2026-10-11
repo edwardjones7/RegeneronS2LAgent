@@ -1,0 +1,44 @@
+# PRACTICE OUTREACH. DEMO: NOT IRB-APPROVED. Facts from ClinicalTrials.gov NCT07053423.
+
+id: practice-nct07053423
+mode: practice
+demo_not_irb_approved: true
+nct_id: NCT07053423
+study_url: https://clinicaltrials.gov/study/NCT07053423
+sponsor: Sanofi, with Regeneron Pharmaceuticals
+agent_name: Ava
+visit_length_minutes: 60
+study_short_name: COPD
+one_liner: >-
+  It's a research study looking at whether dupilumab, a medicine already approved for some
+  conditions, reduces airway inflammation and mucus in adults with COPD.
+
+approved_facts:
+  - fact: The study medicine is dupilumab, also known as Dupixent, given as an injection under the skin.
+    source: ctgov
+  - fact: Some participants receive a placebo injection instead. Who gets which is decided by chance.
+    source: ctgov
+  - fact: Neither participants nor the study team know who gets dupilumab or placebo during the study.
+    source: ctgov
+  - fact: The study is for adults aged 40 to 85 with COPD.
+    source: ctgov
+  - fact: The study lasts up to 40 weeks, with up to 24 weeks of treatment and 9 visits.
+    source: ctgov
+  - fact: It is a Phase 4 study of a medicine that is already approved for some conditions.
+    source: ctgov
+  - fact: The study plans to enroll about 218 people in several countries.
+    source: ctgov
+  - fact: The study is run by Sanofi, with Regeneron Pharmaceuticals as a collaborator.
+    source: ctgov
+  - fact: The first step is a screening visit at the doctor's office to check whether the study is a good fit. It's free.
+    source: demo
+  - fact: Taking part is completely voluntary, and they can stop at any time.
+    source: demo
+
+prescreen_questions:
+  - id: smoking_history
+    kind: yes_no
+    role: require_yes
+    unsure_flags: true
+    ask: "Over the years, have you smoked about a pack a day for ten years or more, or about that much overall?"
+    criterion: "Inclusion: smoking history of at least 10 pack-years"

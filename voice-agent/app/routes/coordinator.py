@@ -133,6 +133,19 @@ def visits(campaign_id: str, s: Session = Depends(get_session)):
     rows = s.execute(
         select(Slot, Lead).join(Lead, Lead.id == Slot.booked_lead_id).where(Slot.campaign_id == campaign_id).order_by(Slot.starts_at)
     ).all()
+    return _visit_rows(rows)
+
+
+@router.get("/practices/{practice_id}/visits")
+def practice_visits(practice_id: str, s: Session = Depends(get_session)):
+    """Every booked screening visit at one practice, across its accepted trials."""
+    rows = s.execute(
+        select(Slot, Lead).join(Lead, Lead.id == Slot.booked_lead_id).where(Slot.practice_id == practice_id).order_by(Slot.starts_at)
+    ).all()
+    return _visit_rows(rows)
+
+
+def _visit_rows(rows) -> list[dict]:
     return [
         {"slot_id": sl.id, "starts_at_local": sl.starts_at.isoformat(), "lead_id": l.id, "first_name": l.first_name,
          "last_name": l.last_name, "phone": l.phone, "status": l.status}

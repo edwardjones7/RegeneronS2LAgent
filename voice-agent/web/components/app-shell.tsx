@@ -1,27 +1,19 @@
 "use client"
 
-import { CalendarDays, ClipboardCheck, ExternalLink, FlaskConical, LayoutDashboard, LogOut, Play, Plus } from "lucide-react"
+import { Building2, CalendarDays, ClipboardCheck, FlaskConical, Inbox, LogOut, PhoneOutgoing } from "lucide-react"
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { createContext, useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { BrandLockup } from "@/components/brand"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { AuthError, api, post } from "@/lib/api"
-import type { Campaign, Persona } from "@/lib/types"
+import { AuthError, api } from "@/lib/api"
+import type { Campaign, Practice } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 type Ctx = { campaigns: Campaign[] | null; campaignId: string | null; setCampaignId: (id: string) => void }
@@ -29,11 +21,46 @@ const CampaignContext = createContext<Ctx>({ campaigns: null, campaignId: null, 
 export const useCampaign = () => useContext(CampaignContext)
 
 const NAV = [
-  { href: "/", label: "Overview", icon: LayoutDashboard },
+  { href: "/", label: "Outreach", icon: PhoneOutgoing },
+  { href: "/trials", label: "Trials", icon: FlaskConical },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
+  { href: "/inbox", label: "Inbox", icon: Inbox },
   { href: "/scorecard", label: "Scorecard", icon: ClipboardCheck },
-  { href: "/campaigns/new", label: "New campaign", icon: Plus },
 ]
+
+// ---- Practice: every outreach screen is scoped to one practice.
+
+type PracticeCtx = { practices: Practice[] | null; practiceId: string | null; setPracticeId: (id: string) => void }
+const PracticeContext = createContext<PracticeCtx>({ practices: null, practiceId: null, setPracticeId: () => {} })
+export const usePractice = () => useContext(PracticeContext)
+
+const PRACTICE_KEY = "cmm.practice"
+
+function usePractices(): PracticeCtx {
+  const [practices, setPractices] = useState<Practice[] | null>(null)
+  const [practiceId, setId] = useState<string | null>(null)
+  useEffect(() => {
+    api<Practice[]>("/practices")
+      .then((list) => {
+        setPractices(list)
+        let saved: string | null = null
+        try {
+          saved = localStorage.getItem(PRACTICE_KEY)
+        } catch {}
+        // Default to the biggest practice: the demo's doctor view.
+        const biggest = [...list].sort((a, b) => (b.patients ?? 0) - (a.patients ?? 0))[0]
+        setId(list.find((p) => p.id === saved)?.id ?? biggest?.id ?? null)
+      })
+      .catch((e) => !(e instanceof AuthError) && toast.error("Couldn't load practices"))
+  }, [])
+  const setPracticeId = (id: string) => {
+    setId(id)
+    try {
+      localStorage.setItem(PRACTICE_KEY, id)
+    } catch {}
+  }
+  return { practices, practiceId, setPracticeId }
+}
 
 const STORAGE_KEY = "cmm.campaign"
 
@@ -61,54 +88,19 @@ function useCampaigns(): Ctx {
   return { campaigns, campaignId, setCampaignId }
 }
 
-function DemoMenu() {
-  const router = useRouter()
-  const [personas, setPersonas] = useState<Persona[]>([])
-  const load = () => personas.length === 0 && api<Persona[]>("/simulate/personas").then(setPersonas).catch(() => {})
-  const run = async (p: Persona) => {
-    try {
-      await post(`/simulate/${p.id}`)
-      toast.success(`Scenario started: ${p.label}`, { description: "Ava is talking to a simulated patient. Watch it live." })
-      router.push("/")
-    } catch (e) {
-      toast.error("Couldn't start the scenario", { description: (e as Error).message })
-    }
-  }
-  return (
-    <DropdownMenu onOpenChange={(o) => o && load()}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <Play className="size-3.5" aria-hidden /> <span className="hidden md:inline">Run scenario</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-          Ava talks to a scripted patient (text mode, real agent and tools)
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {personas.length === 0 && <DropdownMenuItem disabled>Loading…</DropdownMenuItem>}
-        {personas.map((p) => (
-          <DropdownMenuItem key={p.id} onSelect={() => run(p)} className="flex-col items-start gap-0.5 py-2">
-            <span className="font-medium">{p.label}</span>
-            <span className="text-xs text-muted-foreground">{p.brief}</span>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
 export function AppShell({ children, actions }: { children: React.ReactNode; actions?: React.ReactNode }) {
   const ctx = useCampaigns()
+  const practice = usePractices()
   const pathname = usePathname()
   return (
     <CampaignContext.Provider value={ctx}>
+     <PracticeContext.Provider value={practice}>
       <MotionConfig reducedMotion="user">
         <LazyMotion features={domAnimation} strict>
           <TooltipProvider delayDuration={150}>
             <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur-md">
               <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-3 px-4 sm:px-6">
-                <BrandLockup suffix="Coordinator" />
+                <BrandLockup suffix="Office" />
                 <nav className="ml-4 hidden items-center gap-1 lg:flex" aria-label="Main">
                   {NAV.map((n) => {
                     const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href)
@@ -129,27 +121,22 @@ export function AppShell({ children, actions }: { children: React.ReactNode; act
                 </nav>
                 <div className="ml-auto flex items-center gap-2">
                   {actions}
-                  {ctx.campaigns && ctx.campaigns.length > 1 && (
-                    <Select value={ctx.campaignId ?? undefined} onValueChange={ctx.setCampaignId}>
-                      <SelectTrigger size="sm" className="hidden w-52 md:flex" aria-label="Campaign">
-                        <FlaskConical className="size-3.5 text-muted-foreground" aria-hidden />
-                        <SelectValue />
+                  {practice.practices && (
+                    <Select value={practice.practiceId ?? undefined} onValueChange={practice.setPracticeId}>
+                      <SelectTrigger size="sm" className="w-44 sm:w-56" aria-label="Practice">
+                        <Building2 className="size-3.5 text-muted-foreground" aria-hidden />
+                        <SelectValue placeholder="Practice" />
                       </SelectTrigger>
                       <SelectContent align="end">
-                        {ctx.campaigns.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.study.charAt(0).toUpperCase() + c.study.slice(1)} · {c.nct_id}
+                        {practice.practices.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.name}
+                            <span className="ml-auto pl-3 text-xs text-muted-foreground tabular">{p.patients ?? "<5"}</span>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   )}
-                  <DemoMenu />
-                  <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-                    <a href="/demo" target="_blank" rel="noopener">
-                      Opt-in form <ExternalLink aria-hidden />
-                    </a>
-                  </Button>
                   <form method="post" action="/auth/logout">
                     <Button type="submit" variant="ghost" size="sm" aria-label="Sign out">
                       <LogOut aria-hidden />
@@ -178,6 +165,7 @@ export function AppShell({ children, actions }: { children: React.ReactNode; act
           </TooltipProvider>
         </LazyMotion>
       </MotionConfig>
+     </PracticeContext.Provider>
     </CampaignContext.Provider>
   )
 }

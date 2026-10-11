@@ -155,7 +155,7 @@ What each patient record has:
 
 Lab criteria are thresholds in the units above. Synthea doesn't record reference ranges, so the "value divided by its upper limit of normal" pattern from the sponsor's Hy's Law example needs the protocol to state the limit.
 
-**Protocol criteria input:** hand-authored JSON in `protocols/`, one file per trial, for four recruiting Regeneron trials. The format and the three-state results are in `protocols/README.md`. No protocol parser.
+**Protocol criteria input:** hand-authored JSON in `protocols/`, one file per trial, for four recruiting trials Regeneron sponsors or collaborates on (only NCT07685808 is Regeneron-led; NCT07309614 runs outside the U.S.). The format and the three-state results are in `protocols/README.md`. No protocol parser.
 
 ---
 

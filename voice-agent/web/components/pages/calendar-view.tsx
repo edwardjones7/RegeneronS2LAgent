@@ -5,7 +5,7 @@ import { m } from "motion/react"
 import dynamic from "next/dynamic"
 import { useState } from "react"
 
-import { useCampaign } from "@/components/app-shell"
+import { usePractice } from "@/components/app-shell"
 import { useSelectedLead } from "@/components/dashboard/dashboard"
 import { container, item } from "@/components/dashboard/motion"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -28,8 +28,8 @@ function startOfWeek(d: Date) {
 const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
 
 export function CalendarView() {
-  const { campaignId } = useCampaign()
-  const visits = usePoll<Visit[]>(campaignId && `/campaigns/${encodeURIComponent(campaignId)}/visits`, 8000).data
+  const { practiceId } = usePractice()
+  const visits = usePoll<Visit[]>(practiceId && `/practices/${encodeURIComponent(practiceId)}/visits`, 8000).data
   const [weekOffset, setWeekOffset] = useState(0)
   const [leadId, selectLead] = useSelectedLead()
 

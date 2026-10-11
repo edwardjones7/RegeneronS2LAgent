@@ -1,0 +1,40 @@
+# PRACTICE OUTREACH. DEMO: NOT IRB-APPROVED. Facts from ClinicalTrials.gov NCT07309614.
+# Note: the public record lists sites in Canada, the UK and Australia only.
+
+id: practice-nct07309614
+mode: practice
+demo_not_irb_approved: true
+nct_id: NCT07309614
+study_url: https://clinicaltrials.gov/study/NCT07309614
+sponsor: Université de Sherbrooke, with Regeneron Pharmaceuticals and Sanofi
+agent_name: Ava
+visit_length_minutes: 60
+study_short_name: asthma
+one_liner: >-
+  It's a research study testing whether starting dupilumab, an asthma medicine, earlier can
+  help people with moderate asthma get their asthma fully under control.
+
+approved_facts:
+  - fact: The study medicine is dupilumab, an asthma medicine given as an injection every 2 weeks for one year, alongside their regular asthma medicines.
+    source: ctgov
+  - fact: Some participants receive placebo injections instead. Neither participants nor doctors know who gets which until the study ends.
+    source: ctgov
+  - fact: The study is for adults aged 18 to 79 with moderate asthma.
+    source: ctgov
+  - fact: There are clinic visits every 3 months for breathing tests, questionnaires and safety checks.
+    source: ctgov
+  - fact: It is a Phase 3 study planning to enroll about 150 people.
+    source: ctgov
+  - fact: The study is led by Université de Sherbrooke, with Regeneron Pharmaceuticals and Sanofi as collaborators.
+    source: ctgov
+  - fact: The first step is a screening visit at the doctor's office to check whether the study is a good fit. It's free.
+    source: demo
+  - fact: Taking part is completely voluntary, and they can stop at any time.
+    source: demo
+
+prescreen_questions:
+  - id: current_smoker
+    kind: yes_no
+    role: disqualify_if_yes
+    ask: "Do you smoke right now, or did you quit within the last six months?"
+    criterion: "Exclusion: current smoker, or quit less than 6 months ago"

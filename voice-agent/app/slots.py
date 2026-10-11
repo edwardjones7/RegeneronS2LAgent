@@ -12,11 +12,21 @@ from app.models import Slot
 SLOT_TIMES = [time(9, 30), time(11, 0), time(14, 0), time(16, 30)]
 
 
-def seed_slots(session: Session, campaign: Campaign, start: date | None = None, days: int = 5) -> int:
-    """Create slots for the next `days` business days if the campaign has none open."""
+def _at_practice(practice_id: str | None):
+    """Slots belong to one practice in practice outreach; opt-in campaigns have practice_id NULL."""
+    return Slot.practice_id.is_(None) if practice_id is None else Slot.practice_id == practice_id
+
+
+def seed_slots(
+    session: Session, campaign: Campaign, start: date | None = None, days: int = 5, practice_id: str | None = None
+) -> int:
+    """Create slots for the next `days` business days if the campaign (at this practice) has none open."""
     now_local = datetime.now(ZoneInfo(campaign.timezone)).replace(tzinfo=None)
     existing = session.scalars(
-        select(Slot).where(Slot.campaign_id == campaign.id, Slot.starts_at > now_local, Slot.booked_lead_id.is_(None))
+        select(Slot).where(
+            Slot.campaign_id == campaign.id, _at_practice(practice_id),
+            Slot.starts_at > now_local, Slot.booked_lead_id.is_(None),
+        )
     ).first()
     if existing:
         return 0
@@ -25,19 +35,21 @@ def seed_slots(session: Session, campaign: Campaign, start: date | None = None, 
     while made < days * len(SLOT_TIMES):
         if d.weekday() < 5:
             for t in SLOT_TIMES:
-                session.add(Slot(campaign_id=campaign.id, starts_at=datetime.combine(d, t)))
+                session.add(Slot(campaign_id=campaign.id, practice_id=practice_id, starts_at=datetime.combine(d, t)))
                 made += 1
         d += timedelta(days=1)
     session.flush()
     return made
 
 
-def open_slots(session: Session, campaign: Campaign, n: int = 3, after: datetime | None = None) -> list[Slot]:
+def open_slots(
+    session: Session, campaign: Campaign, n: int = 3, after: datetime | None = None, practice_id: str | None = None
+) -> list[Slot]:
     after = after or datetime.now(ZoneInfo(campaign.timezone)).replace(tzinfo=None) + timedelta(hours=12)
     return list(
         session.scalars(
             select(Slot)
-            .where(Slot.campaign_id == campaign.id, Slot.booked_lead_id.is_(None), Slot.starts_at > after)
+            .where(Slot.campaign_id == campaign.id, _at_practice(practice_id), Slot.booked_lead_id.is_(None), Slot.starts_at > after)
             .order_by(Slot.starts_at)
             .limit(n)
         )

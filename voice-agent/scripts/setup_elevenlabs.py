@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.campaigns import get_campaign  # noqa: E402
 from app.config import ROOT, get_settings  # noqa: E402
-from app.prompt import first_message, system_prompt, voicemail_message  # noqa: E402
+from app.prompt import PRACTICE_VOICEMAIL, practice_first_message, practice_system_prompt  # noqa: E402
 
 STATE_FILE = ROOT / ".elevenlabs.json"
 ENV_FILE = ROOT / ".env"
@@ -122,6 +122,31 @@ def tool_defs(base: str) -> list[dict]:
             ["reason"],
         ),
         tool(
+            "verify_identity",
+            "Check the date of birth the person gave. Call once they confirm they're the patient, BEFORE saying anything about a study or their health. Returns VERIFIED with everything you may say about the study, or what to do instead.",
+            {"date_of_birth": s("The date of birth they said, as YYYY-MM-DD if you can, otherwise exactly as they said it.")},
+            ["date_of_birth"],
+        ),
+        tool(
+            "schedule_callback",
+            "The person wants to be called at another time. Moves the next call.",
+            {"when": s("When, in their words, e.g. 'after 5', 'tomorrow morning', 'evenings'.")},
+            ["when"],
+        ),
+        {
+            **tool(
+                "take_message",
+                "A caller we couldn't match to a patient. Records their name, number and message for the office staff.",
+                {
+                    "name": s("The caller's name."),
+                    "callback_number": s("The best number to call them back."),
+                    "message": s("What they're calling about, briefly."),
+                    "caller_id": {"type": "string", "dynamic_variable": "caller_id"},
+                },
+                [],
+            ),
+        },
+        tool(
             "flag_emergency",
             "Possible medical emergency mentioned (chest pain, trouble breathing, stroke signs, self-harm). Call right after telling them to hang up and call 911.",
             {"what_they_said": s("What the person said, briefly quoted.")},
@@ -196,18 +221,22 @@ def main():
             print(f"! couldn't create the post-call webhook (HTTP {r.status_code}); falling back to polling for call results.")
             print("  To use the webhook instead, give the API key the webhooks_write permission and re-run.")
 
-    # 4. Agent.
+    # 4. Agent. Its defaults are the practice-outreach script (a doctor's office calling its own
+    # patients); every outbound call and every inbound callback carries its own script and details.
     coordinator = campaign.coordinator_phone
     agent_body = {
-        "name": f"Call Me Maybe · {campaign.study_short_name} ({campaign.nct_id})",
-        "tags": ["call-me-maybe", campaign.id],
+        "name": "Ava · doctor's office outreach",
+        "tags": ["call-me-maybe", "practice-outreach"],
         "conversation_config": {
             "agent": {
-                "first_message": first_message(campaign),
+                "first_message": practice_first_message(),
                 "language": "en",
-                "dynamic_variables": {"dynamic_variable_placeholders": {"first_name": "there", "lead_id": "0"}},
+                "dynamic_variables": {"dynamic_variable_placeholders": {
+                    "first_name": "there", "lead_id": "0", "office_name": "your doctor's office",
+                    "doctor_name": "your doctor", "callback_number": "", "caller_id": "",
+                }},
                 "prompt": {
-                    "prompt": system_prompt(campaign),
+                    "prompt": practice_system_prompt(),
                     "llm": settings.elevenlabs_llm or DEFAULT_LLM,
                     "temperature": 0.3,
                     "tool_ids": list(tool_ids.values()),
@@ -223,7 +252,8 @@ def main():
                             "type": "system",
                             "name": "voicemail_detection",
                             "description": "",
-                            "params": {"system_tool_type": "voicemail_detection", "voicemail_message": voicemail_message(campaign)},
+                            # No study or health details: anyone could hear a voicemail.
+                            "params": {"system_tool_type": "voicemail_detection", "voicemail_message": PRACTICE_VOICEMAIL},
                         },
                         "transfer_to_number": {
                             "type": "system",
@@ -257,10 +287,14 @@ def main():
         # text_only lets scripts/text_call.py test the real agent + tools without a phone.
         # Per-call overrides: each campaign's prompt/first message ride on the call (one agent, many
         # studies); text_only lets scripts/text_call.py test the real agent + tools without a phone.
-        "platform_settings": {"overrides": {"conversation_config_override": {
-            "agent": {"first_message": True, "prompt": {"prompt": True}},
-            "conversation": {"text_only": True},
-        }}},
+        # Inbound callbacks: ElevenLabs asks /webhooks/elevenlabs/inbound who's calling before Ava answers.
+        "platform_settings": {"overrides": {
+            "conversation_config_override": {
+                "agent": {"first_message": True, "prompt": {"prompt": True}},
+                "conversation": {"text_only": True},
+            },
+            "enable_conversation_initiation_client_data_from_webhook": True,
+        }},
     }
     if state.get("webhook_id"):
         agent_body["platform_settings"] |= {
@@ -282,6 +316,14 @@ def main():
         save_state(state)
         print(f"✓ agent created ({agent_id})")
     set_env("ELEVENLABS_AGENT_ID", agent_id)
+
+    # 4b. Inbound callbacks: the workspace's conversation-initiation webhook.
+    r = http.patch("/v1/convai/settings", json={"conversation_initiation_client_data_webhook": {
+        "url": f"{base}/webhooks/elevenlabs/inbound",
+        "request_headers": {"X-Tool-Secret": tool_secret},
+    }})
+    print(f"{'✓' if r.status_code < 300 else '!'} inbound callbacks -> {base}/webhooks/elevenlabs/inbound"
+          + ("" if r.status_code < 300 else f" (HTTP {r.status_code}: {r.text[:200]})"))
 
     # 5. Twilio number.
     if settings.twilio_from_number:

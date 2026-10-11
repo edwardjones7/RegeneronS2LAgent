@@ -9,6 +9,8 @@ export type LeadStatus =
   | "opted_out"
   | "emergency"
   | "closed"
+  | "chart_review"
+  | "dropped"
 
 export type Flag = { type: string; detail: string; at: string; resolved?: boolean }
 
@@ -156,3 +158,63 @@ export type CampaignDraft = {
   study: { nct_id: string; title: string; sponsor: string; status: string; conditions: string[]; phases: string[] }
   model: string
 }
+
+// ---- Practice outreach (a doctor's office calling its own pre-screened patients)
+
+export type Practice = { id: string; name: string; patients: number | null }
+
+export type PracticeProfile = {
+  practice_id: string
+  name: string
+  doctor_name: string
+  address: string
+  callback_phone: string
+  staff_phone: string
+  timezone: string
+  office_display: string
+}
+
+export type TrialCard = {
+  nct_id: string
+  title: string
+  official_title: string
+  sponsor: string
+  phase: string
+  url: string
+  callable: boolean
+  candidates: number
+  chart_review: number
+  accepted: boolean
+  acceptance_id: number | null
+  accepted_by: string | null
+  accepted_at: string | null
+}
+
+export type OutreachRow = LeadSummary & {
+  practice_id: string
+  nct_id: string | null
+  simulated: boolean
+  identity_verified: boolean
+  call_window: string | null
+  last_activity: { type: string; at: string } | null
+  texts: number
+  inbound_calls: number
+}
+
+export type OutreachOverview = {
+  practice: PracticeProfile
+  totals: {
+    patients: number
+    called: number
+    reached: number
+    texted: number
+    booked: number
+    needs_staff: number
+    chart_review: number
+    in_progress: number
+  }
+  by_status: Partial<Record<LeadStatus, number>>
+  patients: OutreachRow[]
+}
+
+export type InboxMessage = { id: number; at: string; channel: "call" | "sms"; from_phone: string; name: string; text: string; resolved: boolean }
