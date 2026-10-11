@@ -1,6 +1,6 @@
 // Structured eligibility criteria: the shape stored on `trials.criteria_questions`.
 //
-// A generative model (Gemini through OpenRouter) splits a trial's free-text
+// A generative model (Gemini) splits a trial's free-text
 // eligibility into these items once per trial version. Pure types and
 // constants, no runtime side effects.
 
@@ -33,9 +33,9 @@ export const SECTION_STATE_KEYS: Record<Section, string> = {
   conditions: 'conditions',
   medications: 'medications',
   procedures: 'procedures',
-  labs: 'latest_labs_and_vitals',
-  weights: 'weights_last_year',
-  acute_visits: 'emergency_urgent_and_hospital_visits_last_3_years',
+  labs: 'labs',
+  weights: 'weights_kg',
+  acute_visits: 'emergency_urgent_hospital_visits',
 };
 
 /** Observation fields in a patient record (data/synthea-nj.json `observations`). */

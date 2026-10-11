@@ -60,6 +60,8 @@ export type CriterionResult = {
   kind: Criterion['kind'];
   answer: Answer;
   probabilities: Record<Answer, number>;
+  /** Who decided it. Code answers carry probability 1 on their answer. */
+  decided_by?: 'jev' | 'code' | 'not_applicable';
 };
 
 export type Bucket = 'candidate' | 'review' | 'not_match';
@@ -74,7 +76,9 @@ export type MatchResult = {
   accepts: number;
   rejects: number;
   unknowns: number;
-  /** Mean probability of 'accept' across all questions. Used to rank patients. */
+  /** Mean probability of 'accept' across the record criteria. Used to rank patients. */
   score: number;
   criteria: CriterionResult[];
+  /** Criteria no record can settle (screening tests, consent, subgroup items): confirm on the call or at screening. */
+  review_items: string[];
 };

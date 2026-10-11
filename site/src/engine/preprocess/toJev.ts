@@ -1,10 +1,10 @@
 import { DEFAULT_ORDER, type JevChoiceQuestion } from '../questions.ts';
 import type { Answer, Bucket, CodeBook, PatientRecord } from '../types.ts';
-import { SECTION_STATE_KEYS, type CodeCheck, type Section, type StructuredCriterion, type TrialCriteria } from './schema.ts';
+import { SECTION_STATE_KEYS, SECTIONS, type CodeCheck, type Section, type StructuredCriterion, type TrialCriteria } from './schema.ts';
 
 // Turns stored structured criteria into work for one patient:
 //   - criteria code can settle (subgroup gates, age, sex, labs, date windows),
-//   - short Jev questions, batched by the state sections they need,
+//   - short Jev questions, all in one call whose state holds only the sections they need,
 //   - review items ("confirm at screening") that never affect the bucket.
 // Then combines the answers, OR groups included, into a bucket. Pure.
 
@@ -105,9 +105,9 @@ export function structuredQuestion(c: StructuredCriterion, order: Answer[] = DEF
   };
 }
 
-/** Keeps age, sex and only the listed sections of a full Jev state (engine/state.ts). */
+/** Keeps the time note, age, sex and only the listed sections of a full Jev state (engine/state.ts). */
 export function filterState(state: Record<string, unknown>, sections: Section[]): Record<string, unknown> {
-  const keep = new Set(['age', 'sex', ...sections.map((s) => SECTION_STATE_KEYS[s])]);
+  const keep = new Set(['note', 'age', 'sex', ...sections.map((s) => SECTION_STATE_KEYS[s])]);
   // Smoking status lives in the labs section; the labs section stays whole.
   return Object.fromEntries(Object.entries(state).filter(([k]) => keep.has(k)));
 }
@@ -119,7 +119,7 @@ export type PatientPlan = {
   decided: Record<string, Answer>;
   /** How each decided answer was reached, for the drill-down. */
   decidedBy: Record<string, 'not_applicable' | 'code'>;
-  /** Jev calls to make, one per distinct section set. */
+  /** The Jev call to make, if any: at most one per patient and trial. */
   jevCalls: JevCall[];
   /** Confirm-at-screening items for this patient; not in the bucket. */
   review: string[];
@@ -152,11 +152,12 @@ export function planPatient(tc: TrialCriteria, f: PatientFacts, order: Answer[] 
     toJev.push(c);
   }
 
-  const bySections = Map.groupBy(toJev, (c) => [...c.sections].sort().join(','));
-  for (const [, cs] of bySections) {
+  // One call per patient and trial: every question shares a state with the union of the
+  // sections they need (TypeSafe: questions sharing a state belong in one request).
+  if (toJev.length) {
     plan.jevCalls.push({
-      sections: cs[0].sections,
-      questions: Object.fromEntries(cs.map((c) => [c.id, structuredQuestion(c, order)])),
+      sections: SECTIONS.filter((s) => toJev.some((c) => c.sections.includes(s))),
+      questions: Object.fromEntries(toJev.map((c) => [c.id, structuredQuestion(c, order)])),
     });
   }
   return plan;

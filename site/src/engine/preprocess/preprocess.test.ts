@@ -230,12 +230,12 @@ describe('planPatient and combine', async () => {
     assert.equal(p.decided.inc_1, 'unknown');
   });
 
-  it('batches Jev questions by the sections they need, and filters the state to them', () => {
+  it('puts every Jev question in one call, and filters the state to the sections they need', () => {
     const p = planPatient(asthma, facts(40, 'M', {}));
-    const meds = p.jevCalls.find((c) => c.sections.join() === 'medications')!;
-    assert.deepEqual(Object.keys(meds.questions).sort(), ['exc_1', 'exc_11', 'inc_6', 'inc_9']);
-    const state = { age: 40, sex: 'male', conditions: [], medications: [1], procedures: [], latest_labs_and_vitals: [] };
-    assert.deepEqual(filterState(state, meds.sections), { age: 40, sex: 'male', medications: [1] });
+    assert.equal(p.jevCalls.length, 1);
+    assert.ok(['exc_1', 'exc_11', 'inc_6', 'inc_9'].every((id) => id in p.jevCalls[0].questions));
+    const state = { note: 'n', age: 40, sex: 'male', conditions: [], medications: [1], procedures: [], labs: [] };
+    assert.deepEqual(filterState(state, ['medications']), { note: 'n', age: 40, sex: 'male', medications: [1] });
   });
 
   it('a clean obesity patient is a pre-screen candidate', () => {
