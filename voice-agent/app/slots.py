@@ -7,11 +7,11 @@ by every trial it accepted, so two trials can never book the same time.
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session
 
 from app.campaigns import Campaign
-from app.models import Slot
+from app.models import Slot, utcnow
 
 SLOT_TIMES = [time(9, 30), time(11, 0), time(14, 0), time(16, 30)]
 PRACTICE_CALENDAR = "practice-calendar"  # campaign_id on practice slots (shared by every trial)
@@ -78,8 +78,26 @@ def seed_slots(
     return made
 
 
+HOLD = timedelta(minutes=5)
+
+
+def _free_for(lead_id: int | None):
+    """Not held for someone else (holds expire after HOLD)."""
+    return or_(Slot.held_by_lead_id.is_(None), Slot.held_until < utcnow(),
+               *( [Slot.held_by_lead_id == lead_id] if lead_id else [] ))
+
+
+def hold(session: Session, found: list[Slot], lead_id: int) -> None:
+    """Keep the times just offered on a call for this patient while they decide."""
+    until = utcnow() + HOLD
+    for sl in found:
+        sl.held_by_lead_id, sl.held_until = lead_id, until
+    session.flush()
+
+
 def open_slots(
-    session: Session, campaign: Campaign, n: int = 3, after: datetime | None = None, practice_id: str | None = None
+    session: Session, campaign: Campaign, n: int = 3, after: datetime | None = None, practice_id: str | None = None,
+    for_lead_id: int | None = None,
 ) -> list[Slot]:
     after = after or datetime.now(ZoneInfo(campaign.timezone)).replace(tzinfo=None) + timedelta(hours=12)
     return list(
@@ -90,6 +108,7 @@ def open_slots(
                 Slot.practice_id == practice_id if practice_id else (Slot.campaign_id == campaign.id) & Slot.practice_id.is_(None),
                 Slot.booked_lead_id.is_(None),
                 Slot.starts_at > after,
+                _free_for(for_lead_id),
             )
             .order_by(Slot.starts_at)
             .limit(n)
@@ -100,7 +119,9 @@ def open_slots(
 def book(session: Session, slot_id: int, lead_id: int) -> bool:
     """Atomically claim a slot. False if it was already taken."""
     result = session.execute(
-        update(Slot).where(Slot.id == slot_id, Slot.booked_lead_id.is_(None)).values(booked_lead_id=lead_id)
+        update(Slot)
+        .where(Slot.id == slot_id, Slot.booked_lead_id.is_(None), _free_for(lead_id))
+        .values(booked_lead_id=lead_id, held_by_lead_id=None, held_until=None)
     )
     return result.rowcount == 1
 

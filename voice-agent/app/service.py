@@ -326,10 +326,12 @@ def tool_get_open_slots(s: Session, lead: Lead) -> str:
     if existing:
         return f"Already booked for {slots.spoken(existing.starts_at)} (slot_id {existing.id}). Just confirm it."
     campaign = campaign_for(lead)
-    found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id)
+    found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id, for_lead_id=lead.id)
     if not found:
         slots.seed_slots(s, campaign, practice_id=lead.practice_id)
-        found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id)
+        found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id, for_lead_id=lead.id)
+    if found:
+        slots.hold(s, found, lead.id)  # nobody else can take these while they decide
     if not found:
         return "No open times right now. Say the research team will call to schedule, then call escalate_to_human with reason 'no open slots'."
     options = "; ".join(f"slot_id {sl.id}: {slots.spoken(sl.starts_at)}" for sl in found)
