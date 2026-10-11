@@ -219,7 +219,7 @@ export const PAGE_TITLES: Record<NavKey, string> = {
 /** The sidebar page a path belongs to, if any. */
 export function navKeyFor(pathname: string): NavKey | null {
   const first = pathname.split(/[?#]/)[0].split('/')[1];
-  if (first === 'trials' || first === '') return 'trials';
+  if (first === 'trials') return 'trials';
   return first === 'campaigns' || first === 'calendar' || first === 'patients' ? first : null;
 }
 

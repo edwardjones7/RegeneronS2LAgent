@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { type ReactNode, useCallback, useState } from 'react';
+import { useRouter } from 'next/router';
+import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { PipelineWalkthrough } from '@/components/walkthrough/PipelineWalkthrough';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { cn } from '@/lib/utils/cn';
@@ -83,8 +84,17 @@ const initials = (name: string) =>
 
 /** Sidebar + main column. Every dashboard page renders inside this. */
 export function AppShell({ title, active, children }: AppShellProps) {
-  const [walkthrough, setWalkthrough] = useState(false);
+  const router = useRouter();
+  // Signing in from the landing page arrives with ?welcome=1: play the pipeline walkthrough once.
+  const [walkthrough, setWalkthrough] = useState(() => router.query.welcome === '1');
   const closeWalkthrough = useCallback(() => setWalkthrough(false), []);
+
+  // Drop ?welcome from the URL so a refresh doesn't replay it.
+  useEffect(() => {
+    if (router.query.welcome === undefined) return;
+    const query = Object.fromEntries(Object.entries(router.query).filter(([key]) => key !== 'welcome'));
+    void router.replace({ pathname: router.pathname, query }, undefined, { shallow: true, scroll: false });
+  }, [router]);
 
   return (
     <>
@@ -96,7 +106,7 @@ export function AppShell({ title, active, children }: AppShellProps) {
         <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(640px_260px_at_6%_0%,#FFD9C7,transparent),radial-gradient(640px_240px_at_42%_0%,#D4E9FB,transparent),radial-gradient(600px_220px_at_78%_0%,#E0F2D3,transparent)] [mask-image:linear-gradient(to_bottom,black_35%,transparent)]" />
 
         <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-ink/[0.06] px-3 py-5">
-          <Link href="/" className="flex items-center gap-2 px-2">
+          <Link href="/trials" className="flex items-center gap-2 px-2">
             <TrialistLogo className="h-6 text-ink" />
           </Link>
 
