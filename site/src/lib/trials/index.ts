@@ -138,3 +138,5 @@ export async function syncTrials(scope: TrialScopeId, opts: { mode?: SyncMode } 
 
   return { scope, mode, since, ctgovDataTimestamp, studiesUpserted, skipped: false };
 }
+
+export { countOpenTrials, getTrialDetail, listOpenTrials, type TrialDetail, type TrialListItem, type TrialLocation } from './queries';
