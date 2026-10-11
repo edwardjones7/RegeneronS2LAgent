@@ -1,4 +1,4 @@
-.PHONY: setup web dev test mock text-test elevenlabs docker
+.PHONY: setup web dev test mock text-test elevenlabs docker outreach-demo
 
 setup:            ## install Python + web deps, copy .env, build the web app
 	uv sync
@@ -26,3 +26,6 @@ elevenlabs:       ## create/update the ElevenLabs agent, tools, webhook, number
 
 docker:           ## build + run everything in one container
 	docker compose up --build
+
+outreach-demo:    ## practice outreach in mock mode, a "day" = 20s (http://localhost:8000/dashboard)
+	MOCK_MODE=true DEMO_DAY_SECONDS=20 SIMULATED_CALL_SECS=5 uv run uvicorn app.main:app --port 8000

@@ -1,0 +1,32 @@
+# PRACTICE OUTREACH. DEMO: NOT IRB-APPROVED. Facts from ClinicalTrials.gov NCT06931717.
+
+id: practice-nct06931717
+mode: practice
+demo_not_irb_approved: true
+nct_id: NCT06931717
+study_url: https://clinicaltrials.gov/study/NCT06931717
+sponsor: ETOP IBCSG Partners Foundation, with Regeneron Pharmaceuticals
+agent_name: Ava
+visit_length_minutes: 60
+study_short_name: lung cancer
+one_liner: >-
+  It's a research study of cemiplimab, an immunotherapy, for people who've had surgery to
+  remove non-small cell lung cancer.
+
+approved_facts:
+  - fact: The study compares cemiplimab given after surgery with careful observation without extra treatment. Who gets which is decided by chance.
+    source: ctgov
+  - fact: Cemiplimab is given by IV every 3 weeks for 4 cycles, then every 6 weeks for up to 6 more cycles.
+    source: ctgov
+  - fact: It is a Phase 3 study planning to enroll about 390 people.
+    source: ctgov
+  - fact: The study is led by the ETOP IBCSG Partners Foundation, with Regeneron Pharmaceuticals as a collaborator.
+    source: ctgov
+  - fact: The first step is a screening visit to check whether the study is a good fit. It's free.
+    source: demo
+  - fact: Taking part is completely voluntary, and they can stop at any time.
+    source: demo
+
+# No phone questions: the practice's records already pre-screened these patients, and the
+# screening visit confirms anything the chart can't (protocols/*.json `review` criteria).
+prescreen_questions: []

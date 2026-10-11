@@ -121,7 +121,7 @@ The engine returns **three** states per criterion, never two. `UNKNOWN` is a fir
 
 **Computable from structured data:**
 - Age and sex
-- Diagnosis codes (ICD-10)
+- Diagnosis codes (SNOMED CT in the Synthea data; ICD-10 in many real EHRs)
 - Lab values against protocol thresholds (e.g. ALT, bilirubin, eGFR, HbA1c)
 - Medication history and prior lines of therapy
 - Date windows (diagnosis within N months, washout periods)
@@ -138,29 +138,24 @@ The engine returns **three** states per criterion, never two. `UNKNOWN` is a fir
 
 ## 7. Data
 
-**Source:** https://github.com/cdisc-org/sdtm-adam-pilot-project
+**Source:** synthetic patients from [Synthea](https://github.com/synthetichealth/synthea), 2,000 living patients in New Jersey (seed 42). No real people. Full guide: `.claude/context/sample-ehr-data.md`.
 
-CDISC SDTM and ADaM pilot dataset. Real-shaped, de-identified, built for exactly this kind of educational use.
+Synthea is Apache-2.0 and the generated patients are ours, so the trimmed data is committed: `data/synthea-nj.json` (6 MB). Regenerate it with `./data/generate.sh` (needs Java 17+). The same patients are loaded into Supabase by `supabase/seed_patients.py`, each linked to their practice (see section 5).
 
-⚠️ **License: educational use. It is NOT MIT and must NOT be committed into this repo under our license.** Fetch it at setup time via a script, keep it gitignored, and document the provenance in `/docs`. Our own code is MIT. The data is not ours to relicense.
+Practices are the county Synthea placed each patient in: 21 groups, from Middlesex (200 patients) to Salem (9). No practice or doctor names are invented.
 
-Relevant SDTM shapes an agent will need:
-- `DM` demographics: `USUBJID`, `AGE`, `SEX`
-- `LB` labs: `LBTESTCD`, `LBSTRESN` (result), `LBSTNRHI` (upper limit of normal)
-- `CM` concomitant medications
-- `MH` medical history
+What each patient record has:
+- Demographics: name, birth date, sex, race, ethnicity, county.
+- `conditions`: SNOMED CT codes with start and end dates.
+- `medications`: RxNorm codes with start and end dates.
+- `procedures`: SNOMED CT codes with the latest date.
+- `observations`: the latest value of about 20 labs and vitals (BMI, blood pressure, HbA1c, glucose, lipids, creatinine, eGFR, liver tests, smoking status, and a few others). US units (mg/dL), as Synthea records them.
+- `weights`: the last 12 months of weights.
+- `acuteVisits`: the last 3 years of emergency, urgent care and hospital visits, with the reason when recorded.
 
-Worked example, Hy's Law style liver signal, from the sponsor's own starter material:
+Lab criteria are thresholds in the units above. Synthea doesn't record reference ranges, so the "value divided by its upper limit of normal" pattern from the sponsor's Hy's Law example needs the protocol to state the limit.
 
-```
-ALT_ratio  = LBSTRESN / LBSTNRHI   where LBTESTCD = 'ALT'
-BILI_ratio = LBSTRESN / LBSTNRHI   where LBTESTCD = 'BILI'
-flag       = ALT_ratio > 3 AND BILI_ratio > 2
-```
-
-That pattern, a lab value normalized against its own reference limit, is the template for every lab criterion. Write it once, generically, and parameterize it.
-
-**Protocol criteria input:** hand-author 3 to 5 trial protocols as JSON for the demo. Do not build a protocol parser. Optionally prefill from the ClinicalTrials.gov v2 API by NCT number if there is time, which ticks the "real public data" box, but it is a COULD not a MUST.
+**Protocol criteria input:** hand-authored JSON in `protocols/`, one file per trial, for four recruiting trials Regeneron sponsors or collaborates on (only NCT07685808 is Regeneron-led; NCT07309614 runs outside the U.S.). The format and the three-state results are in `protocols/README.md`. No protocol parser.
 
 ---
 
@@ -230,11 +225,14 @@ If we pitch "AI calls patients," we are pitching their product with less infrast
 
 Judges trust teams that state their own limits. It reads as competence.
 
-- Runs on the CDISC pilot dataset, not a live EHR. Real deployment needs FHIR or a direct EHR integration and that is not built.
-- Only the criterion types in section 6 are computable. Free-text and judgment criteria are surfaced for human review, not evaluated.
-- Protocols are hand-authored JSON. No protocol parser.
+- Runs on synthetic patients from Synthea (2,000 in New Jersey, seed 42), not a live EHR. Real deployment needs FHIR or a direct EHR integration and that is not built.
+- "Practices" are the county groups Synthea placed patients in, not real practices. No practice or doctor names are invented.
+- Synthea leaves gaps that show up as chart review, not as failures: no LAMA inhalers, no FeNO, eosinophils and lung function on few patients, weight recorded about once a year, no family history.
+- Structured criteria are checked by code. Judgment criteria go to the Jev evaluation model as de-identified summaries. Jev's answers have not been checked against a clinician's.
+- Protocols are hand-authored JSON covering each trial's key criteria only, simplified from the real protocols. No protocol parser.
+- For exclusions, a missing record counts as a pass: no diabetes diagnosis on file is read as not diabetic.
 - Not validated against a site's actual pre-screening output. Next step is benchmarking candidate lists against a real coordinator's manual review.
-- No HIPAA or 21 CFR Part 11 compliance work has been done. The architecture is designed to make it reachable, not to claim it.
+- No HIPAA or 21 CFR Part 11 compliance work has been done. The Jev summaries follow the Safe Harbor de-identification approach, but there's been no expert determination and no BAA with Vercel or TypeSafe AI. The architecture is designed to make compliance reachable, not to claim it.
 
 ---
 

@@ -54,6 +54,22 @@ class Emergency(Base):
     what_they_said: str = ""
 
 
+class VerifyIdentity(Base):
+    date_of_birth: str
+
+
+class Callback(Base):
+    when: str
+
+
+class Message(BaseModel):
+    lead_id: str = ""  # empty or "0" for an unknown inbound caller
+    name: str = ""
+    callback_number: str = ""
+    message: str = ""
+    caller_id: str = ""
+
+
 deps = [Depends(require_tool_secret)]
 
 
@@ -90,3 +106,22 @@ def escalate(body: Reason, s: Session = Depends(get_session)):
 @router.post("/flag_emergency", dependencies=deps)
 def flag_emergency(body: Emergency, s: Session = Depends(get_session)):
     return {"result": service.tool_flag_emergency(s, _lead(s, body.lead_id), body.what_they_said)}
+
+
+# ---- practice outreach
+
+
+@router.post("/verify_identity", dependencies=deps)
+def verify_identity(body: VerifyIdentity, s: Session = Depends(get_session)):
+    return {"result": service.tool_verify_identity(s, _lead(s, body.lead_id), body.date_of_birth)}
+
+
+@router.post("/schedule_callback", dependencies=deps)
+def schedule_callback(body: Callback, s: Session = Depends(get_session)):
+    return {"result": service.tool_schedule_callback(s, _lead(s, body.lead_id), body.when)}
+
+
+@router.post("/take_message", dependencies=deps)
+def take_message(body: Message, s: Session = Depends(get_session)):
+    """For callers we can't match to a patient. Records a message for office staff."""
+    return {"result": service.take_message(s, body.name, body.callback_number, body.message, body.caller_id)}

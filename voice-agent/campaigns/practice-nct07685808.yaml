@@ -1,0 +1,49 @@
+# PRACTICE OUTREACH: a doctor's office calling its own pre-screened patients.
+# DEMO: NOT IRB-APPROVED. Study facts come from the public ClinicalTrials.gov record NCT07685808
+# (snapshot: campaigns/sources/NCT07685808.json). `source: demo` marks demo wording.
+# Office name, doctor, address and phone numbers come from the practice at call time.
+
+id: practice-nct07685808
+mode: practice
+demo_not_irb_approved: true
+nct_id: NCT07685808
+study_url: https://clinicaltrials.gov/study/NCT07685808
+sponsor: Regeneron Pharmaceuticals
+agent_name: Ava
+visit_length_minutes: 60
+study_short_name: weight management
+one_liner: >-
+  It's a research study of an experimental weight-management medication for adults living
+  with overweight or obesity who don't have diabetes.
+
+approved_facts:
+  - fact: The study is testing an experimental medication called olatorepatide.
+    source: ctgov
+  - fact: Olatorepatide is in the GLP-1 and GIP family of medicines; it acts on both of those hormone receptors.
+    source: ctgov
+  - fact: The study is for adults 18 or older living with overweight or obesity who do not have diabetes.
+    source: ctgov
+  - fact: It is a Phase 2 study, which means the medication is still being tested for safety and how well it works.
+    source: ctgov
+  - fact: Some participants will receive a placebo, an inactive look-alike, instead of the study medication. Who gets which is decided by chance.
+    source: ctgov
+  - fact: Neither participants nor the study team will know who is getting the study medication or the placebo during the study.
+    source: ctgov
+  - fact: Participation lasts about 60 weeks, a little over a year.
+    source: ctgov
+  - fact: The study looks at side effects, how the body processes the medication, and changes in body weight.
+    source: ctgov
+  - fact: The study plans to enroll about 360 people at sites across the United States.
+    source: ctgov
+  - fact: The study is sponsored by Regeneron Pharmaceuticals.
+    source: ctgov
+  - fact: The first step is a screening visit of about an hour at the doctor's office, where the team checks whether the study is a good fit. It's free.
+    source: demo
+  - fact: The doctor's office is taking part in the study, so they'd stay the patient's doctor.
+    source: demo
+  - fact: Taking part is completely voluntary, and they can stop at any time.
+    source: demo
+
+# No phone questions: the practice's records already pre-screened these patients, and the
+# screening visit confirms anything the chart can't (protocols/*.json `review` criteria).
+prescreen_questions: []

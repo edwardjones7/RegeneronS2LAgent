@@ -110,10 +110,10 @@ def campaign_overview(campaign_id: str, s: Session = Depends(get_session)):
 
 
 @router.get("/calls/live")
-def calls_live(campaign_id: str | None = None, s: Session = Depends(get_session)):
+def calls_live(campaign_id: str | None = None, practice_id: str | None = None, s: Session = Depends(get_session)):
     from app.live import live_calls
 
-    return live_calls(s, campaign_id)
+    return live_calls(s, campaign_id, practice_id)
 
 
 @router.get("/campaigns/{campaign_id}/leads")

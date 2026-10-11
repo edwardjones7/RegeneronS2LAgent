@@ -4,14 +4,14 @@ import logging
 import re
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session, object_session
 
 from app import hours, slots, sms
 from app.campaigns import Campaign, get_campaign
 from app.config import get_settings
 from app.db import session_scope
-from app.models import FINAL_STATUSES, Answer, Call, Event, Lead, LeadStatus, Slot, Suppression, utcnow
+from app.models import FINAL_STATUSES, Answer, Call, Event, InboxMessage, Lead, LeadStatus, Slot, Suppression, utcnow
 from app.screening import AnswerRecord, Decision, decide, score_answer
 from app.voice import get_voice
 
@@ -75,7 +75,22 @@ def campaign_for(lead: Lead) -> Campaign:
     c = get_campaign(lead.campaign_id)
     if c is None:
         raise LeadError(f"unknown campaign {lead.campaign_id}")
+    if lead.practice_id:
+        from app import outreach
+
+        s = object_session(lead)
+        if s is not None:
+            return c.for_practice(outreach.profile(s, lead.practice_id))
     return c
+
+
+def is_practice(lead: Lead) -> bool:
+    return bool(lead.practice_id)
+
+
+def sms_for(lead: Lead):
+    """Simulated demo patients never get real texts (and neither does staff about them)."""
+    return sms.MockSms() if lead.simulated else sms.get_sms()
 
 
 def answer_records(lead: Lead) -> list[AnswerRecord]:
@@ -159,7 +174,14 @@ def dial(lead_id: int) -> None:
             return
         if LeadStatus(lead.status) in FINAL_STATUSES or lead.status == LeadStatus.CALLING:
             return
-        if not hours.can_call_now(lead.timezone, campaign, now):
+        if is_practice(lead):
+            from app import outreach
+
+            if not outreach.in_calling_hours(lead, now):
+                lead.next_attempt_at = outreach.next_calling_time(lead, now)
+                set_status(s, lead, LeadStatus.QUEUED, "outside calling hours")
+                return
+        elif not hours.can_call_now(lead.timezone, campaign, now):
             lead.next_attempt_at = hours.clamp_to_window(lead.timezone, campaign, now)
             set_status(s, lead, LeadStatus.QUEUED, "outside calling hours")
             return
@@ -170,10 +192,19 @@ def dial(lead_id: int) -> None:
         set_status(s, lead, LeadStatus.CALLING)
         s.flush()
         call_id, first_name, phone = call.id, lead.first_name, lead.phone
+        context = None
+        if is_practice(lead):
+            from app import outreach
+
+            context = outreach.dynamic_variables(s, lead)
+        if lead.simulated:
+            from app.simulate_practice import SimulatedVoice
+
+            voice = SimulatedVoice()
 
     # Network call outside the transaction.
     try:
-        result = voice.start_call(lead_id=lead_id, first_name=first_name, phone=phone, campaign=campaign)
+        result = voice.start_call(lead_id=lead_id, first_name=first_name, phone=phone, campaign=campaign, context=context)
     except Exception as exc:  # noqa: BLE001
         log.exception("start_call failed for lead %s", lead_id)
         with session_scope() as s:
@@ -190,6 +221,11 @@ def dial(lead_id: int) -> None:
 
 
 def _no_answer(s: Session, lead: Lead, reason: str) -> None:
+    if is_practice(lead):
+        from app import outreach
+
+        outreach.after_missed_attempt(s, lead, reason)
+        return
     campaign = campaign_for(lead)
     if lead.attempts >= get_settings().max_attempts:
         set_status(s, lead, LeadStatus.CLOSED, f"no answer after {lead.attempts} attempts")
@@ -200,14 +236,22 @@ def _no_answer(s: Session, lead: Lead, reason: str) -> None:
 
 
 def due_leads(s: Session, now: datetime | None = None) -> list[int]:
+    """Leads due a call, at most `batch_size` calls in progress at once."""
     now = now or utcnow()
+    in_progress = s.scalar(select(func.count()).select_from(Lead).where(Lead.status == LeadStatus.CALLING)) or 0
+    room = max(0, get_settings().batch_size - in_progress)
+    if not room:
+        return []
     return list(
         s.scalars(
-            select(Lead.id).where(
+            select(Lead.id)
+            .where(
                 Lead.status.in_([LeadStatus.QUEUED, LeadStatus.NO_ANSWER]),
                 Lead.next_attempt_at.is_not(None),
                 Lead.next_attempt_at <= now,
             )
+            .order_by(Lead.next_attempt_at, Lead.id)
+            .limit(room)
         )
     )
 
@@ -231,6 +275,8 @@ def tool_record_answer(s: Session, lead: Lead, question_id: str, answer: str) ->
     s.add(Answer(lead_id=lead.id, question_id=q.id, raw_text=rec.raw_text, normalized_value=rec.normalized_value, verdict=rec.verdict))
     s.flush()
     s.refresh(lead)
+    if is_practice(lead):
+        return _practice_answer(s, lead, q, answer, rec.verdict)
     d = current_decision(lead)
     log_event(s, lead, "answer", question_id=q.id, answer=answer, verdict=rec.verdict, state=d.state)
 
@@ -243,7 +289,14 @@ def tool_record_answer(s: Session, lead: Lead, question_id: str, answer: str) ->
         for f in d.flags:
             add_flag(lead, "screening", f)
         log_event(s, lead, "screening_complete", result="fit", bmi=d.bmi, flags=d.flags)
+        if is_practice(lead):
+            return "Thanks, that's all the questions. Call get_open_slots now and offer two or three times for a screening visit."
         return "Screening complete: LOOKS LIKE A FIT. Call get_open_slots now and offer two or three times."
+    if d.state == "not_a_fit" and is_practice(lead):
+        set_status(s, lead, LeadStatus.NOT_A_FIT, d.reason)
+        log_event(s, lead, "screening_complete", result="not_a_fit", reason=d.reason)
+        return ("Done: THE OFFICE WILL FOLLOW UP. Don't offer times. Thank them warmly, say someone from the office "
+                "will be in touch, and end the call. Never say why or mention eligibility.")
     if d.state == "not_a_fit":
         set_status(s, lead, LeadStatus.NOT_A_FIT, d.reason)
         log_event(s, lead, "screening_complete", result="not_a_fit", reason=d.reason, bmi=d.bmi)
@@ -253,12 +306,18 @@ def tool_record_answer(s: Session, lead: Lead, question_id: str, answer: str) ->
     set_status(s, lead, LeadStatus.NEEDS_HUMAN, d.reason)
     log_event(s, lead, "screening_complete", result="needs_review", reason=d.reason)
     alert_coordinator(s, lead, "needs_human", f"Screening needs review: {d.reason}.")
+    if is_practice(lead):
+        return "Done: THE OFFICE WILL FOLLOW UP. Thank them, say someone from the office will call to go over a couple of things, and end the call."
     return "Screening complete: NEEDS REVIEW. Thank them and say someone from the research team will call back to go over a couple of things, then end the call."
 
 
 def tool_get_open_slots(s: Session, lead: Lead) -> str:
+    if is_practice(lead) and not lead.identity_verified:
+        return "Not yet: confirm their date of birth with verify_identity first."
+    if is_practice(lead) and (nxt := practice_next_question(lead)):
+        return f"Not yet: ask this first: {_question_line(nxt)}"
     d = current_decision(lead)
-    if not d.may_offer_slots:
+    if not is_practice(lead) and not d.may_offer_slots:
         nxt = d.next_question
         if nxt:
             return f"Not yet: the screening isn't finished. Ask next: {_question_line(nxt)}"
@@ -267,10 +326,10 @@ def tool_get_open_slots(s: Session, lead: Lead) -> str:
     if existing:
         return f"Already booked for {slots.spoken(existing.starts_at)} (slot_id {existing.id}). Just confirm it."
     campaign = campaign_for(lead)
-    found = slots.open_slots(s, campaign, n=3)
+    found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id)
     if not found:
-        slots.seed_slots(s, campaign)
-        found = slots.open_slots(s, campaign, n=3)
+        slots.seed_slots(s, campaign, practice_id=lead.practice_id)
+        found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id)
     if not found:
         return "No open times right now. Say the research team will call to schedule, then call escalate_to_human with reason 'no open slots'."
     options = "; ".join(f"slot_id {sl.id}: {slots.spoken(sl.starts_at)}" for sl in found)
@@ -282,11 +341,18 @@ def tool_book_visit(s: Session, lead: Lead, slot_id: int) -> str:
     existing = booked_slot(s, lead)
     if existing:
         return f"Already booked: {slots.spoken(existing.starts_at)}. Confirm that time with them."
+    if is_practice(lead) and not lead.identity_verified:
+        return "Can't book yet: confirm their date of birth with verify_identity first."
+    if is_practice(lead) and (nxt := practice_next_question(lead)):
+        return f"Can't book yet: ask this first: {_question_line(nxt)}"
     d = current_decision(lead)
-    if not d.may_offer_slots:
+    if not is_practice(lead) and not d.may_offer_slots:
         return "Can't book: the screening doesn't show a fit. Follow the last record_answer instructions."
     slot = s.get(Slot, int(slot_id))
-    if slot is None or slot.campaign_id != campaign.id:
+    wrong = slot is None or (
+        slot.practice_id != lead.practice_id if is_practice(lead) else slot.campaign_id != campaign.id
+    )
+    if wrong:
         return "That slot_id doesn't exist. Call get_open_slots again and offer those times."
     if not slots.book(s, slot.id, lead.id):
         return "That time was just taken. Call get_open_slots again and offer the new times."
@@ -294,16 +360,18 @@ def tool_book_visit(s: Session, lead: Lead, slot_id: int) -> str:
     set_status(s, lead, LeadStatus.BOOKED, f"visit {slot.starts_at.isoformat()}")
     log_event(s, lead, "visit_booked", slot_id=slot.id, starts_at=slot.starts_at.isoformat())
 
+    lead.next_attempt_at = None
     when = slots.short(slot.starts_at)
-    client = sms.get_sms()
+    client = sms_for(lead)
     for to, body, kind in (
         (lead.phone, sms.patient_confirmation(lead.first_name, when, campaign, calendar_link(lead.id)), "patient"),
         (
             campaign.coordinator_phone,
             sms.coordinator_booked(
-                lead.first_name, lead.last_name, when, campaign, d.answered, d.total,
-                d.flags + [f["detail"] for f in lead.flags if f["type"] == "escalation"],
-                seconds_to_first_call(lead), record_link(lead),
+                lead.first_name, lead.last_name, when, campaign,
+                *((len({a.question_id for a in lead.answers}), len(campaign.prescreen_questions)) if is_practice(lead) else (d.answered, d.total)),
+                d.flags + [f["detail"] for f in lead.flags if f["type"] in ("escalation", "screening_note")],
+                None if is_practice(lead) else seconds_to_first_call(lead), record_link(lead),
             ),
             "coordinator",
         ),
@@ -314,20 +382,23 @@ def tool_book_visit(s: Session, lead: Lead, slot_id: int) -> str:
         except Exception as exc:  # noqa: BLE001
             log.exception("sms to %s failed", kind)
             log_event(s, lead, "sms_failed", to=kind, error=str(exc)[:300])
+    who = "the office" if is_practice(lead) else "the research team"
     return (
         f"Booked for {slots.spoken(slot.starts_at)}. Read the time back, tell them a text confirmation is on its way, "
-        "and that the research team will confirm whether the study is a good fit at the visit."
+        f"and that {who} will check whether the study is a good fit at the visit."
     )
 
 
 def tool_opt_out(s: Session, lead: Lead, reason: str = "") -> str:
     if not is_suppressed(s, lead.phone):
         s.add(Suppression(phone=lead.phone, reason=reason or "asked not to be called"))
+    lead.next_attempt_at = None
     set_status(s, lead, LeadStatus.OPTED_OUT, reason or "asked not to be called")
     return "Done: they won't be called again. Apologize for the bother, confirm that, and end the call politely."
 
 
 def tool_not_interested(s: Session, lead: Lead, reason: str = "") -> str:
+    lead.next_attempt_at = None
     set_status(s, lead, LeadStatus.CLOSED, f"not interested{': ' + reason if reason else ''}")
     return "Noted. Thank them for their time, say they can reach out any time, and end the call politely."
 
@@ -349,7 +420,7 @@ def tool_flag_emergency(s: Session, lead: Lead, what_they_said: str) -> str:
 def send_sms_logged(s: Session, lead: Lead, to: str, body: str, kind: str) -> bool:
     """Send a text and record it on the lead's timeline either way."""
     try:
-        sid = sms.get_sms().send(to, body)
+        sid = sms_for(lead).send(to, body)
         log_event(s, lead, "sms_sent", to=kind, sid=sid, body=body)
         return True
     except Exception as exc:  # noqa: BLE001
@@ -368,11 +439,109 @@ def alert_coordinator(s: Session, lead: Lead, kind: str, detail: str) -> None:
     campaign = campaign_for(lead)
     body = sms.coordinator_alert(kind, lead.first_name, lead.last_name, lead.phone, detail, record_link(lead))
     try:
-        sid = sms.get_sms().send(campaign.coordinator_phone, body)
+        sid = sms_for(lead).send(campaign.coordinator_phone, body)
         log_event(s, lead, "sms_sent", to="coordinator", sid=sid, body=body)
     except Exception as exc:  # noqa: BLE001
         log.exception("coordinator alert failed")
         log_event(s, lead, "sms_failed", to="coordinator", error=str(exc)[:300])
+
+
+# ---------------------------------------------------------------- practice outreach tools
+
+MAX_DOB_TRIES = 2
+
+
+def tool_verify_identity(s: Session, lead: Lead, date_of_birth: str) -> str:
+    """Check the date of birth on our server. Only after this does Ava learn anything about the study."""
+    from app import outreach
+
+    if not is_practice(lead):
+        return "Not needed on this call."
+    if lead.identity_verified:
+        return "Already VERIFIED. " + _study_briefing(s, lead)
+    said = outreach.parse_date_of_birth(date_of_birth)
+    if said is None:
+        return "Couldn't understand that date. Ask again, kindly: month, day and year."
+    tries = s.scalar(
+        select(func.count()).select_from(Event).where(Event.lead_id == lead.id, Event.type == "identity_check_failed")
+    ) or 0
+    if lead.birth_date and said.isoformat() == lead.birth_date:
+        lead.identity_verified = True
+        log_event(s, lead, "identity_verified")
+        return "VERIFIED. " + _study_briefing(s, lead)
+    log_event(s, lead, "identity_check_failed")
+    if tries + 1 >= MAX_DOB_TRIES:
+        add_flag(lead, "identity", "date of birth didn't match")
+        set_status(s, lead, LeadStatus.NEEDS_HUMAN, "couldn't confirm identity")
+        lead.next_attempt_at = None
+        return ("NOT VERIFIED. Don't share anything about why you called. Say kindly that you'll have someone from "
+                "the office give them a call, and end the call. Never reveal the date on file.")
+    return "That doesn't match our records. Ask them, kindly, to say their date of birth once more. Never reveal the date on file."
+
+
+def _study_briefing(s: Session, lead: Lead) -> str:
+    campaign = campaign_for(lead)
+    facts = "\n".join(f"- {f.fact}" for f in campaign.approved_facts)
+    q = practice_next_question(lead)
+    nxt = (
+        f"If they'd like to come in, first ask: {_question_line(q)}"
+        if q
+        else "If they'd like to come in, call get_open_slots and offer two times."
+    )
+    touch = f"Personal line: {lead.personal_touch}\n" if lead.personal_touch else ""
+    return (
+        f"{touch}One-liner: {campaign.one_liner}\n"
+        "Pitch in one or two sentences, then ask if they'd like to come in for a screening visit. "
+        f"{nxt}\n"
+        f"FACTS, only if they ask (the only study information you may share; ClinicalTrials.gov {campaign.nct_id}):\n{facts}"
+    )
+
+
+def practice_next_question(lead: Lead):
+    """Practice calls ask each question once (a second time only if the answer was unclear).
+    Answers never block booking: the in-person screening visit decides eligibility."""
+    tries: dict[str, list[str]] = {}
+    for a in lead.answers:
+        tries.setdefault(a.question_id, []).append(a.verdict)
+    for q in campaign_for(lead).prescreen_questions:
+        verdicts = tries.get(q.id, [])
+        if not verdicts or (verdicts[-1] == "unsure" and len(verdicts) < 2):
+            return q
+    return None
+
+
+def _practice_answer(s: Session, lead: Lead, q, answer: str, verdict: str) -> str:
+    asked_before = sum(1 for a in lead.answers if a.question_id == q.id) - 1
+    log_event(s, lead, "answer", question_id=q.id, answer=answer, verdict=verdict)
+    if verdict == "unsure" and asked_before == 0:
+        return f"Recorded, but the answer wasn't clear. Gently ask again, for a yes or no: {_question_line(q)}"
+    if verdict in ("disqualify", "unsure"):
+        # A note for staff to go over at the screening visit, never a reason to stop the call.
+        add_flag(lead, "screening_note", f"{q.id.replace('_', ' ')}: {answer[:160]}")
+    nxt = practice_next_question(lead)
+    if nxt:
+        return f"Recorded. Ask next: {_question_line(nxt)}"
+    log_event(s, lead, "screening_complete", result="booking", notes=[f["detail"] for f in lead.flags if f["type"] == "screening_note"])
+    return ("Thanks, that's all the questions. Don't comment on their answers or on eligibility. Call get_open_slots now, "
+            "offer two or three times for the screening visit at the office, and book the one they pick with book_visit.")
+
+
+def tool_schedule_callback(s: Session, lead: Lead, when: str) -> str:
+    from app import outreach
+
+    window = outreach.parse_call_window(when)
+    if window is None:
+        add_flag(lead, "callback", when[:120])
+        set_status(s, lead, LeadStatus.NEEDS_HUMAN, f"callback requested: {when[:120]}")
+        lead.next_attempt_at = None
+        return "Noted: someone from the office will call them back then. Thank them and end the call."
+    outreach.set_call_window(s, lead, window, when)
+    return f"Done: the next call will be {outreach.describe_window(window)}. Confirm that, thank them, and end the call."
+
+
+def take_message(s: Session, name: str, callback_number: str, message: str, from_phone: str = "") -> str:
+    s.add(InboxMessage(channel="call", from_phone=from_phone or callback_number, name=name[:200], text=message[:1000]))
+    return "Message taken: someone from the office will call them back. Thank them and end the call."
 
 
 # ---------------------------------------------------------------- after the call
@@ -415,6 +584,9 @@ def call_ended(
     if lead.status == LeadStatus.CALLING:
         if voicemail or not user_spoke:
             _no_answer(s, lead, reason="voicemail left" if voicemail else "no answer")
+        elif is_practice(lead) and not lead.identity_verified:
+            # Hung up before we knew who we were talking to: same as a missed call (text + retry).
+            _no_answer(s, lead, reason="hung up before identity was confirmed")
         else:
             add_flag(lead, "incomplete", "call ended before screening finished")
             set_status(s, lead, LeadStatus.NEEDS_HUMAN, "call ended before screening finished")

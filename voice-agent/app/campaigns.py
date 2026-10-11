@@ -52,17 +52,21 @@ class BmiRules(BaseModel):
 
 class Campaign(BaseModel):
     id: str
+    # opt_in: the original ad opt-in flow, clinic details in this file.
+    # practice: a doctor's office calling its own pre-screened patients; the clinic details
+    # (office name, doctor, address, phones) come from the practice at call time.
+    mode: Literal["opt_in", "practice"] = "opt_in"
     demo_not_irb_approved: bool
     nct_id: str
     study_url: str
     sponsor: str
-    clinic_name: str
-    team_name: str
-    clinic_address: str
-    clinic_phone: str
-    coordinator_name: str
-    coordinator_phone: str
-    timezone: str
+    clinic_name: str = ""
+    team_name: str = ""
+    clinic_address: str = ""
+    clinic_phone: str = ""
+    coordinator_name: str = ""
+    coordinator_phone: str = ""
+    timezone: str = "America/New_York"
     calling_hours: CallingHours = CallingHours()
     visit_length_minutes: int = 60
     agent_name: str = "Ava"
@@ -81,6 +85,19 @@ class Campaign(BaseModel):
         if not self.approved_facts:
             raise ValueError("a campaign needs approved_facts")
         return self
+
+    def for_practice(self, profile) -> "Campaign":
+        """This campaign as spoken by one practice's office (see models.PracticeProfile)."""
+        office = f"Dr. {profile.doctor_name}'s office" if profile.doctor_name else f"your doctor's office at {profile.name}"
+        return self.model_copy(update={
+            "clinic_name": profile.name,
+            "team_name": office,
+            "clinic_address": profile.address,
+            "clinic_phone": profile.callback_phone,
+            "coordinator_name": f"{profile.name} office staff",
+            "coordinator_phone": profile.staff_phone,
+            "timezone": profile.timezone,
+        })
 
     def question(self, qid: str) -> Question | None:
         return next((q for q in self.prescreen_questions if q.id == qid), None)

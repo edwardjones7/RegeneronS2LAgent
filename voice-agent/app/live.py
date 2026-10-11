@@ -62,7 +62,7 @@ def _remote_state(call: Call) -> dict:
     return state
 
 
-def live_calls(s: Session, campaign_id: str | None = None) -> list[dict]:
+def live_calls(s: Session, campaign_id: str | None = None, practice_id: str | None = None) -> list[dict]:
     now = utcnow()
     q = (
         select(Call)
@@ -73,6 +73,9 @@ def live_calls(s: Session, campaign_id: str | None = None) -> list[dict]:
     )
     if campaign_id:
         q = q.where(Lead.campaign_id == campaign_id)
+    if practice_id:
+        # Real conversations only; simulated demo patients would flood the live view.
+        q = q.where(Lead.practice_id == practice_id, (Lead.simulated.is_(None)) | (Lead.simulated.is_(False)))
     out = []
     for call in s.scalars(q).all():
         lead = call.lead
@@ -85,6 +88,8 @@ def live_calls(s: Session, campaign_id: str | None = None) -> list[dict]:
             phase = "in_progress"  # text-mode test conversations have no phone leg
         if not ended and tw_status in ("completed", "busy", "no-answer", "failed", "canceled"):
             phase = "ending"
+        if not ended and call.direction == "inbound":
+            phase = "in_progress"  # they called us: already connected
         # Record first-seen timestamps (accurate to the dashboard's ~1.5s polling).
         if tw_status:
             call.telephony_status = tw_status
@@ -123,5 +128,6 @@ def live_calls(s: Session, campaign_id: str | None = None) -> list[dict]:
             "current_question": {"id": nxt.id, "ask": nxt.ask} if nxt and lead.status == LeadStatus.CALLING else None,
             "screening_state": decision.state,
             "transcript": transcript[-12:],
+            "direction": call.direction or "outbound",
         })
     return out

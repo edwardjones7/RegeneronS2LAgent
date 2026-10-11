@@ -6,6 +6,21 @@ Goal: fetch clinical trials from ClinicalTrials.gov and store them so a matching
 
 All API parameters below were verified live on 2026-10-10 (API version 2.0.5).
 
+## Implementation status (2026-10-10)
+
+**Phase 1 done: fetch + store.**
+- Schema: `supabase/migrations/00001_trials.sql` + `00002_rename_trial_sites_to_trial_locations.sql` (`trials`, `trial_locations`, `trial_sync_runs`; RLS on, backend-only).
+- Code: `site/src/lib/trials/` (`ctgov.ts` client, `normalize.ts` rows + age parsing, `scopes.ts`, `index.ts` sync).
+- Trigger: `GET/POST /api/trials/sync` with `Authorization: Bearer $CRON_SECRET`. Optional `?scope=` and `?mode=full|incremental`.
+- Scope `regeneron-interventional`: 147 open trials, 3,511 locations (1,679 US, 25 recruiting in NJ) on first sync.
+- Incremental runs drop the status filter so closed trials get their new status. Runs skip when `/version` `dataTimestamp` is unchanged.
+
+**Registry locations ≠ our sites.** `trial_locations` holds locations the sponsor has already activated. A practice whose doctor accepts a trial in our app is a new *candidate* site; that goes in our own tables (e.g. `trial_acceptances`), not here. For the investigator model, registry locations are context: gaps near a practice are the opportunity, nearby open locations are competition or a referral fallback.
+
+**Not built yet:** LLM criteria parsing (`trial_criteria`), embeddings (pgvector), scheduled cron for `site/`.
+
+**Privacy:** no `patient_trial_matches` table in Supabase. Matching runs inside the practice; only de-identified counts leave it (`.claude/AGENTS.MD` §5).
+
 ---
 
 ## 1. Fetching
@@ -114,6 +129,6 @@ Module names are what go in the `fields=` parameter.
 
 **Suggested tables**
 - `trials`: normalized fields, raw JSON, embedding
-- `trial_sites`: one row per location (geo, status, contacts)
+- `trial_locations`: one row per location (geo, status, contacts)
 - `trial_criteria`: parsed rules
 - `patient_trial_matches`: scores, per-criterion verdicts, evidence

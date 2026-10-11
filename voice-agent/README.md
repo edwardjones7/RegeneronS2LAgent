@@ -1,10 +1,56 @@
-# Call Me Maybe: speed-to-lead voice agent for clinical trials
+# Call Me Maybe: Ava, the doctor's office outreach agent
 
-When someone opts in to a clinical-trial ad, **Ava** calls them within seconds. She says up front that she's an automated assistant and that the call is recorded, explains the study in one plain sentence, and runs the pre-screen questions conversationally. She answers questions **only from approved study facts**, books a screening visit on the call, and texts a confirmation to the patient and an alert to the coordinator.
+**Practice outreach (current product):** when a doctor accepts a trial their patients were pre-screened for, **Ava** calls those patients from the doctor's own office and books a screening visit. The doctor does nothing else. Design: [`docs/superpowers/specs/2026-10-11-outbound-caller-design.md`](../docs/superpowers/specs/2026-10-11-outbound-caller-design.md).
 
-> **Hackathon demo. Not IRB-approved.** The study wording is drawn from the public ClinicalTrials.gov record **[NCT07685808](https://clinicaltrials.gov/study/NCT07685808)** (Regeneron, olatorepatide, Phase 2, adults with overweight/obesity without diabetes). Clinic details, slots, and phone numbers are demo data. Only call teammates' phones.
+The original **speed-to-lead** flow (an ad opt-in triggers a call within seconds) still works and is described further down.
 
-> **Location:** this app lives in `voice-agent/` and will be migrated into the Next.js backend in `site/`. Run every command below from `voice-agent/`. The Vercel project for it needs its Root Directory set to `voice-agent`.
+> **Hackathon demo. Not IRB-approved.** Patients are synthetic (Synthea, `../data/`). Study wording comes from the public ClinicalTrials.gov records, simplified. Only teammates' real phones are ever called; everyone else is simulated.
+
+> **Location:** this app lives in `voice-agent/` and will be migrated into the Next.js backend in `site/`. Run every command below from `voice-agent/`.
+
+## Practice outreach
+
+1. **The doctor accepts a trial** (Trials page, or `POST /practices/{id}/trials/{nct}/accept`). The caller builds the call list from that practice's pre-screen candidates (`app/prescreen.py`, reading `../protocols/`). Patients needing chart review aren't called until staff clear them.
+2. **Ava calls,** 10 at a time, 9am–8pm in the patient's time zone, Monday to Saturday:
+   - She says she's an automated assistant from the doctor's office and that the call is recorded, and asks for the patient by first name.
+   - She checks the date of birth through `verify_identity`. **Our server checks it; Ava and the LLM never see it.** Only then does the tool hand her the study one-liner, the approved facts, one line from the chart ("you were in to see Dr. Rivera back in March") and the questions.
+   - She asks one or two questions the chart can't answer, then books a screening visit at the office.
+3. **No answer:**
+   - A voicemail with no study details, if a machine picks up.
+   - A text offering 3 real times; replying 1, 2 or 3 books one.
+   - A retry the next day at a different time of day.
+   - **After 3 tries, the staff queue.**
+4. **Text replies:**
+   - A number books a time.
+   - "After 5" or "mornings" moves the next call.
+   - "Not interested" ends this trial's outreach.
+   - STOP stops everything.
+   - Anything unclear goes to staff.
+5. **Callbacks:** when the patient calls the office number back, ElevenLabs asks `/webhooks/elevenlabs/inbound` who it is. Ava greets them, re-checks identity, and picks up the thread. An unknown caller gets a message taken for the staff inbox.
+6. **After booking:** a confirmation text with a calendar invite, a reminder the day before, and replies C to confirm or R to reschedule.
+
+**Privacy:**
+- **What ElevenLabs gets:** before verification, only the first name, office, doctor and callback number. The birth date stays on our server.
+- **Texts and voicemails** never name the study or a condition.
+- **Patients are read per practice** (`app/ehr.py`), from Supabase or the committed Synthea file.
+
+**Demo mode:**
+- **Real phones:** set `DEMO_PHONES` to teammates' verified numbers. They go to the first candidates.
+- **Everyone else is simulated** (`app/simulate_practice.py`). Outcomes are fixed per patient, and texts are logged, never sent.
+- **Fast-forward:** `DEMO_DAY_SECONDS=20` makes a "day" between tries last 20 seconds, so the whole 3-day sequence plays out on screen.
+
+```bash
+make outreach-demo      # mock mode + fast-forward on http://localhost:8000/dashboard
+```
+
+The **office dashboard** (`web/`) has these pages:
+
+| Page | What it shows |
+|---|---|
+| **Outreach** | KPIs, the stage bar, a patient list with each patient's 3-try sequence, live calls, and the staff queue (call again, I reached them, drop, clear chart review) |
+| **Trials** | Candidate counts and the accept button |
+| **Calendar** | Booked visits |
+| **Inbox** | Unknown callers and texters |
 
 ## What's in it
 
@@ -42,7 +88,7 @@ When someone opts in to a clinical-trial ad, **Ava** calls them within seconds. 
 ```bash
 uv sync
 uv run python scripts/mock_call.py --persona all   # 7 scripted calls through the real backend
-uv run pytest                                       # 82 tests
+uv run pytest                                       # 114 tests
 ```
 
 ## Run it for real

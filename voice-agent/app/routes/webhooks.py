@@ -152,3 +152,43 @@ def handle_event(payload: dict) -> str:
             service.call_failed(s, call, data.get("failure_reason") or "unknown")
             return "call_failed"
         return "ignored"
+
+
+@router.post("/elevenlabs/inbound")
+async def elevenlabs_inbound(request: Request):
+    """Someone called the office number. ElevenLabs asks us who it is before Ava answers.
+
+    Registered as the agent's conversation-initiation webhook (scripts/setup_elevenlabs.py).
+    Known caller: Ava greets them by name and picks up the outreach thread (identity is still
+    checked before anything health-related). Unknown caller: she takes a message for staff.
+    """
+    import hmac
+
+    from app import outreach
+    from app.voice import practice_override
+
+    if not hmac.compare_digest(request.headers.get("x-tool-secret", ""), get_settings().tool_secret):
+        raise HTTPException(401, "bad tool secret")
+    data = await request.json()
+    caller = data.get("caller_id") or ""
+    with session_scope() as s:
+        try:
+            phone = service.normalize_phone(caller)
+        except service.LeadError:
+            phone = ""
+        lead = outreach.lead_for_caller(s, phone) if phone else None
+        if lead is None:
+            log.info("inbound call from unknown number")
+            return {
+                "type": "conversation_initiation_client_data",
+                "dynamic_variables": {"lead_id": "0", "first_name": "", "office_name": "your doctor's office",
+                                      "doctor_name": "", "callback_number": "", "caller_id": phone},
+                "conversation_config_override": practice_override(inbound=True, known_caller=False),
+            }
+        outreach.start_inbound_call(s, lead, data.get("call_sid"))
+        variables = outreach.dynamic_variables(s, lead)
+    return {
+        "type": "conversation_initiation_client_data",
+        "dynamic_variables": {**variables, "caller_id": phone},
+        "conversation_config_override": practice_override(inbound=True),
+    }

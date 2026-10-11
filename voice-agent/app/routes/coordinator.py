@@ -102,7 +102,9 @@ def reschedule(lead_id: int, body: RescheduleIn, s: Session = Depends(get_sessio
     lead = _lead(s, lead_id)
     old = service.booked_slot(s, lead)
     new = s.get(Slot, body.slot_id)
-    if new is None or new.campaign_id != lead.campaign_id:
+    # Practice outreach: one calendar per practice, shared by its trials.
+    wrong = new is None or (new.practice_id != lead.practice_id if lead.practice_id else new.campaign_id != lead.campaign_id)
+    if wrong:
         raise HTTPException(404, "unknown slot")
     if not slots.book(s, new.id, lead.id):
         raise HTTPException(409, "That time was just taken.")
@@ -133,6 +135,19 @@ def visits(campaign_id: str, s: Session = Depends(get_session)):
     rows = s.execute(
         select(Slot, Lead).join(Lead, Lead.id == Slot.booked_lead_id).where(Slot.campaign_id == campaign_id).order_by(Slot.starts_at)
     ).all()
+    return _visit_rows(rows)
+
+
+@router.get("/practices/{practice_id}/visits")
+def practice_visits(practice_id: str, s: Session = Depends(get_session)):
+    """Every booked screening visit at one practice, across its accepted trials."""
+    rows = s.execute(
+        select(Slot, Lead).join(Lead, Lead.id == Slot.booked_lead_id).where(Slot.practice_id == practice_id).order_by(Slot.starts_at)
+    ).all()
+    return _visit_rows(rows)
+
+
+def _visit_rows(rows) -> list[dict]:
     return [
         {"slot_id": sl.id, "starts_at_local": sl.starts_at.isoformat(), "lead_id": l.id, "first_name": l.first_name,
          "last_name": l.last_name, "phone": l.phone, "status": l.status}

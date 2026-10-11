@@ -7,10 +7,12 @@ from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parent.parent
+REPO = ROOT.parent  # the monorepo: data/, protocols/, site/
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=ROOT / ".env", extra="ignore")
+    # Later files win: the repo-root .env, then site/.env (Supabase keys), then voice-agent/.env.
+    model_config = SettingsConfigDict(env_file=(REPO / ".env", REPO / "site" / ".env", ROOT / ".env"), extra="ignore")
 
     # With MOCK_MODE on, no call or text leaves the machine: voice and SMS are simulated.
     mock_mode: bool = True
@@ -53,6 +55,27 @@ class Settings(BaseSettings):
     # Max dial attempts per lead (first call + retries).
     max_attempts: int = 3
     worker_interval_secs: int = 30
+
+    # ---- Practice outreach
+    # The EHR stand-in. Without these, patients come from data/synthea-nj.json (tests, offline demo).
+    supabase_url: str = ""
+    supabase_secret_key: str = ""
+    patients_file: Path = REPO / "data" / "synthea-nj.json"
+    protocols_dir: Path = REPO / "protocols"
+    # How many calls may be in progress at once across all practices.
+    batch_size: int = 10
+    # Real, verified phone numbers (comma-separated) given to the first candidates of each accepted
+    # trial, so the demo rings real phones. Everyone else is simulated. Only people who agreed.
+    demo_phones: str = ""
+    # Demo fast-forward: when > 0, a "day" between attempts lasts this many seconds and calling
+    # hours are ignored. 0 = real timing.
+    demo_day_seconds: int = 0
+    # Seconds a simulated call takes before its outcome lands.
+    simulated_call_secs: int = 12
+
+    @property
+    def demo_phone_list(self) -> list[str]:
+        return [p.strip() for p in self.demo_phones.split(",") if p.strip()]
 
 
 @lru_cache

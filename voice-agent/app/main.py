@@ -13,7 +13,7 @@ from starlette.concurrency import run_in_threadpool
 from app import db, messaging, service
 from app.campaigns import all_campaigns
 from app.config import ROOT, get_settings
-from app.routes import coordinator, dashboard, leads, read_api, tools, webhooks
+from app.routes import coordinator, dashboard, leads, practices, read_api, tools, webhooks
 from app.models import Lead
 from app.slots import seed_slots
 
@@ -24,7 +24,10 @@ log = logging.getLogger("app")
 def worker_tick() -> int:
     """Dial queued leads whose calling window opened and no-answer leads due for a retry."""
     webhooks.poll_open_calls()
+    from app import simulate_practice
+
     with db.session_scope() as s:
+        simulate_practice.resolve_due(s)
         service.settle_stale_calls(s)
         messaging.send_due_reminders(s)
         due = service.due_leads(s)
@@ -49,11 +52,14 @@ async def lifespan(app: FastAPI):
     db.init_engine()
     with db.session_scope() as s:
         for c in all_campaigns().values():
-            seed_slots(s, c)
+            if c.mode == "opt_in":  # practice slots are created per practice when a trial is accepted
+                seed_slots(s, c)
     s = get_settings()
     interval = s.worker_interval_secs
     if not s.elevenlabs_webhook_secret and not s.mock_mode:
-        interval = min(interval, 15)  # no webhook: we poll ElevenLabs for call results, so check often
+        interval = min(interval, 15)
+    if s.demo_day_seconds:
+        interval = min(interval, 3)  # demo fast-forward: keep the sequence moving on screen  # no webhook: we poll ElevenLabs for call results, so check often
     log.info("mock_mode=%s vercel=%s public_base_url=%s", s.mock_mode, s.vercel, s.public_base_url)
     # On Vercel there is no long-running process: Vercel Cron calls /cron/tick instead.
     task = None if s.vercel else asyncio.create_task(_worker_loop(interval))
@@ -69,6 +75,7 @@ app.include_router(tools.router)
 app.include_router(webhooks.router)
 app.include_router(read_api.router)
 app.include_router(coordinator.router)
+app.include_router(practices.router)
 app.include_router(dashboard.router)
 app.include_router(dashboard.auth_router)
 
