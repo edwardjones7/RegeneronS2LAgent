@@ -173,6 +173,18 @@ def test_next_attempt_is_the_next_day_at_a_different_time():
         assert outreach.next_attempt(lead, tue_10am).hour == 21  # 17:00 Eastern = 21:00 UTC
 
 
+def test_call_sundays_lets_the_caller_dial_on_sunday():
+    lead = Lead(timezone="America/New_York", call_window=None)
+    sun_noon = datetime(2026, 10, 18, 16, 0)  # Sunday 12:00 Eastern
+    with patch("app.outreach.fast_forward", return_value=0):
+        assert not outreach.in_calling_hours(lead, sun_noon)
+        with patch("app.outreach.get_settings") as gs:
+            gs.return_value.call_sundays = True
+            assert outreach.in_calling_hours(lead, sun_noon)
+            sat = datetime(2026, 10, 17, 14, 0)
+            assert outreach.next_attempt(lead, sat).date() == date(2026, 10, 18)  # Sunday allowed
+
+
 def test_batches_cap_calls_in_progress(s):
     accept(s)
     with patch("app.service.get_settings") as gs:

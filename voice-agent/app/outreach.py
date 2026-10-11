@@ -236,7 +236,7 @@ def next_attempt(lead: Lead, now: datetime, last_call_local: datetime | None = N
     if hour >= end.hour or hour < start.hour:
         hour = start.hour + (1 if start.hour == CALL_START.hour else 0)
     day = local_now.date() + timedelta(days=1)
-    if day.weekday() == 6:  # Sunday: no calls
+    if day.weekday() == 6 and not get_settings().call_sundays:  # Sunday: no calls unless allowed
         day += timedelta(days=1)
     target = datetime.combine(day, time(hour, 0 if hour > start.hour else start.minute), tzinfo=ZoneInfo(tz))
     return _to_utc_naive(target)
@@ -247,7 +247,7 @@ def in_calling_hours(lead: Lead, now: datetime) -> bool:
         return True
     local = _local(now, lead.timezone or "America/New_York")
     start, end = window_range(lead.call_window)
-    return local.weekday() != 6 and start <= local.time() < end
+    return (local.weekday() != 6 or get_settings().call_sundays) and start <= local.time() < end
 
 
 def next_calling_time(lead: Lead, now: datetime) -> datetime:
@@ -259,7 +259,7 @@ def next_calling_time(lead: Lead, now: datetime) -> datetime:
     start, end = window_range(lead.call_window)
     for add in range(8):
         day = local.date() + timedelta(days=add)
-        if day.weekday() == 6:
+        if day.weekday() == 6 and not get_settings().call_sundays:
             continue
         open_at = datetime.combine(day, start, tzinfo=tz)
         close_at = datetime.combine(day, end, tzinfo=tz)
