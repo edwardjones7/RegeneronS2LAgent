@@ -88,19 +88,7 @@ export function AppShell({ title, active, children }: AppShellProps) {
             <span className="text-[15px] font-semibold tracking-[-0.02em]">trialmatch</span>
           </Link>
 
-          <div className="mt-6 flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/60 p-2.5 backdrop-blur-sm">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#A3CEF6] to-[#E0F2D3] text-[12px] font-semibold text-ink">
-              {initials(DEMO_PRACTICE.doctor)}
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-[13px] font-semibold">{DEMO_PRACTICE.doctor}</span>
-              <span className="block truncate text-[11.5px] text-ink-3" title="Illustrative practice name for the demo">
-                {DEMO_PRACTICE.name}
-              </span>
-            </span>
-          </div>
-
-          <nav className="mt-5 flex flex-col gap-0.5">
+          <nav className="mt-7 flex flex-col gap-0.5">
             {NAV.map((item) => (
               <Link
                 key={item.key}
@@ -130,15 +118,16 @@ export function AppShell({ title, active, children }: AppShellProps) {
             Run pre-screen
           </button>
 
-          <div className="mt-auto rounded-2xl bg-surface-2 p-3 text-[12px] leading-snug text-ink-2">
-            <span className="flex items-center gap-1.5 font-semibold text-ink">
-              <svg {...ICON_PROPS} className="size-3.5 shrink-0">
-                <rect x="5" y="11" width="14" height="9" rx="2" />
-                <path d="M8 11V8a4 4 0 018 0v3" />
-              </svg>
-              Patient data stays here
+          <div className="mt-auto flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/60 p-2.5 backdrop-blur-sm">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#A3CEF6] to-[#E0F2D3] text-[12px] font-semibold text-ink">
+              {initials(DEMO_PRACTICE.doctor)}
             </span>
-            <span className="mt-1 block">Records stay scoped to your practice. Sponsors only see counts. Patients stay with you.</span>
+            <span className="min-w-0">
+              <span className="block truncate text-[13px] font-semibold">{DEMO_PRACTICE.doctor}</span>
+              <span className="block truncate text-[11.5px] text-ink-3" title="Illustrative practice name for the demo">
+                {DEMO_PRACTICE.name}
+              </span>
+            </span>
           </div>
         </aside>
 

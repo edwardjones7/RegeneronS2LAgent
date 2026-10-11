@@ -3,29 +3,26 @@ import type { TherapeuticArea } from '@/lib/trials/areas';
 import { cn } from '@/lib/utils/cn';
 
 /** Line drawings per therapeutic area, on a 200×200 canvas. Drawn in currentColor. */
-const ART: Record<TherapeuticArea, ReactNode> = {
+export const AREA_ART: Record<TherapeuticArea, ReactNode> = {
   'solid-tumors': (
-    <>
-      <path d="M60 70c10-30 50-38 72-20 24 4 40 30 30 54 8 26-14 52-42 50-20 16-52 8-60-14-22-10-24-44 0-70z" />
-      <circle cx="88" cy="88" r="11" />
-      <circle cx="122" cy="80" r="7" />
-      <circle cx="112" cy="120" r="14" />
-      <circle cx="112" cy="120" r="5" />
-      <circle cx="78" cy="124" r="6" />
-      <circle cx="140" cy="108" r="4" />
-      <path d="M60 70L42 54M162 104l22 4M124 154l6 22M40 122l-22 8M132 50l10-20" />
-    </>
+    // Scaled up about the center so it carries the same weight as the other drawings.
+    <g transform="translate(-26 -26) scale(1.25)" strokeWidth={1.28}>
+      {/* A lumpy mass of cells. */}
+      <path d="M60 72a26 26 0 0144-14 24 24 0 0140 10 24 24 0 0114 40 26 26 0 01-18 42 24 24 0 01-42 6 26 26 0 01-40-24 24 24 0 012-60z" />
+      <circle cx="86" cy="94" r="12" />
+      <circle cx="120" cy="88" r="7" />
+      <circle cx="114" cy="122" r="14" />
+      <circle cx="80" cy="128" r="6" />
+    </g>
   ),
   'blood-cancers': (
     <>
-      <path d="M100 16c-30 44-58 78-58 110a58 58 0 00116 0c0-32-28-66-58-110z" />
-      <ellipse cx="82" cy="132" rx="18" ry="11" />
-      <ellipse cx="82" cy="132" rx="7" ry="4" />
-      <circle cx="120" cy="110" r="13" />
-      <circle cx="120" cy="110" r="5" />
-      <ellipse cx="118" cy="152" rx="12" ry="8" />
-      <circle cx="90" cy="96" r="4" />
-      <circle cx="140" cy="140" r="3" />
+      {/* A drop, with a highlight and two red cells. */}
+      <path d="M100 18C82 46 46 86 46 124a54 54 0 00108 0c0-38-36-78-54-106z" />
+      <path d="M64 120c0-14 6-28 16-40" />
+      <ellipse cx="96" cy="134" rx="22" ry="13" />
+      <ellipse cx="96" cy="134" rx="9" ry="4.5" />
+      <circle cx="126" cy="110" r="9" />
     </>
   ),
   immunology: (
@@ -49,10 +46,10 @@ const ART: Record<TherapeuticArea, ReactNode> = {
   ),
   cardiovascular: (
     <>
-      <path d="M100 176C55 146 28 116 28 82a36 36 0 0172-12 36 36 0 0172 12c0 34-27 64-72 94z" />
-      <path d="M86 56V36c0-10 8-16 18-16h10c10 0 16 8 16 18v18" />
-      <path d="M104 20V6M120 22l5-14" />
-      <path d="M44 104h30l8-18 12 36 10-30 8 12h44" />
+      {/* A symmetric heart, a highlight, and a heartbeat across it. */}
+      <path d="M100 170C60 142 28 112 28 78c0-26 20-44 42-44 14 0 24 8 30 18 6-10 16-18 30-18 22 0 42 18 42 44 0 34-32 64-72 92z" />
+      <path d="M46 78c0-12 8-22 20-24" />
+      <path d="M48 104h30l9-20 13 40 10-30 7 10h35" />
     </>
   ),
   // Shifted right so the kidney's outline isn't lost off the card's left edge.
@@ -66,11 +63,12 @@ const ART: Record<TherapeuticArea, ReactNode> = {
   ),
   eye: (
     <>
-      <path d="M12 100C44 54 156 54 188 100 156 146 44 146 12 100z" />
-      <circle cx="100" cy="100" r="31" />
-      <circle cx="100" cy="100" r="12" />
-      <path d="M113 89a15 15 0 017 9" />
-      <path d="M40 74l-9-13M62 62l-5-15M100 56V39M138 62l5-15M160 74l9-13" />
+      {/* Almond eye: two lids, a crease above, iris, pupil, one glint. */}
+      <path d="M20 100Q100 30 180 100Q100 170 20 100z" />
+      <path d="M44 74Q100 30 156 74" />
+      <circle cx="100" cy="100" r="28" />
+      <circle cx="100" cy="100" r="11" />
+      <path d="M110 86a16 16 0 017 8" />
     </>
   ),
   neurology: (
@@ -82,12 +80,9 @@ const ART: Record<TherapeuticArea, ReactNode> = {
   ),
   other: (
     <>
-      <circle cx="100" cy="70" r="34" />
-      <path d="M28 192c4-46 34-72 72-72s68 26 72 72" />
-      <circle cx="86" cy="72" r="9" />
-      <circle cx="114" cy="72" r="9" />
-      <path d="M95 72h10M66 68h11M123 68h11M90 90c6 5 14 5 20 0" />
-      <path d="M72 46c8-10 20-14 28-14s20 4 28 14" />
+      {/* A person: head and shoulders, nothing more. */}
+      <circle cx="100" cy="70" r="30" />
+      <path d="M40 186c0-42 26-66 60-66s60 24 60 66" />
     </>
   ),
 };
@@ -111,7 +106,7 @@ export function AreaArt({ area, className }: { area: TherapeuticArea; className?
         className
       )}
     >
-      {ART[area]}
+      {AREA_ART[area]}
     </svg>
   );
 }
