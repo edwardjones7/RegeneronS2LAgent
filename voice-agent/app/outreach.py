@@ -118,7 +118,8 @@ def accept_trial(s: Session, practice_id: str, nct_id: str, doctor_name: str) ->
     if doctor_name.strip():
         prof.doctor_name = clean_doctor_name(doctor_name)
     results = prescreen.screen_practice(practice_id, nct_id)
-    candidates = sorted((r for r in results if r.bucket == "candidate"), key=lambda r: r.patient["name"])
+    # Best matches first when the engine ranked them; otherwise alphabetical.
+    candidates = sorted((r for r in results if r.bucket == "candidate"), key=lambda r: (-(r.score or 0), r.patient["name"]))
     review = [r for r in results if r.bucket == "chart_review"]
 
     acc = TrialAcceptance(

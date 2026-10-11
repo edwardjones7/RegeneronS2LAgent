@@ -431,3 +431,20 @@ def test_booked_patient_calling_back_can_keep_or_move_their_visit(s):
     assert service.booked_slot(s, lead).id == new_slot and lead.status == LeadStatus.BOOKED
     s.refresh(lead)
     assert any(e.type == "visit_rescheduled" for e in lead.events)
+
+
+def test_call_list_comes_from_the_engine_when_it_has_run(s):
+    patients = prescreen.ehr.list_patients(PRACTICE)
+    a, b, c = patients[0]["id"], patients[1]["id"], patients[2]["id"]
+    rows = [
+        {"patient_id": b, "bucket": "candidate", "score": 0.95, "uncertain_criteria": []},
+        {"patient_id": a, "bucket": "candidate", "score": 0.60, "uncertain_criteria": []},
+        {"patient_id": c, "bucket": "chart_review", "score": 0.5, "uncertain_criteria": ["inc_2 accept 0.61: BMI?"]},
+    ]
+    with patch("app.ehr.prescreen_results", return_value=rows):
+        assert prescreen.counts(PRACTICE, TRIAL) == {"candidate": 2, "chart_review": 1, "not_a_match": len(patients) - 3}
+        accept(s)
+    queued = sorted(leads(s, LeadStatus.QUEUED), key=lambda x: x.id)
+    assert [x.patient_id for x in queued] == [b, a]  # best match is called first
+    review = leads(s, LeadStatus.CHART_REVIEW)
+    assert len(review) == 1 and "BMI?" in review[0].flags[0]["detail"]
