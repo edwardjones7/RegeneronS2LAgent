@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getEnv } from '@/lib/utils/envManager';
 
 /**
- * Server-only Supabase client using the SERVICE ROLE key. It bypasses RLS, so
+ * Server-only Supabase client using the SECRET key (formerly service_role). It bypasses RLS, so
  * every API route must enforce authorization in code before calling it.
  *
  * Never import this from a component or any browser code.
@@ -12,8 +12,8 @@ import { getEnv } from '@/lib/utils/envManager';
  * de-identified aggregate counts only.
  */
 const supabase = createClient(
-  getEnv('NEXT_PUBLIC_SUPABASE_URL'),
-  getEnv('SUPABASE_SERVICE_ROLE_KEY'),
+  getEnv('SUPABASE_URL'),
+  getEnv('SUPABASE_SECRET_KEY'),
   {
     auth: {
       autoRefreshToken: false,

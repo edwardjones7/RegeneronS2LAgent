@@ -1,18 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
-import { getEnv } from '@/lib/utils/envManager';
-
-const supabaseAuth = createClient(
-  getEnv('NEXT_PUBLIC_SUPABASE_URL'),
-  getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
-);
+import supabase from '@/lib/utils/db/client';
 
 /**
  * Low-level JWT verification via Supabase Auth.
  * Returns the user ID if valid, null otherwise.
  */
 export async function verifyToken(token: string): Promise<string | null> {
-  const { data, error } = await supabaseAuth.auth.getUser(token);
+  const { data, error } = await supabase.auth.getUser(token);
   if (error || !data.user) return null;
   return data.user.id;
 }

@@ -15,7 +15,7 @@ HackRU 2026, Regeneron challenge. Trials come to doctors with the patients alrea
 
 ```bash
 cd site
-cp .env.example .env.local   # fill in Supabase URL + keys
+cp .env.example .env         # fill in Supabase URL + keys
 npm install
 npm run dev                  # http://localhost:3000, health check at /api/health
 ```

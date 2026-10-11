@@ -3,7 +3,7 @@ import supabase from '@/lib/utils/db/client';
 
 /**
  * Public health check: confirms the server can reach Supabase with the
- * service role key. Emits only an ok/error status, no data.
+ * secret key. Emits only an ok/error status, no data.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
