@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { type ReactNode, useCallback, useState } from 'react';
+import { PipelineWalkthrough } from '@/components/walkthrough/PipelineWalkthrough';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { cn } from '@/lib/utils/cn';
 
@@ -69,6 +70,9 @@ const initials = (name: string) =>
 
 /** Sidebar + main column. Every dashboard page renders inside this. */
 export function AppShell({ title, active, children }: AppShellProps) {
+  const [walkthrough, setWalkthrough] = useState(false);
+  const closeWalkthrough = useCallback(() => setWalkthrough(false), []);
+
   return (
     <>
       <Head>
@@ -112,6 +116,20 @@ export function AppShell({ title, active, children }: AppShellProps) {
             ))}
           </nav>
 
+          {/* Demo: an animated walkthrough of the pipeline (fetch → Jev → dashboard). Visual only. */}
+          <button
+            type="button"
+            onClick={() => setWalkthrough(true)}
+            className="group mt-4 flex h-10 items-center gap-2.5 rounded-xl border border-white/80 bg-white/60 px-2.5 text-[13px] font-semibold text-ink shadow-[0_1px_2px_rgba(30,36,48,0.05)] backdrop-blur-sm transition-colors hover:bg-white"
+          >
+            <span className="flex size-6 items-center justify-center rounded-full bg-linear-to-br from-[#FF9F80] via-[#F7B6CF] to-[#78B4F4] text-white">
+              <svg className="ml-px size-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M8 5.5v13a1 1 0 001.5.86l10.5-6.5a1 1 0 000-1.72L9.5 4.64A1 1 0 008 5.5z" />
+              </svg>
+            </span>
+            Run pre-screen
+          </button>
+
           <div className="mt-auto rounded-2xl bg-surface-2 p-3 text-[12px] leading-snug text-ink-2">
             <span className="flex items-center gap-1.5 font-semibold text-ink">
               <svg {...ICON_PROPS} className="size-3.5 shrink-0">
@@ -126,6 +144,7 @@ export function AppShell({ title, active, children }: AppShellProps) {
 
         <main className="min-w-0 flex-1 px-8 py-7">{children}</main>
       </div>
+      {walkthrough && <PipelineWalkthrough onClose={closeWalkthrough} />}
     </>
   );
 }
