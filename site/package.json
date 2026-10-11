@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test 'src/**/*.test.ts'",
+    "criteria": "node --env-file-if-exists=../.env scripts/preprocess-criteria.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

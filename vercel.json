@@ -1,0 +1,41 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "site": {
+      "root": "site",
+      "framework": "nextjs",
+      "bindings": [
+        { "type": "service", "service": "caller", "format": "url", "env": "CALLER_URL" }
+      ]
+    },
+    "caller": {
+      "root": "voice-agent",
+      "entrypoint": "app.main:app",
+      "buildCommand": "rm -rf protocols data && cp -R ../protocols protocols && mkdir data && cp ../data/synthea-nj.json data/",
+      "functions": {
+        "app/main.py": {
+          "maxDuration": 300,
+          "excludeFiles": "{web/**,tests/**,docs/**,images/**,.superpowers/**,.venv/**,*.db,*.log}"
+        }
+      }
+    },
+    "dashboard": {
+      "root": "voice-agent/web",
+      "framework": "nextjs",
+      "rewrites": [{ "source": "/demo", "destination": "/dashboard/opt-in" }]
+    }
+  },
+  "rewrites": [
+    { "source": "/dashboard/leads/(.*)", "destination": { "service": "caller" } },
+    { "source": "/dashboard", "destination": { "service": "dashboard" } },
+    { "source": "/dashboard/(.*)", "destination": { "service": "dashboard" } },
+    { "source": "/demo", "destination": { "service": "dashboard" } },
+    { "source": "/(campaigns|practices|inbox|leads|calls|simulate|scorecard|visits|tools|webhooks|auth|cron)/(.*)", "destination": { "service": "caller" } },
+    { "source": "/(campaigns|practices|inbox|leads|health)", "destination": { "service": "caller" } },
+    { "source": "/(.*)", "destination": { "service": "site" } }
+  ],
+  "crons": [
+    { "path": "/cron/tick", "schedule": "0 14 * * *" },
+    { "path": "/api/trials/sync", "schedule": "0 6 * * *" }
+  ]
+}

@@ -32,7 +32,9 @@ const UNAVAILABLE: TrialOutreach = {
 function config() {
   const url = getEnvOptional('CALLER_URL')?.replace(/\/$/, '');
   const key = getEnvOptional('CALLER_API_KEY');
-  return url && key ? { url, key, publicUrl: getEnvOptional('CALLER_PUBLIC_URL')?.replace(/\/$/, '') ?? url } : null;
+  // On Vercel, CALLER_URL is the service binding (internal); the caller's dashboard is on this same domain.
+  const publicUrl = getEnvOptional('CALLER_PUBLIC_URL')?.replace(/\/$/, '') ?? (process.env.VERCEL ? '' : url);
+  return url && key ? { url, key, publicUrl } : null;
 }
 
 async function call<T>(path: string, init?: { method: 'POST'; body: unknown }): Promise<T> {

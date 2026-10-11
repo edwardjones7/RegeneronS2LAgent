@@ -1,12 +1,13 @@
 """Which of a practice's patients are pre-screen candidates for a trial.
 
-This evaluates the plain-code criteria in protocols/*.json (format: protocols/README.md), so the
-caller can build its call list. The backend's engine is the source of truth for the counts a
-doctor sees; when it exposes per-patient results, `screen_practice` should read those instead so
-the number the doctor saw is the number that gets called.
+Source of truth: the matching engine (site/src/engine, Gemini criteria + Jev), which writes one
+row per evaluated patient to Supabase `prescreen_results`. When it has run for a practice and
+trial, `screen_practice` uses those rows, so the patients Ava calls are exactly the ones counted
+for the doctor, best matches first.
 
-Criteria decided by Jev aren't evaluated here: until Jev has answered, they count as UNKNOWN,
-so those patients land in chart review and are never called before a person clears them.
+Fallback (no database, or the engine hasn't run for that pair): evaluate the plain-code criteria
+in protocols/*.json (format: protocols/README.md). Jev criteria count as UNKNOWN there, so those
+patients land in chart review and are never called before a person clears them.
 """
 
 from __future__ import annotations
@@ -42,6 +43,8 @@ class Screened:
     bucket: str  # candidate | chart_review | not_a_match
     results: dict[str, str] = field(default_factory=dict)  # criterion id -> MATCH / NO_MATCH / UNKNOWN
     review_reasons: list[str] = field(default_factory=list)
+    score: float | None = None  # engine ranking within a bucket (higher first); None from the fallback
+    source: str = "rules"  # "engine" (prescreen_results) or "rules" (the fallback below)
 
 
 def _age(birth: str, as_of: date) -> int:
@@ -129,12 +132,30 @@ def screen(protocol_: dict, p: dict, as_of: date) -> Screened:
 
 
 def screen_practice(practice_id: str, nct_id: str, as_of: date | None = None) -> list[Screened]:
-    """Every patient of one practice, screened against one trial."""
+    """Every patient of one practice, screened against one trial: the engine's results when it
+    has run for this practice and trial, else the protocol rules."""
+    patients = ehr.list_patients(practice_id)
+    rows = ehr.prescreen_results(practice_id, nct_id)
+    if rows:
+        by_id = {p["id"]: p for p in patients}
+        out, seen = [], set()
+        for r in rows:
+            p = by_id.get(r["patient_id"])
+            if p is None:
+                continue
+            seen.add(p["id"])
+            reasons = list(r.get("uncertain_criteria") or []) if r["bucket"] == "chart_review" else []
+            out.append(Screened(patient=p, bucket=r["bucket"], review_reasons=reasons or (
+                ["The pre-screen wasn't sure about a criterion"] if r["bucket"] == "chart_review" else []),
+                score=r.get("score"), source="engine"))
+        # Patients the engine didn't evaluate didn't match the trial's condition at all.
+        out += [Screened(patient=p, bucket="not_a_match", source="engine") for p in patients if p["id"] not in seen]
+        return out
     proto = protocol(nct_id)
     if proto is None:
         raise KeyError(nct_id)
     as_of = as_of or date.today()
-    return [screen(proto, p, as_of) for p in ehr.list_patients(practice_id)]
+    return [screen(proto, p, as_of) for p in patients]
 
 
 def counts(practice_id: str, nct_id: str) -> dict[str, int]:

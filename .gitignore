@@ -24,3 +24,14 @@ next-env.d.ts
 /web/
 /app/
 /tests/
+
+# Matcher run output (patient-level results)
+/data/matches/
+.claude/worktrees/
+# Structured criteria written locally by site/scripts/preprocess-criteria.ts (stored in Supabase trials)
+/data/criteria/
+
+# Vercel CLI link and local build output; Python envs and test caches
+.vercel/
+.venv/
+.pytest_cache/

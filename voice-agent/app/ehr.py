@@ -120,3 +120,22 @@ def get_patient(practice_id: str, patient_id: str) -> dict | None:
             ).raise_for_status().json()
         return _from_row(rows[0]) if rows else None
     return next((p for p in list_patients(practice_id) if p["id"] == patient_id), None)
+
+
+def prescreen_results(practice_id: str, nct_id: str) -> list[dict] | None:
+    """The matching engine's results for one practice and trial (site/src/engine, table
+    prescreen_results). None when there's no database or the engine hasn't run for this pair."""
+    client = _supabase()
+    if not client:
+        return None
+    with client:
+        rows = client.get(
+            "/prescreen_results",
+            params={
+                "select": "patient_id,bucket,score,condition_match,review_items,uncertain_criteria,evaluated_at",
+                "practice_id": f"eq.{practice_id}",
+                "nct_id": f"eq.{nct_id}",
+                "order": "score.desc",
+            },
+        ).raise_for_status().json()
+    return rows or None
