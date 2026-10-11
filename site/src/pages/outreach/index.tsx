@@ -61,8 +61,9 @@ function whatHappened(p: OutreachPatient): string {
 function NeedsYouCard({ p, onDone }: { p: OutreachPatient; onDone: () => void }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDrop, setConfirmDrop] = useState(false);
   const urgent = p.status === 'emergency';
-  const act = async (action: 'restart' | 'contacted') => {
+  const act = async (action: 'restart' | 'contacted' | 'drop') => {
     setBusy(action);
     setError(null);
     try {
@@ -101,6 +102,25 @@ function NeedsYouCard({ p, onDone }: { p: OutreachPatient; onDone: () => void })
             <Button variant="secondary" className="px-3 py-1.5" disabled={busy !== null} onClick={() => act('restart')}>
               {busy === 'restart' ? 'Saving…' : 'Ava, try again'}
             </Button>
+          )}
+          {/* Remove them from the outreach: no more calls or texts, and off this list. */}
+          {confirmDrop ? (
+            <span className="flex items-center gap-1.5 text-[12.5px]">
+              <Button variant="secondary" className="border-fail/40 px-3 py-1.5 text-fail" disabled={busy !== null} onClick={() => act('drop')}>
+                {busy === 'drop' ? 'Removing…' : `Remove ${first(p.name)}`}
+              </Button>
+              <button className="text-ink-3 hover:text-ink-2" onClick={() => setConfirmDrop(false)} disabled={busy !== null}>
+                Keep
+              </button>
+            </span>
+          ) : (
+            <button
+              className="px-1.5 text-[12.5px] font-medium text-ink-3 hover:text-fail"
+              disabled={busy !== null}
+              onClick={() => setConfirmDrop(true)}
+            >
+              Don&rsquo;t follow up
+            </button>
           )}
         </div>
         {error && <p className="mt-1.5 text-xs text-fail">{error}</p>}
