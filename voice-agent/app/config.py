@@ -71,6 +71,8 @@ class Settings(BaseSettings):
     # Demo fast-forward: when > 0, a "day" between attempts lasts this many seconds and calling
     # hours are ignored. 0 = real timing.
     demo_day_seconds: int = 0
+    # Calls run Mon-Sat by default; CALL_SUNDAYS=true lets the caller dial on Sundays too.
+    call_sundays: bool = False
     # Seconds a simulated call takes before its outcome lands.
     simulated_call_secs: int = 12
 

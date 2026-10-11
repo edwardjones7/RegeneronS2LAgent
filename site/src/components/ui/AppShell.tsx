@@ -116,8 +116,7 @@ export function AppShell({ title, active, children }: AppShellProps) {
             ))}
           </nav>
 
-
-          {/* Re-runs the pipeline as an animated walkthrough (fetch → match → dashboard). Visual only. */}
+          {/* Replays the last pipeline run as an animated walkthrough (fetch → match → dashboard). Fetches and matches nothing. */}
           <button
             type="button"
             onClick={() => setWalkthrough(true)}
@@ -130,7 +129,7 @@ export function AppShell({ title, active, children }: AppShellProps) {
               <path d="M20 11a8 8 0 00-14.9-3.9M4 4v4h4" />
               <path d="M4 13a8 8 0 0014.9 3.9M20 20v-4h-4" />
             </svg>
-            Refetch trials
+            Replay pipeline
           </button>
 
           <div className="mt-2 flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/60 p-2.5 backdrop-blur-sm">

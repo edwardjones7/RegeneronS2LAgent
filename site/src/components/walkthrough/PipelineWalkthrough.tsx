@@ -7,14 +7,15 @@ import { PhaseBadge } from '@/components/trials/PhaseBadge';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { fetchJson } from '@/lib/utils/api';
 import { cn } from '@/lib/utils/cn';
+import { formatDate } from '@/lib/utils/format';
 import type { TrialListItem } from '@/lib/trials';
 import type { WalkthroughData, WalkthroughTrial } from '@/pages/api/walkthrough';
 
 /**
  * A motion walkthrough of the pipeline, for the demo: fetch trials → match them
- * against the practice's patients → the dashboard. Visual only; nothing is run.
- * Real: the trial count, which trials have criteria, the panel size. Illustrative (and
- * labelled so): the candidate and chart-review counts, until real match results are wired in.
+ * against the practice's patients → the dashboard. It replays the last matcher run; nothing
+ * is re-run here. Every number is real: the open trial count, the panel size, and each trial's
+ * candidate and chart-review counts from `prescreen_trial_counts`.
  */
 
 const SCENES = [
@@ -110,7 +111,7 @@ function FetchScene({ data, t }: { data: WalkthroughData; t: number }) {
               slot === 0 || slot === 5 ? 'opacity-0' : 'opacity-100'
             )}
           >
-            <TrialRow trial={data.trials[seq % data.trials.length]} />
+            {data.trials.length > 0 && <TrialRow trial={data.trials[seq % data.trials.length]} />}
           </div>
         ))}
       </div>
@@ -129,11 +130,6 @@ function FetchScene({ data, t }: { data: WalkthroughData; t: number }) {
   );
 }
 
-/** Illustrative pre-screen counts for a matched trial. Not real results; the UI says so. */
-function mockCounts(i: number) {
-  return { candidates: 6 + Math.floor(rand(i) * 11), review: 2 + Math.floor(rand(i + 50) * 6) };
-}
-
 /** Deck depth: the newest card in front, older ones peeking out above and behind. Full class names for Tailwind. */
 const DECK = [
   'z-40 translate-y-0 scale-100 opacity-100',
@@ -142,17 +138,35 @@ const DECK = [
   'z-10 -translate-y-14 scale-[0.85] opacity-25',
 ];
 
-const PANEL_SIZE_DOTS = 200;
+/** At most this many dots per card; past it, one dot stands for several patients. */
+const MAX_DOTS = 200;
+/** Cards dealt onto the deck; the rest are counted, not shown. */
+const DECK_SIZE = DECK.length;
+
+/**
+ * The patients the matcher checked for one trial, as dots: one per patient, or one per
+ * `perDot` patients on a big panel. A bucket with anyone in it gets at least one dot.
+ */
+function dotLayout(candidates: number, review: number, notAMatch: number) {
+  const checked = candidates + review + notAMatch;
+  const perDot = Math.max(1, Math.ceil(checked / MAX_DOTS));
+  const total = Math.max(1, Math.ceil(checked / perDot));
+  const cand = Math.min(total, candidates ? Math.max(1, Math.round(candidates / perDot)) : 0);
+  const rev = Math.min(total - cand, review ? Math.max(1, Math.round(review / perDot)) : 0);
+  return { perDot, total, cand, rev, checked };
+}
 
 /** One trial being matched: its patients as dots, the matches lighting up as the counts tick up. */
 function MatchCard({ trial, i, age }: { trial: TrialListItem; i: number; age: number }) {
   const style = AREA_STYLES[trial.area];
-  const { candidates, review } = mockCounts(i);
+  const candidates = trial.prescreen?.candidates ?? 0;
+  const review = trial.prescreen?.review ?? 0;
+  const dots = dotLayout(candidates, review, trial.prescreen?.notAMatch ?? 0);
   const progress = easeOut((age - 250) / 900);
   // Which dots light up: a stable shuffle per trial, candidates first, then those to review.
-  const rank = Array.from({ length: PANEL_SIZE_DOTS }, (_, j) => j).sort((a, b) => rand(a + i * 997) - rand(b + i * 997));
+  const rank = Array.from({ length: dots.total }, (_, j) => j).sort((a, b) => rand(a + i * 997) - rand(b + i * 997));
   const order = new Map(rank.map((dot, k) => [dot, k]));
-  const lit = progress * (candidates + review);
+  const lit = progress * (dots.cand + dots.rev);
 
   return (
     <div className="relative flex h-[440px] flex-col overflow-hidden rounded-3xl border border-line-2 bg-surface p-5 shadow-[0_16px_40px_-20px_rgba(30,36,48,0.3)]">
@@ -172,12 +186,15 @@ function MatchCard({ trial, i, age }: { trial: TrialListItem; i: number; age: nu
 
         {/* The practice's patients, one dot each. */}
         <div className="mt-4 grid grid-cols-25 gap-[3px]">
-          {Array.from({ length: PANEL_SIZE_DOTS }, (_, dot) => {
+          {Array.from({ length: dots.total }, (_, dot) => {
             const k = order.get(dot)!;
-            const tone = k < Math.min(lit, candidates) ? 'bg-pass' : k >= candidates && k < lit ? 'bg-unk' : 'bg-ink/[0.08]';
+            const tone = k < Math.min(lit, dots.cand) ? 'bg-pass' : k >= dots.cand && k < lit ? 'bg-unk' : 'bg-ink/[0.08]';
             return <span key={dot} className={cn('aspect-square rounded-full transition-colors duration-300', tone)} />;
           })}
         </div>
+        <p className="mt-2 text-[11px] text-ink-3">
+          {dots.checked.toLocaleString()} patients checked{dots.perDot > 1 && ` · 1 dot = ${dots.perDot} patients`}
+        </p>
 
         <div className="mt-4 flex gap-6 border-t border-line-2 pt-3">
           <span>
@@ -203,13 +220,20 @@ const MATCH_EVERY_MS = 1150;
 const FIRST_MATCH_MS = 150;
 
 function MatchScene({ data, t }: { data: WalkthroughData; t: number }) {
-  const matchable = data.matched;
+  // The deck shows the top-ranked trials; the big number counts every trial that fits.
+  const matchable = data.matched.slice(0, DECK_SIZE);
   const matched = Math.min(matchable.length, Math.max(0, Math.floor((t - FIRST_MATCH_MS) / MATCH_EVERY_MS) + 1));
+  const counted = Math.round(easeOut((t - FIRST_MATCH_MS) / (MATCH_EVERY_MS * DECK_SIZE)) * data.matched.length);
 
   return (
     <div className="mx-auto grid w-full max-w-5xl animate-modal-in grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-16">
       {/* A deck: each matched trial is dealt on top, the earlier ones stacking up behind it. */}
       <div className="relative mx-auto mt-14 h-[440px] w-[360px]">
+        {matchable.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center rounded-3xl border border-dashed border-line p-8 text-center text-[14px] text-ink-3">
+            {data.screened ? 'None of your patients fit an open trial in the last run.' : 'Your patients haven’t been pre-screened yet.'}
+          </div>
+        )}
         {matchable.map((trial, i) => {
           if (i > matched) return null; // not dealt yet
           const depth = matched - 1 - i; // -1 = waiting below, about to be dealt
@@ -230,13 +254,16 @@ function MatchScene({ data, t }: { data: WalkthroughData; t: number }) {
       <div>
         <h2 className="text-[34px] font-semibold leading-tight tracking-[-0.03em]">Matching your patients</h2>
         <div className="mt-6 flex items-baseline gap-3">
-          <span className="text-[112px] font-semibold leading-none tabular-nums tracking-[-0.05em]">{matched}</span>
-          <span className="text-[17px] text-ink-3">{matched === 1 ? 'trial matches' : 'trials match'} your patients</span>
+          <span className="text-[112px] font-semibold leading-none tabular-nums tracking-[-0.05em]">{counted}</span>
+          <span className="text-[17px] text-ink-3">{counted === 1 ? 'trial fits' : 'trials fit'} your patients</span>
         </div>
         <p className="mt-6 max-w-sm text-[15px] leading-relaxed text-ink-2">
-          {data.patientCount} patients checked against each trial&apos;s criteria. Records never leave your practice.
+          Your {data.patientCount.toLocaleString()} patients, pre-screened against {data.screened.toLocaleString()} open{' '}
+          {data.screened === 1 ? 'trial' : 'trials'}. Records never leave your practice.
         </p>
-        <p className="mt-3 text-[12px] text-ink-3">Candidate counts are illustrative for now.</p>
+        {data.evaluatedAt && (
+          <p className="mt-3 text-[12px] text-ink-3">From the pre-screen run on {formatDate(data.evaluatedAt.slice(0, 10))}.</p>
+        )}
       </div>
     </div>
   );
@@ -256,7 +283,7 @@ function RecommendScene({ data, onFinish }: { data: WalkthroughData; onFinish: (
         </span>
       </div>
       <p className="mx-auto mt-6 max-w-md text-[16px] leading-relaxed text-ink-2">
-        Ranked by how many of your patients could join. Take a look.
+        {fit ? 'Ranked by how many of your patients could join. Take a look.' : 'Nothing to recommend yet. The open trials are still on the dashboard.'}
       </p>
       <button
         type="button"

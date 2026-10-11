@@ -108,10 +108,15 @@ export type PatientPlan = {
   jevCalls: JevCall[];
   /** Confirm-at-screening items for this patient; not in the bucket. */
   review: string[];
+  /**
+   * Jev-asked criteria whose precondition code couldn't settle (value missing or stale, or
+   * a gated inclusion alternative). Pass their Jev answers through `finalAnswer`.
+   */
+  preconditionUnknown: string[];
 };
 
 export function planPatient(tc: TrialCriteria, f: PatientFacts, order: Answer[] = DEFAULT_ORDER): PatientPlan {
-  const plan: PatientPlan = { decided: {}, decidedBy: {}, jevCalls: [], review: [] };
+  const plan: PatientPlan = { decided: {}, decidedBy: {}, jevCalls: [], review: [], preconditionUnknown: [] };
   const toJev: StructuredCriterion[] = [];
 
   for (const c of tc.criteria) {
@@ -123,6 +128,21 @@ export function planPatient(tc: TrialCriteria, f: PatientFacts, order: Answer[] 
     }
     if (isReviewItem(c)) {
       plan.review.push(c.id);
+      continue;
+    }
+    if (c.code_check && c.code_check_role === 'precondition') {
+      // "Number AND clinical fact": code checks the number, Jev only the rest.
+      const r = evaluateCodeCheck(c.code_check, f);
+      // A gated inclusion outside any group passes outside its gate whatever the number,
+      // so there a failed check can't settle it (validation keeps this case out).
+      const settles = ap === true || c.kind === 'exclusion' || c.group != null;
+      if (r === false && settles) {
+        plan.decided[c.id] = c.kind === 'inclusion' ? 'reject' : 'accept'; // condition false
+        plan.decidedBy[c.id] = 'code';
+        continue;
+      }
+      if (r !== true) plan.preconditionUnknown.push(c.id);
+      toJev.push(c);
       continue;
     }
     if (c.code_check && ap === true) {
@@ -143,6 +163,17 @@ export function planPatient(tc: TrialCriteria, f: PatientFacts, order: Answer[] 
     });
   }
   return plan;
+}
+
+/**
+ * A Jev answer on a criterion whose precondition is unsettled: the condition is
+ * "number AND rest" (three-valued AND), so only an answer that the rest is false settles
+ * it; anything else is unknown. Other criteria keep Jev's answer.
+ */
+export function finalAnswer(c: StructuredCriterion, plan: PatientPlan, a: Answer): Answer {
+  if (!plan.preconditionUnknown.includes(c.id)) return a;
+  const conditionFalse: Answer = c.kind === 'inclusion' ? 'reject' : 'accept';
+  return a === conditionFalse ? conditionFalse : 'unknown';
 }
 
 export type GroupedResult = {

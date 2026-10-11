@@ -10,6 +10,7 @@ os.environ["SUPABASE_URL"] = ""
 os.environ["SUPABASE_SECRET_KEY"] = ""
 os.environ["DEMO_PHONES"] = ""
 os.environ["DEMO_DAY_SECONDS"] = "0"
+os.environ["CALL_SUNDAYS"] = "false"
 os.environ["TWILIO_FROM_NUMBER"] = "+12015550123"
 
 import pytest  # noqa: E402

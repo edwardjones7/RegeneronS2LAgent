@@ -64,8 +64,8 @@ export interface TrialFilters {
   area: TherapeuticArea | null;
   /** Selected option values per group; empty means no filter. */
   groups: Record<FilterGroupKey, string[]>;
-  /** Only trials with hand-authored criteria. */
-  ready: boolean;
+  /** Only trials with at least one pre-screen candidate in the practice's panel. */
+  candidates: boolean;
   /** Only trials recruiting at a New Jersey site. */
   nj: boolean;
 }
@@ -83,14 +83,14 @@ export function parseFilters(query: Query): TrialFilters {
       .filter((v) => allowed.has(v));
   }
   const area = first(query.area);
-  return { area: isTherapeuticArea(area) ? area : null, groups, ready: first(query.ready) === '1', nj: first(query.nj) === '1' };
+  return { area: isTherapeuticArea(area) ? area : null, groups, candidates: first(query.candidates) === '1', nj: first(query.nj) === '1' };
 }
 
 export function filtersToQuery(f: TrialFilters): Record<string, string> {
   const query: Record<string, string> = {};
   if (f.area) query.area = f.area;
   for (const g of FILTER_GROUPS) if (f.groups[g.key].length) query[g.key] = f.groups[g.key].join(',');
-  if (f.ready) query.ready = '1';
+  if (f.candidates) query.candidates = '1';
   if (f.nj) query.nj = '1';
   return query;
 }
@@ -102,18 +102,18 @@ export function filtersHref(f: TrialFilters): string {
 
 /** Filters set in the menu (everything except area). */
 export function countMenuFilters(f: TrialFilters): number {
-  return FILTER_GROUPS.reduce((n, g) => n + f.groups[g.key].length, 0) + Number(f.ready) + Number(f.nj);
+  return FILTER_GROUPS.reduce((n, g) => n + f.groups[g.key].length, 0) + Number(f.candidates) + Number(f.nj);
 }
 
-export const NO_MENU_FILTERS: Pick<TrialFilters, 'groups' | 'ready' | 'nj'> = {
+export const NO_MENU_FILTERS: Pick<TrialFilters, 'groups' | 'candidates' | 'nj'> = {
   groups: Object.fromEntries(FILTER_GROUPS.map((g) => [g.key, []])) as unknown as Record<FilterGroupKey, string[]>,
-  ready: false,
+  candidates: false,
   nj: false,
 };
 
 /** Within a group options are OR'd; across groups they're AND'd. */
 export function matchesMenuFilters(t: TrialListItem, f: TrialFilters): boolean {
-  if (f.ready && !t.hasProtocol) return false;
+  if (f.candidates && !t.prescreen?.candidates) return false;
   if (f.nj && t.njRecruiting === 0) return false;
   return FILTER_GROUPS.every((g) => {
     const selected = f.groups[g.key];

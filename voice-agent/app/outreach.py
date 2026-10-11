@@ -103,10 +103,28 @@ def _fake_phone(patient_id: str) -> str:
     return f"+1555{n:07d}"
 
 
+def ensure_campaign(s: Session, nct_id: str) -> Campaign | None:
+    """The trial's practice call script: an existing campaign, else one built from its public
+    registry row (campaigns.from_trial, templated, no LLM) and stored. None when neither exists."""
+    campaign = get_campaign(campaign_id_for(nct_id))
+    if campaign is not None:
+        return campaign
+    row = ehr.trial(nct_id)
+    if row is None:
+        return None
+    from app import campaigns
+
+    log.info("built a call script for %s from the trial registry", nct_id)
+    return campaigns.save_campaign(s, campaigns.from_trial(row), note="built from the trial registry")
+
+
 def accept_trial(s: Session, practice_id: str, nct_id: str, doctor_name: str) -> TrialAcceptance:
     """The doctor said yes. Build the call list; calls start on the next worker tick."""
-    campaign = get_campaign(campaign_id_for(nct_id))
-    if campaign is None or prescreen.protocol(nct_id) is None:
+    # Something to screen against: the engine's stored results for this practice, or a protocol.
+    if prescreen.protocol(nct_id) is None and not ehr.prescreen_results(practice_id, nct_id):
+        raise OutreachError(f"no pre-screen results for {nct_id} at this practice")
+    campaign = ensure_campaign(s, nct_id)
+    if campaign is None:
         raise OutreachError(f"no call script for {nct_id}")
     existing = s.scalars(
         select(TrialAcceptance).where(TrialAcceptance.practice_id == practice_id, TrialAcceptance.nct_id == nct_id)
@@ -218,7 +236,7 @@ def next_attempt(lead: Lead, now: datetime, last_call_local: datetime | None = N
     if hour >= end.hour or hour < start.hour:
         hour = start.hour + (1 if start.hour == CALL_START.hour else 0)
     day = local_now.date() + timedelta(days=1)
-    if day.weekday() == 6:  # Sunday: no calls
+    if day.weekday() == 6 and not get_settings().call_sundays:  # Sunday: no calls unless allowed
         day += timedelta(days=1)
     target = datetime.combine(day, time(hour, 0 if hour > start.hour else start.minute), tzinfo=ZoneInfo(tz))
     return _to_utc_naive(target)
@@ -229,7 +247,7 @@ def in_calling_hours(lead: Lead, now: datetime) -> bool:
         return True
     local = _local(now, lead.timezone or "America/New_York")
     start, end = window_range(lead.call_window)
-    return local.weekday() != 6 and start <= local.time() < end
+    return (local.weekday() != 6 or get_settings().call_sundays) and start <= local.time() < end
 
 
 def next_calling_time(lead: Lead, now: datetime) -> datetime:
@@ -241,7 +259,7 @@ def next_calling_time(lead: Lead, now: datetime) -> datetime:
     start, end = window_range(lead.call_window)
     for add in range(8):
         day = local.date() + timedelta(days=add)
-        if day.weekday() == 6:
+        if day.weekday() == 6 and not get_settings().call_sundays:
             continue
         open_at = datetime.combine(day, start, tzinfo=tz)
         close_at = datetime.combine(day, end, tzinfo=tz)

@@ -30,7 +30,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import { bucketOf, CONFIDENT, confidenceOf, REJECT_THRESHOLD, toResult } from '../src/engine/decide.ts';
-import { combine, filterState, planPatient } from '../src/engine/preprocess/toJev.ts';
+import { combine, filterState, finalAnswer, planPatient } from '../src/engine/preprocess/toJev.ts';
 import type { TrialCriteria } from '../src/engine/preprocess/schema.ts';
 import { ageOn } from '../src/engine/state.ts';
 import { splitEligibility } from '../src/engine/eligibility.ts';
@@ -307,7 +307,7 @@ function prepare(p: Patient, t: Trial, why: string): Prepared | null {
   const state = call ? filterState(buildState(p, codes, asOf), call.sections) : null;
   return {
     p, t, why, jevState: state, jevQuestions: call?.questions ?? null,
-    hash: sha(JSON.stringify([why, plan.decided, plan.review, state, call?.questions ?? null, settings])),
+    hash: sha(JSON.stringify([why, plan.decided, plan.review, plan.preconditionUnknown, state, call?.questions ?? null, settings])),
     finish: (res) => {
       if (call && !res) return null; // dry run or budget stop
       const answers: Record<string, Answer> = { ...plan.decided };
@@ -321,8 +321,8 @@ function prepare(p: Patient, t: Trial, why: string): Prepared | null {
         for (const id of Object.keys(call.questions)) {
           const c = byId.get(id)!;
           const r = toResult({ id, kind: c.kind, text: c.question }, res.answers[id]);
-          answers[id] = r.answer;
-          criteria.push({ ...r, decided_by: 'jev' });
+          answers[id] = finalAnswer(c, plan, r.answer);
+          criteria.push({ ...r, answer: answers[id], decided_by: 'jev' });
         }
       }
       const { bucket, units } = combine(tc, answers, plan.review, notApplicable);

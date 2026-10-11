@@ -102,7 +102,8 @@ export function AcceptCard({ nctId, initial }: { nctId: string; initial: TrialOu
     );
   }
 
-  const none = state.candidates === 0;
+  // Chart-review-only trials can still be accepted: staff clear those patients before Ava calls.
+  const none = state.candidates === 0 && state.chartReview === 0;
 
   return (
     <div className={cn(CARD, 'border-line-2')}>
