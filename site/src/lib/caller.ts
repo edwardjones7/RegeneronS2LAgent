@@ -275,3 +275,65 @@ export const isStaffAction = (a: string): a is StaffAction => (STAFF_ACTIONS as 
 export async function staffAction(leadId: number, action: StaffAction): Promise<void> {
   await call(`/leads/${leadId}/${action}`, { method: 'POST', body: {} });
 }
+
+/* ————————— The practice's visit calendar ————————— */
+
+export interface CalendarSlot {
+  slotId: number;
+  /** Local time at the practice, no zone: "2026-10-14T09:30:00". */
+  startsAt: string;
+  minutes: number;
+  booked: { leadId: number; patientId: string | null; name: string; trial: string | null; bookedBy: 'Ava' | 'text' } | null;
+}
+
+export interface PracticeCalendar {
+  available: boolean;
+  start: string;
+  days: number;
+  slots: CalendarSlot[];
+}
+
+/** One week of this practice's visit times, booked or open. The same calendar every trial books into. */
+export async function getCalendar(start: string, days = 7): Promise<PracticeCalendar> {
+  if (!config()) return { available: false, start, days, slots: [] };
+  try {
+    const r = await call<{
+      start: string;
+      days: number;
+      slots: {
+        slot_id: number;
+        starts_at_local: string;
+        minutes: number;
+        booked: { lead_id: number; patient_id: string | null; name: string; trial: string | null; booked_by: 'Ava' | 'text' } | null;
+      }[];
+    }>(`/practices/${practice}/calendar?start=${encodeURIComponent(start)}&days=${days}`);
+    return {
+      available: true,
+      start: r.start,
+      days: r.days,
+      slots: r.slots.map((x) => ({
+        slotId: x.slot_id,
+        startsAt: x.starts_at_local,
+        minutes: x.minutes,
+        booked: x.booked && {
+          leadId: x.booked.lead_id,
+          patientId: x.booked.patient_id,
+          name: x.booked.name,
+          trial: x.booked.trial,
+          bookedBy: x.booked.booked_by,
+        },
+      })),
+    };
+  } catch (err) {
+    console.error('[caller] calendar failed:', err);
+    return { available: false, start, days, slots: [] };
+  }
+}
+
+/** Monday of the week to show first: this week, or next week on a weekend. Local practice date. */
+export function calendarWeekStart(now = new Date()): string {
+  const local = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const day = local.getDay();
+  local.setDate(local.getDate() + (day === 0 ? 1 : day === 6 ? 2 : 1 - day));
+  return `${local.getFullYear()}-${String(local.getMonth() + 1).padStart(2, '0')}-${String(local.getDate()).padStart(2, '0')}`;
+}

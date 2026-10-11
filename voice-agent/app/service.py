@@ -349,7 +349,10 @@ def tool_book_visit(s: Session, lead: Lead, slot_id: int) -> str:
     if not is_practice(lead) and not d.may_offer_slots:
         return "Can't book: the screening doesn't show a fit. Follow the last record_answer instructions."
     slot = s.get(Slot, int(slot_id))
-    if slot is None or slot.campaign_id != campaign.id or slot.practice_id != lead.practice_id:
+    wrong = slot is None or (
+        slot.practice_id != lead.practice_id if is_practice(lead) else slot.campaign_id != campaign.id
+    )
+    if wrong:
         return "That slot_id doesn't exist. Call get_open_slots again and offer those times."
     if not slots.book(s, slot.id, lead.id):
         return "That time was just taken. Call get_open_slots again and offer the new times."

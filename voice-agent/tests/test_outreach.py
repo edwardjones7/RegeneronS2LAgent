@@ -366,3 +366,19 @@ def test_practice_scripts_ask_no_phone_questions():
 
     practice = [c for c in file_campaigns().values() if c.mode == "practice"]
     assert practice and all(not c.prescreen_questions for c in practice)
+
+
+def test_one_calendar_per_practice_shared_by_trials(client):
+    client.post(f"/practices/{PRACTICE}/trials/{TRIAL}/accept", json={"doctor_name": "Rivera"}, headers=READ)
+    cal = client.get(f"/practices/{PRACTICE}/calendar?days=14", headers=READ).json()
+    times = [x["starts_at_local"] for x in cal["slots"]]
+    assert times and len(times) == len(set(times))  # one cell per time, never two
+    with db.session_scope() as s:
+        lead = first_candidate(s)
+        service.tool_verify_identity(s, lead, lead.birth_date)
+        slot_id = int(service.tool_get_open_slots(s, lead).split("slot_id ")[1].split(":")[0])
+        service.tool_book_visit(s, lead, slot_id)
+        name = f"{lead.first_name} {lead.last_name}"
+    cal = client.get(f"/practices/{PRACTICE}/calendar?days=14", headers=READ).json()
+    booked = [x for x in cal["slots"] if x["booked"]]
+    assert [b["booked"]["name"] for b in booked] == [name] and booked[0]["booked"]["booked_by"] == "Ava"

@@ -1,8 +1,9 @@
 import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { WeekCalendar } from '@/components/outreach/WeekCalendar';
 import { AppShell, Button, LinkButton, PageHeader, Tabs } from '@/components/ui';
-import { getOutreachOverview, type OutreachOverview, type OutreachPatient } from '@/lib/caller';
+import { calendarWeekStart, getCalendar, getOutreachOverview, type OutreachOverview, type OutreachPatient, type PracticeCalendar } from '@/lib/caller';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { fetchJson, getErrorMessage } from '@/lib/utils/api';
 import { formatDate } from '@/lib/utils/format';
@@ -15,11 +16,16 @@ import { formatDate } from '@/lib/utils/format';
 interface OutreachPageProps {
   nct: string | null;
   initial: OutreachOverview;
+  calendar: PracticeCalendar;
+  /** The practice's local date, YYYY-MM-DD. */
+  today: string;
 }
 
 export const getServerSideProps: GetServerSideProps<OutreachPageProps> = async ({ query }) => {
   const nct = typeof query.nct === 'string' && /^NCT\d{8}$/.test(query.nct) ? query.nct : null;
-  return { props: { nct, initial: await getOutreachOverview(nct ?? undefined) } };
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  const [initial, calendar] = await Promise.all([getOutreachOverview(nct ?? undefined), getCalendar(calendarWeekStart(), 5)]);
+  return { props: { nct, initial, calendar, today } };
 };
 
 const first = (name: string) => name.split(' ')[0];
@@ -74,20 +80,12 @@ function NeedsYouItem({ p, onDone }: { p: OutreachPatient; onDone: () => void })
   );
 }
 
-function visitTime(local: string) {
-  return new Date(local).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-}
-
-export default function OutreachPage({ nct, initial }: OutreachPageProps) {
+export default function OutreachPage({ nct, initial, calendar, today }: OutreachPageProps) {
   const [data, setData] = useState(initial);
-  const [now, setNow] = useState(() => Date.now());
   const url = `/api/outreach${nct ? `?nct=${nct}` : ''}`;
   const load = () =>
     fetchJson<OutreachOverview>(url)
-      .then((d) => {
-        setData(d);
-        setNow(Date.now());
-      })
+      .then(setData)
       .catch(() => {});
   const refresh = () => void load();
 
@@ -96,10 +94,7 @@ export default function OutreachPage({ nct, initial }: OutreachPageProps) {
     const tick = () =>
       !document.hidden &&
       fetchJson<OutreachOverview>(url)
-        .then((d) => {
-          setData(d);
-          setNow(Date.now());
-        })
+        .then(setData)
         .catch(() => {});
     const id = setInterval(tick, 5000);
     return () => clearInterval(id);
@@ -113,7 +108,6 @@ export default function OutreachPage({ nct, initial }: OutreachPageProps) {
     .sort((a, b) => Number(b.status === 'emergency') - Number(a.status === 'emergency'));
   const charts = data.patients.filter((p) => p.status === 'chart_review');
   const tests = data.patients.filter((p) => p.testBirthDate);
-  const comingIn = data.visits.filter((v) => new Date(v.startsAt).getTime() >= now - 3600_000);
   const everyone = `/outreach/patients${nct ? `?nct=${nct}` : ''}`;
 
   return (
@@ -169,25 +163,8 @@ export default function OutreachPage({ nct, initial }: OutreachPageProps) {
             )}
           </section>
 
-          <div className="mt-8 grid gap-10 lg:grid-cols-2">
-            <section>
-              <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-3">Coming in</h2>
-              {comingIn.length === 0 ? (
-                <p className="mt-3 text-[13.5px] text-ink-3">No one&rsquo;s booked yet. Ava is still calling.</p>
-              ) : (
-                <ul className="mt-2">
-                  {comingIn.slice(0, 12).map((v) => (
-                    <li key={v.leadId} className="flex items-baseline justify-between gap-4 border-b border-line-2 py-2.5 text-[13.5px] last:border-b-0">
-                      <span className="font-medium">{v.name}</span>
-                      <span className="shrink-0 tabular-nums text-ink-2">{visitTime(v.startsAt)}</span>
-                    </li>
-                  ))}
-                  {comingIn.length > 12 && (
-                    <li className="pt-2.5 text-[12.5px] text-ink-3">and {comingIn.length - 12} more</li>
-                  )}
-                </ul>
-              )}
-            </section>
+          <div className="mt-8 grid gap-10 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <WeekCalendar initial={calendar} today={today} />
 
             <section>
               <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-3">

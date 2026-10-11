@@ -269,3 +269,46 @@ def patient_outreach(practice_id: str, patient_id: str, s: Session = Depends(get
             "timeline": timeline,
         })
     return out
+
+
+@router.get("/practices/{practice_id}/calendar")
+def calendar(practice_id: str, start: str | None = None, days: int = 7, s: Session = Depends(get_session)):
+    """The practice's visit calendar for a week: every visit time, open or booked (and by whom).
+
+    `start` is a local date (YYYY-MM-DD), default today. One calendar per practice, shared by trials.
+    """
+    from datetime import date, datetime, timedelta
+
+    from app import slots as visit_slots
+    from app.models import Slot
+
+    _practice(practice_id)
+    prof = outreach.profile(s, practice_id)
+    first = date.fromisoformat(start) if start else date.today()
+    days = max(1, min(days, 14))
+    visit_slots.ensure_practice_calendar(s, practice_id, prof.timezone)
+    lo, hi = datetime.combine(first, datetime.min.time()), datetime.combine(first + timedelta(days=days), datetime.min.time())
+    rows = s.scalars(
+        select(Slot).where(Slot.practice_id == practice_id, Slot.starts_at >= lo, Slot.starts_at < hi).order_by(Slot.starts_at)
+    ).all()
+    out, seen = [], set()
+    for sl in rows:
+        lead = s.get(Lead, sl.booked_lead_id) if sl.booked_lead_id else None
+        if sl.starts_at in seen and not lead:
+            continue  # an older per-trial slot at the same time: show one open cell
+        seen.add(sl.starts_at)
+        campaign = get_campaign(lead.campaign_id) if lead else None
+        out.append({
+            "slot_id": sl.id,
+            "starts_at_local": sl.starts_at.isoformat(),
+            "minutes": 60,
+            "booked": {
+                "lead_id": lead.id,
+                "patient_id": lead.patient_id,
+                "name": f"{lead.first_name} {lead.last_name}".strip(),
+                "trial": campaign.study_short_name if campaign else None,
+                "status": lead.status,
+                "booked_by": "text" if any(e.type == "visit_booked" and e.detail.get("via") == "sms" for e in lead.events) else "Ava",
+            } if lead else None,
+        })
+    return {"start": first.isoformat(), "days": days, "timezone": prof.timezone, "slots": out}
