@@ -1,8 +1,10 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { type ReactNode, useCallback, useState } from 'react';
+import { PipelineWalkthrough } from '@/components/walkthrough/PipelineWalkthrough';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { cn } from '@/lib/utils/cn';
+import { TrialistLogo } from './TrialistLogo';
 
 export type NavKey = 'trials' | 'outreach' | 'calendar' | 'patients';
 
@@ -81,10 +83,13 @@ const initials = (name: string) =>
 
 /** Sidebar + main column. Every dashboard page renders inside this. */
 export function AppShell({ title, active, children }: AppShellProps) {
+  const [walkthrough, setWalkthrough] = useState(false);
+  const closeWalkthrough = useCallback(() => setWalkthrough(false), []);
+
   return (
     <>
       <Head>
-        <title>{`${title} · trialmatch`}</title>
+        <title>{`${title} · Trialist`}</title>
       </Head>
       <div className="relative isolate flex min-h-screen">
         {/* Soft wash of the area colors across the top, behind the sidebar and the page. */}
@@ -92,23 +97,10 @@ export function AppShell({ title, active, children }: AppShellProps) {
 
         <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-ink/[0.06] px-3 py-5">
           <Link href="/" className="flex items-center gap-2 px-2">
-            <span className="size-6 rounded-lg bg-linear-to-br from-[#FF9F80] via-[#F7B6CF] to-[#78B4F4]" />
-            <span className="text-[15px] font-semibold tracking-[-0.02em]">trialmatch</span>
+            <TrialistLogo className="h-6 text-ink" />
           </Link>
 
-          <div className="mt-6 flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/60 p-2.5 backdrop-blur-sm">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#A3CEF6] to-[#E0F2D3] text-[12px] font-semibold text-ink">
-              {initials(DEMO_PRACTICE.doctor)}
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-[13px] font-semibold">{DEMO_PRACTICE.doctor}</span>
-              <span className="block truncate text-[11.5px] text-ink-3" title="Illustrative practice name for the demo">
-                {DEMO_PRACTICE.name}
-              </span>
-            </span>
-          </div>
-
-          <nav className="mt-5 flex flex-col gap-0.5">
+          <nav className="mt-7 flex flex-col gap-0.5">
             {NAV.map((item) => (
               <Link
                 key={item.key}
@@ -124,20 +116,39 @@ export function AppShell({ title, active, children }: AppShellProps) {
             ))}
           </nav>
 
-          <div className="mt-auto rounded-2xl bg-surface-2 p-3 text-[12px] leading-snug text-ink-2">
-            <span className="flex items-center gap-1.5 font-semibold text-ink">
-              <svg {...ICON_PROPS} className="size-3.5 shrink-0">
-                <rect x="5" y="11" width="14" height="9" rx="2" />
-                <path d="M8 11V8a4 4 0 018 0v3" />
-              </svg>
-              Patient data stays here
+
+          {/* Re-runs the pipeline as an animated walkthrough (fetch → match → dashboard). Visual only. */}
+          <button
+            type="button"
+            onClick={() => setWalkthrough(true)}
+            className="group mt-auto flex h-10 items-center gap-2.5 rounded-xl px-2.5 text-[13px] font-medium text-ink-2 transition-colors hover:bg-ink/[0.04] hover:text-ink"
+          >
+            <svg
+              {...ICON_PROPS}
+              className={cn('size-[18px] shrink-0 transition-transform duration-500 group-hover:rotate-180', walkthrough && 'animate-spin')}
+            >
+              <path d="M20 11a8 8 0 00-14.9-3.9M4 4v4h4" />
+              <path d="M4 13a8 8 0 0014.9 3.9M20 20v-4h-4" />
+            </svg>
+            Refetch trials
+          </button>
+
+          <div className="mt-2 flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/60 p-2.5 backdrop-blur-sm">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#A3CEF6] to-[#E0F2D3] text-[12px] font-semibold text-ink">
+              {initials(DEMO_PRACTICE.doctor)}
             </span>
-            <span className="mt-1 block">Records stay scoped to your practice. Sponsors only see counts. Patients stay with you.</span>
+            <span className="min-w-0">
+              <span className="block truncate text-[13px] font-semibold">{DEMO_PRACTICE.doctor}</span>
+              <span className="block truncate text-[11.5px] text-ink-3" title="Illustrative practice name for the demo">
+                {DEMO_PRACTICE.name}
+              </span>
+            </span>
           </div>
         </aside>
 
         <main className="min-w-0 flex-1 px-8 py-7">{children}</main>
       </div>
+      {walkthrough && <PipelineWalkthrough onClose={closeWalkthrough} />}
     </>
   );
 }

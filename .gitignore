@@ -12,9 +12,21 @@ node_modules/
 # Brainstorming companion mockups
 .superpowers/
 
+# Never commit: runtime logs, local databases, agent state, build caches,
+# and the old product's leftover root folders (it now lives in voice-agent/).
+*.log
+*.db
+.elevenlabs.json
+__pycache__/
+.next/
+tsconfig.tsbuildinfo
+next-env.d.ts
+/web/
+/app/
+/tests/
+
 # Matcher run output (patient-level results)
 /data/matches/
 .claude/worktrees/
-/data/conditions/build/dl_*/
 # Structured criteria written locally by site/scripts/preprocess-criteria.ts (stored in Supabase trials)
 /data/criteria/

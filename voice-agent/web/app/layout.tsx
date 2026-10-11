@@ -7,8 +7,8 @@ const sans = Geist({ subsets: ["latin"], variable: "--font-geist-sans", display:
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" })
 
 export const metadata: Metadata = {
-  title: "Call Me Maybe · Coordinator",
-  description: "Speed-to-lead outreach for clinical-trial research teams",
+  title: "Trialist",
+  description: "Trials come to doctors with the patients already found.",
   robots: { index: false, follow: false },
 }
 
