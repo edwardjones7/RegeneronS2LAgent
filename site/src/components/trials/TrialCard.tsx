@@ -1,8 +1,9 @@
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 import type { TrialListItem } from '@/lib/trials';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { cn } from '@/lib/utils/cn';
-import { formatDate, formatPhases } from '@/lib/utils/format';
+import { formatAgeRange, formatDate, formatPhases } from '@/lib/utils/format';
 import { AREA_STYLES } from './areaStyles';
 
 export function TrialCard({ trial }: { trial: TrialListItem }) {
@@ -11,7 +12,7 @@ export function TrialCard({ trial }: { trial: TrialListItem }) {
   return (
     <Link
       href={`/trials/${trial.nctId}`}
-      className="group relative flex aspect-[4/5] flex-col overflow-hidden rounded-2xl border border-line bg-surface p-4 transition hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(30,36,48,0.25)]"
+      className="group relative flex aspect-square flex-col overflow-hidden rounded-2xl border border-line bg-surface p-4 transition hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_rgba(30,36,48,0.25)]"
     >
       {/* Area gradient, fading out into the card background. */}
       <div
@@ -38,19 +39,25 @@ export function TrialCard({ trial }: { trial: TrialListItem }) {
             Criteria ready
           </span>
         )}
-        <h3 className="line-clamp-3 text-[17px] font-semibold leading-snug tracking-[-0.015em]">{trial.indication}</h3>
-        <p className="mt-1 truncate text-[13px] text-ink-3">
-          {trial.drug ?? 'Intervention not listed'}
-          {trial.enrollment !== null && ` · ${trial.enrollment.toLocaleString()} patients`}
-        </p>
+        <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug tracking-[-0.015em]">{trial.indication}</h3>
+        <p className="mt-0.5 truncate text-[13px] text-ink-3">{trial.drug ?? 'Intervention not listed'}</p>
 
-        <div className="mt-4 flex items-center justify-between gap-2 border-t border-line-2 pt-3 text-xs text-ink-3">
-          <span>
-            {trial.njRecruiting > 0 ? `${trial.njRecruiting} NJ ${trial.njRecruiting === 1 ? 'site' : 'sites'}` : 'No NJ sites'}
-          </span>
-          {trial.primaryCompletion && <span>Ends {formatDate(trial.primaryCompletion.slice(0, 7))}</span>}
-        </div>
+        <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line-2 pt-3">
+          <Fact label="Ages">{formatAgeRange(trial.minimumAge, trial.maximumAge)}</Fact>
+          <Fact label="Enrolling">{trial.enrollment?.toLocaleString() ?? '—'}</Fact>
+          <Fact label="NJ sites">{trial.njRecruiting || 'None'}</Fact>
+          <Fact label="Ends">{trial.primaryCompletion ? formatDate(trial.primaryCompletion.slice(0, 7)) : '—'}</Fact>
+        </dl>
       </div>
     </Link>
+  );
+}
+
+function Fact({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ink-3">{label}</dt>
+      <dd className="truncate text-[13px] font-medium tabular-nums">{children}</dd>
+    </div>
   );
 }
