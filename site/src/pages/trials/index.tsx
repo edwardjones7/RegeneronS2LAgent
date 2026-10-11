@@ -2,12 +2,13 @@ import type { GetServerSideProps } from 'next';
 import { AreaFilter } from '@/components/trials/AreaFilter';
 import { FilterMenu } from '@/components/trials/FilterMenu';
 import { TrialCard } from '@/components/trials/TrialCard';
+import { TrialModal } from '@/components/trials/TrialModal';
 import { AppShell } from '@/components/ui';
 import { getPatientStats } from '@/lib/patients';
 import { DEMO_PRACTICE, greeting } from '@/lib/practice';
 import { listOpenTrials, type TrialListItem } from '@/lib/trials';
 import { AREA_ORDER, type TherapeuticArea } from '@/lib/trials/areas';
-import { matchesMenuFilters, parseFilters, type TrialFilters } from '@/lib/trials/filters';
+import { filtersToQuery, matchesMenuFilters, parseFilters, type TrialFilters } from '@/lib/trials/filters';
 
 interface TrialsPageProps {
   filters: TrialFilters;
@@ -67,10 +68,12 @@ export default function TrialsPage({ filters, trials, areaCounts, total, greetin
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-5 lg:grid-cols-3">
           {trials.map((t) => (
-            <TrialCard key={t.nctId} trial={t} />
+            <TrialCard key={t.nctId} trial={t} href={{ pathname: '/trials', query: { ...filtersToQuery(filters), trial: t.nctId } }} />
           ))}
         </div>
       )}
+
+      <TrialModal order={trials.map((t) => t.nctId)} />
     </AppShell>
   );
 }

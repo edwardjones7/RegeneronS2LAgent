@@ -8,12 +8,15 @@ import { AreaIcon } from './AreaIcon';
 import { AREA_STYLES } from './areaStyles';
 import { PhaseBadge } from './PhaseBadge';
 
-export function TrialCard({ trial }: { trial: TrialListItem }) {
+/** `href` opens the trial modal (shallow, so the grid stays where it is). */
+export function TrialCard({ trial, href }: { trial: TrialListItem; href: { pathname: string; query: Record<string, string> } }) {
   const style = AREA_STYLES[trial.area];
 
   return (
     <Link
-      href={`/trials/${trial.nctId}`}
+      href={href}
+      shallow
+      scroll={false}
       className="group relative flex aspect-square flex-col overflow-hidden rounded-2xl border border-line bg-surface p-4 transition-shadow hover:shadow-[0_8px_24px_-12px_rgba(30,36,48,0.25)]"
     >
       {/* Area gradient, fading out into the card background. */}
