@@ -58,7 +58,7 @@ export function FilterMenu({ filters, resultCount }: { filters: TrialFilters; re
   };
 
   return (
-    <div ref={ref} className="relative ml-auto">
+    <div ref={ref} className="relative shrink-0">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

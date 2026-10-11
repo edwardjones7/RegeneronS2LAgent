@@ -1,20 +1,18 @@
 import type { GetServerSideProps } from 'next';
-import Link from 'next/link';
-import { AREA_STYLES } from '@/components/trials/areaStyles';
+import { AreaFilter } from '@/components/trials/AreaFilter';
 import { FilterMenu } from '@/components/trials/FilterMenu';
 import { TrialCard } from '@/components/trials/TrialCard';
 import { AppShell } from '@/components/ui';
 import { getPatientStats } from '@/lib/patients';
 import { DEMO_PRACTICE, greeting } from '@/lib/practice';
 import { listOpenTrials, type TrialListItem } from '@/lib/trials';
-import { AREA_LABELS, AREA_ORDER, type TherapeuticArea } from '@/lib/trials/areas';
-import { filtersHref, matchesMenuFilters, parseFilters, type TrialFilters } from '@/lib/trials/filters';
-import { cn } from '@/lib/utils/cn';
+import { AREA_ORDER, type TherapeuticArea } from '@/lib/trials/areas';
+import { matchesMenuFilters, parseFilters, type TrialFilters } from '@/lib/trials/filters';
 
 interface TrialsPageProps {
   filters: TrialFilters;
   trials: TrialListItem[];
-  /** Trials per area, after the menu filters. */
+  /** Trials per area after the menu filters, largest first. */
   areaCounts: { area: TherapeuticArea; count: number }[];
   total: number;
   greeting: string;
@@ -26,9 +24,10 @@ export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ 
   const all = await listOpenTrials();
 
   const inScope = all.filter((t) => matchesMenuFilters(t, filters));
-  const areaCounts = AREA_ORDER.map((area) => ({ area, count: inScope.filter((t) => t.area === area).length })).filter(
-    (a) => a.count > 0 || a.area === filters.area
-  );
+  // Biggest areas first, so they're the ones that keep their labels when the row is tight.
+  const areaCounts = AREA_ORDER.map((area) => ({ area, count: inScope.filter((t) => t.area === area).length }))
+    .filter((a) => a.count > 0 || a.area === filters.area)
+    .sort((a, b) => b.count - a.count);
 
   return {
     props: {
@@ -41,31 +40,6 @@ export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ 
     },
   };
 };
-
-const pillClass = (active: boolean) =>
-  cn(
-    'flex h-8 shrink-0 items-center rounded-full border px-3 text-[12.5px] font-medium transition-colors',
-    active ? 'border-ink bg-ink text-white' : 'border-line bg-surface text-ink-2 hover:border-ink-3'
-  );
-
-/** A color dot that opens up to show its label on hover, and stays open when selected. */
-function AreaPill({ area, count, href: to, active }: { area: TherapeuticArea; count: number; href: string; active: boolean }) {
-  return (
-    <Link href={to} scroll={false} aria-label={AREA_LABELS[area]} className={cn(pillClass(active), 'group/pill px-2.5')}>
-      <span className={cn('size-2.5 shrink-0 rounded-full', AREA_STYLES[area].dot)} />
-      <span
-        className={cn(
-          'overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-300 ease-out',
-          active ? 'max-w-48 opacity-100' : 'max-w-0 opacity-0 group-hover/pill:max-w-48 group-hover/pill:opacity-100'
-        )}
-      >
-        <span className="pl-1.5">
-          {AREA_LABELS[area]} <span className="tabular-nums opacity-60">{count}</span>
-        </span>
-      </span>
-    </Link>
-  );
-}
 
 export default function TrialsPage({ filters, trials, areaCounts, total, greeting, practicePatients }: TrialsPageProps) {
   return (
@@ -83,13 +57,8 @@ export default function TrialsPage({ filters, trials, areaCounts, total, greetin
         </p>
       </header>
 
-      <div className="mt-7 flex items-center gap-2">
-        <Link href={filtersHref({ ...filters, area: null })} scroll={false} className={pillClass(!filters.area)}>
-          All <span className="ml-1.5 tabular-nums opacity-60">{total}</span>
-        </Link>
-        {areaCounts.map(({ area, count }) => (
-          <AreaPill key={area} area={area} count={count} href={filtersHref({ ...filters, area })} active={filters.area === area} />
-        ))}
+      <div className="mt-7 flex items-center gap-3">
+        <AreaFilter filters={filters} areaCounts={areaCounts} total={total} />
         <FilterMenu filters={filters} resultCount={trials.length} />
       </div>
 
