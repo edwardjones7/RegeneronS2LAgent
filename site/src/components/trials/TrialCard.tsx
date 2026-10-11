@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { TrialListItem } from '@/lib/trials';
+import { canFill, type PrescreenCounts } from '@/lib/trials/prescreen';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { cn } from '@/lib/utils/cn';
 import { formatAgeRange, formatDate, formatStatus } from '@/lib/utils/format';
@@ -15,8 +16,8 @@ interface TrialCardProps {
   href: { pathname: string; query: Record<string, string> };
   /** Set once the practice accepted this trial: Ava's call progress. */
   outreach?: { booked: number; called: number };
-  /** Pre-screen results for this practice's patients, once matching has run. */
-  prescreen?: { candidates: number; review: number };
+  /** Pre-screen counts for this practice's patients; null until the matcher has run on this trial. */
+  prescreen?: PrescreenCounts | null;
 }
 
 export function TrialCard({ trial, href, outreach, prescreen }: TrialCardProps) {
@@ -55,25 +56,13 @@ export function TrialCard({ trial, href, outreach, prescreen }: TrialCardProps) 
         On hover the whole block slides up, so the details rise out of the card's own edge.
       */}
       <div className="absolute inset-x-4 bottom-4 translate-y-16 transition-transform duration-300 ease-out group-hover:translate-y-0 group-focus-visible:translate-y-0">
-        {outreach ? (
-          <span className="mb-2 flex items-center gap-1 text-xs font-semibold text-accent">
+        {outreach && (
+          <span className="mb-1.5 flex items-center gap-1 text-xs font-semibold text-accent">
             <span className="size-1.5 animate-pulse rounded-full bg-accent" />
             Ava calling · {outreach.booked} booked
           </span>
-        ) : prescreen ? (
-          <span className="mb-2 flex items-center gap-1 text-xs font-semibold">
-            <span className="text-pass">{prescreen.candidates} candidates</span>
-            <span className="text-ink-3">·</span>
-            <span className="text-unk">{prescreen.review} to review</span>
-          </span>
-        ) : (
-          trial.hasProtocol && (
-            <span className="mb-2 flex items-center gap-1 text-xs font-semibold text-pass">
-              <span className="size-1.5 rounded-full bg-pass" />
-              Criteria ready
-            </span>
-          )
         )}
+        <PrescreenLine prescreen={prescreen ?? null} />
         <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug tracking-[-0.015em]">{trial.indication}</h3>
         <p className="mt-0.5 truncate text-[13px] text-ink-3">{trial.drug ?? 'Intervention not listed'}</p>
         {trial.blurb && <p className="mt-2.5 line-clamp-3 text-[13px] leading-relaxed text-ink-2">{trial.blurb}</p>}
@@ -97,5 +86,21 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
       <dt className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ink-3">{label}</dt>
       <dd className="truncate text-[13px] font-medium tabular-nums">{children}</dd>
     </div>
+  );
+}
+
+const plural = (n: number, one: string, many: string) => `${n.toLocaleString()} ${n === 1 ? one : many}`;
+
+/** "14 candidates · 6 to review", always visible, so the grid reads as a ranking. */
+function PrescreenLine({ prescreen }: { prescreen: PrescreenCounts | null }) {
+  if (!prescreen) return <span className="mb-2 block text-xs font-medium text-ink-3">Not pre-screened yet</span>;
+  if (!canFill(prescreen)) return <span className="mb-2 block text-xs font-medium text-ink-3">No candidates in your panel</span>;
+  return (
+    <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-white/85 px-2.5 py-1 text-xs font-semibold shadow-[0_1px_2px_rgba(30,36,48,0.06)] ring-1 ring-white/70 backdrop-blur-md">
+      <span className="size-1.5 rounded-full bg-pass" />
+      <span className="text-pass">{plural(prescreen.candidates, 'candidate', 'candidates')}</span>
+      <span className="text-ink-3">·</span>
+      <span className="text-unk">{prescreen.review.toLocaleString()} to review</span>
+    </span>
   );
 }
