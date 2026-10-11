@@ -76,7 +76,8 @@ def test_birth_date_and_personal_touch_stay_server_side(s):
     lead = first_candidate(s)
     assert lead.birth_date and lead.personal_touch
     variables = outreach.dynamic_variables(s, lead)
-    assert set(variables) == {"first_name", "lead_id", "office_name", "doctor_name", "callback_number"}
+    # Every dynamic variable any tool uses must be present, or ElevenLabs ends the call.
+    assert set(variables) == {"first_name", "lead_id", "office_name", "doctor_name", "callback_number", "caller_id"}
     assert lead.birth_date not in str(variables) and lead.last_name not in str(variables)
     assert variables["office_name"] == "Dr. Rivera's office"
 
@@ -130,12 +131,34 @@ def test_verified_patient_answers_then_books(s):
     assert lead.status == LeadStatus.BOOKED and lead.next_attempt_at is None
 
 
-def test_a_ruling_out_answer_never_mentions_eligibility(s):
+def test_answers_never_stop_booking_they_become_staff_notes(s):
     accept(s)
     lead = first_candidate(s)
     service.tool_verify_identity(s, lead, lead.birth_date)
-    out = service.tool_record_answer(s, lead, "weight_change", "yes")
-    assert "OFFICE WILL FOLLOW UP" in out and "qualif" not in out.lower()
+    out = service.tool_record_answer(s, lead, "weight_change", "yes, gained about 15 pounds")
+    assert "Ask next" in out and "qualif" not in out.lower()
+    out = service.tool_record_answer(s, lead, "thyroid_cancer_history", "yes, my uncle")
+    assert "get_open_slots" in out and "eligib" in out.lower()  # told NOT to comment on eligibility
+    notes = [f["detail"] for f in lead.flags if f["type"] == "screening_note"]
+    assert len(notes) == 2
+    slot_id = int(service.tool_get_open_slots(s, lead).split("slot_id ")[1].split(":")[0])
+    assert "Booked" in service.tool_book_visit(s, lead, slot_id) and lead.status == LeadStatus.BOOKED
+
+
+def test_unclear_answer_is_asked_once_more_then_noted(s):
+    accept(s)
+    lead = first_candidate(s)
+    service.tool_verify_identity(s, lead, lead.birth_date)
+    assert "ask again" in service.tool_record_answer(s, lead, "weight_change", "hmm, up I guess")
+    assert "Ask next" in service.tool_record_answer(s, lead, "weight_change", "I really don't know")
+    assert any(f["type"] == "screening_note" for f in lead.flags)
+
+
+def test_no_booking_before_every_question_is_asked(s):
+    accept(s)
+    lead = first_candidate(s)
+    service.tool_verify_identity(s, lead, lead.birth_date)
+    assert "ask this first" in service.tool_get_open_slots(s, lead)
 
 
 # ---------------------------------------------------------------- the missed-call sequence
@@ -149,16 +172,16 @@ def _missed(s, lead, voicemail=True):
     s.flush()
 
 
-def test_missed_call_texts_times_without_study_details_and_retries(s):
+def test_missed_call_texts_a_callback_request_without_study_details_and_retries(s):
     accept(s)
     lead = first_candidate(s)
     _missed(s, lead)
     assert lead.status == LeadStatus.NO_ANSWER and lead.next_attempt_at
     text = next(e for e in lead.events if e.type == "sms_sent").detail["body"]
-    assert "Dr. Rivera" in text and "Reply 1, 2, 3" in text and "STOP" in text
+    assert "Dr. Rivera" in text and "call back" in text and "STOP" in text
+    assert "Reply 1" not in text  # no time menu: booking happens on the callback
     for word in ("weight", "obesity", "olatorepatide", "NCT"):
         assert word.lower() not in text.lower()
-    assert any(e.type == "slots_offered" for e in lead.events)
 
 
 def test_three_misses_go_to_the_staff_queue(s):
@@ -194,13 +217,17 @@ def test_batches_cap_calls_in_progress(s):
 # ---------------------------------------------------------------- text replies
 
 
-def test_reply_with_a_number_books_from_the_missed_call_text(s):
+def test_callback_after_the_text_books_on_the_phone(s):
     accept(s)
     lead = first_candidate(s)
     _missed(s, lead)
-    out = messaging.apply_reply(s, lead, "2")
-    assert "You're booked" in out and lead.status == LeadStatus.BOOKED and lead.next_attempt_at is None
-    assert any(f["type"] == "booked_by_text" for f in lead.flags)
+    outreach.start_inbound_call(s, lead, "CA_back")
+    assert lead.status == LeadStatus.CALLING and lead.next_attempt_at is None  # pending retry cancelled
+    service.tool_verify_identity(s, lead, lead.birth_date)
+    for q in ("weight_change", "thyroid_cancer_history"):
+        service.tool_record_answer(s, lead, q, "no")
+    slot_id = int(service.tool_get_open_slots(s, lead).split("slot_id ")[1].split(":")[0])
+    assert "Booked" in service.tool_book_visit(s, lead, slot_id) and lead.status == LeadStatus.BOOKED
 
 
 def test_reply_with_a_time_moves_the_next_call(s):
@@ -357,3 +384,13 @@ def test_new_slots_never_repeat_a_time(s):
 
 def slots_open(s, campaign):
     return outreach_slots.open_slots(s, campaign, n=100, practice_id=PRACTICE)
+
+
+def test_hanging_up_before_identity_counts_as_a_missed_call(s):
+    accept(s)
+    lead = first_candidate(s)
+    service.dial(lead.id)
+    s.expire_all()
+    service.call_ended(s, lead.calls[-1], transcript=[{"role": "user", "message": "Who is this?"}])
+    assert lead.status == LeadStatus.NO_ANSWER and lead.next_attempt_at
+    assert any(e.type == "callback_requested" for e in lead.events)

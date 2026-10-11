@@ -253,18 +253,14 @@ def next_calling_time(lead: Lead, now: datetime) -> datetime:
 
 
 def after_missed_attempt(s: Session, lead: Lead, reason: str) -> None:
-    """Voicemail was (or wasn't) left. Text them times, then retry tomorrow or hand to staff."""
+    """Voicemail was (or wasn't) left. Text them to call back, then retry tomorrow or hand to staff.
+
+    Booking happens on the phone: when they call back, Ava answers, checks who it is and books."""
     from app import service
 
-    campaign = service.campaign_for(lead)
-    offered = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id)
-    if not offered:
-        slots.seed_slots(s, campaign, practice_id=lead.practice_id)
-        offered = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id)
     p = profile(s, lead.practice_id)
-    body = missed_call_text(lead, p, offered)
-    if service.send_sms_logged(s, lead, lead.phone, body, "patient"):
-        service.log_event(s, lead, "slots_offered", slot_ids=[o.id for o in offered], via="sms")
+    if service.send_sms_logged(s, lead, lead.phone, missed_call_text(lead, p), "patient"):
+        service.log_event(s, lead, "callback_requested", via="sms")
 
     if lead.attempts >= get_settings().max_attempts:
         lead.next_attempt_at = None
@@ -277,14 +273,13 @@ def after_missed_attempt(s: Session, lead: Lead, reason: str) -> None:
     service.log_event(s, lead, "retry_scheduled", at=lead.next_attempt_at.isoformat() + "Z")
 
 
-def missed_call_text(lead: Lead, p: PracticeProfile, offered: list) -> str:
+def missed_call_text(lead: Lead, p: PracticeProfile) -> str:
     # No study name, condition or test in a text: lock screens are public.
-    lines = " ".join(f"{i}) {slots.short(o.starts_at)}" for i, o in enumerate(offered, 1))
-    book = f" Reply {', '.join(str(i) for i in range(1, len(offered) + 1))} to book a visit: {lines}." if offered else ""
-    callback = f" Or call us at {p.callback_phone}." if p.callback_phone else ""
+    number = spoken_phone(p.callback_phone) if p.callback_phone else "this number"
     return (
-        f"Hi {lead.first_name}, this is Ava from {office_display(p)}. {doctor_display(p)} asked us to reach out about "
-        f"a research study you might be interested in.{book}{callback} Reply STOP to opt out."
+        f"Hi {lead.first_name}, this is Ava from {office_display(p)}. Sorry we missed you! {doctor_display(p)} wanted to "
+        f"tell you about a research study you might be interested in. If you are, give us a call back at {number}. "
+        f"Reply STOP to opt out."
     )
 
 
@@ -406,6 +401,9 @@ def dynamic_variables(s: Session, lead: Lead) -> dict[str, str]:
         "office_name": office_display(p),
         "doctor_name": doctor_display(p),
         "callback_number": spoken_phone(p.callback_phone),
+        # Every dynamic variable a tool references must be sent on every call, or ElevenLabs
+        # ends the call. caller_id is only meaningful on inbound calls (take_message).
+        "caller_id": "",
     }
 
 

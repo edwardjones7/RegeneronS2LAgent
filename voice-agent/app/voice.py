@@ -61,6 +61,7 @@ class ElevenLabsVoice:
         variables = context or {
             "first_name": first_name, "lead_id": str(lead_id),
             "office_name": campaign.team_name, "doctor_name": "", "callback_number": campaign.clinic_phone,
+            "caller_id": "",
         }
         body = {
             "agent_id": self.settings.elevenlabs_agent_id,

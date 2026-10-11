@@ -18,7 +18,7 @@ from datetime import timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import messaging, service, slots
+from app import service, slots
 from app.config import get_settings
 from app.models import Call, Lead, LeadStatus, utcnow
 
@@ -66,6 +66,30 @@ def resolve_due(s: Session) -> int:
     return len(due)
 
 
+def _callback_and_book(s: Session, lead: Lead) -> None:
+    from app import outreach
+
+    call = outreach.start_inbound_call(s, lead, None)
+    service.tool_verify_identity(s, lead, lead.birth_date or "")
+    _answer_and_book(s, lead, call.attempt_no)
+    service.call_ended(s, call, transcript=[
+        {"role": "agent", "message": "Hi, thanks for calling the office! This is Ava, an automated assistant, and this call is recorded."},
+        {"role": "user", "message": "Hi, I got your text. I'm interested."},
+    ], summary="Simulated: called back after the text and booked.", duration_secs=110)
+
+
+def _answer_and_book(s: Session, lead: Lead, attempt: int) -> None:
+    for q in service.campaign_for(lead).prescreen_questions:
+        service.tool_record_answer(s, lead, q.id, "no" if q.role != "require_yes" else "yes")
+    campaign = service.campaign_for(lead)
+    found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id)
+    if not found:
+        slots.seed_slots(s, campaign, practice_id=lead.practice_id)
+        found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id)
+    if found:
+        service.tool_book_visit(s, lead, found[_roll(lead, attempt, "slot") % len(found)].id)
+
+
 def _finish(s: Session, call: Call) -> None:
     lead = call.lead
     result = outcome(lead, call.attempt_no)
@@ -73,10 +97,10 @@ def _finish(s: Session, call: Call) -> None:
     if result in ("voicemail", "no_answer"):
         service.call_ended(s, call, transcript=[], summary=f"Simulated: {result.replace('_', ' ')}.",
                            duration_secs=25 if result == "voicemail" else 0, voicemail=result == "voicemail")
-        # Some people who miss the call book from the text instead.
-        if lead.status == LeadStatus.NO_ANSWER or lead.status == LeadStatus.NEEDS_HUMAN:
-            if _roll(lead, call.attempt_no, "text") < 14:
-                messaging.apply_reply(s, lead, str(1 + _roll(lead, call.attempt_no, "pick") % 3))
+        # Some people who miss the call ring the office back after the text, and Ava books them.
+        if lead.status in (LeadStatus.NO_ANSWER, LeadStatus.NEEDS_HUMAN):
+            if _roll(lead, call.attempt_no, "callback") < 14:
+                _callback_and_book(s, lead)
         return
 
     call.answered_at = call.connected_at = call.started_at + timedelta(seconds=4)
@@ -86,15 +110,7 @@ def _finish(s: Session, call: Call) -> None:
     if lead.birth_date:
         service.tool_verify_identity(s, lead, lead.birth_date)
     if result == "booked":
-        for q in service.campaign_for(lead).prescreen_questions:
-            service.tool_record_answer(s, lead, q.id, "no" if q.role != "require_yes" else "yes")
-        campaign = service.campaign_for(lead)
-        found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id)
-        if not found:
-            slots.seed_slots(s, campaign, practice_id=lead.practice_id)
-            found = slots.open_slots(s, campaign, n=3, practice_id=lead.practice_id)
-        if found:
-            service.tool_book_visit(s, lead, found[_roll(lead, call.attempt_no, "slot") % len(found)].id)
+        _answer_and_book(s, lead, call.attempt_no)
         said.append({"role": "user", "message": "Sure, that time works for me."})
     elif result == "not_interested":
         service.tool_not_interested(s, lead, "not right now")

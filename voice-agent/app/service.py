@@ -275,6 +275,8 @@ def tool_record_answer(s: Session, lead: Lead, question_id: str, answer: str) ->
     s.add(Answer(lead_id=lead.id, question_id=q.id, raw_text=rec.raw_text, normalized_value=rec.normalized_value, verdict=rec.verdict))
     s.flush()
     s.refresh(lead)
+    if is_practice(lead):
+        return _practice_answer(s, lead, q, answer, rec.verdict)
     d = current_decision(lead)
     log_event(s, lead, "answer", question_id=q.id, answer=answer, verdict=rec.verdict, state=d.state)
 
@@ -312,8 +314,10 @@ def tool_record_answer(s: Session, lead: Lead, question_id: str, answer: str) ->
 def tool_get_open_slots(s: Session, lead: Lead) -> str:
     if is_practice(lead) and not lead.identity_verified:
         return "Not yet: confirm their date of birth with verify_identity first."
+    if is_practice(lead) and (nxt := practice_next_question(lead)):
+        return f"Not yet: ask this first: {_question_line(nxt)}"
     d = current_decision(lead)
-    if not d.may_offer_slots:
+    if not is_practice(lead) and not d.may_offer_slots:
         nxt = d.next_question
         if nxt:
             return f"Not yet: the screening isn't finished. Ask next: {_question_line(nxt)}"
@@ -339,8 +343,10 @@ def tool_book_visit(s: Session, lead: Lead, slot_id: int) -> str:
         return f"Already booked: {slots.spoken(existing.starts_at)}. Confirm that time with them."
     if is_practice(lead) and not lead.identity_verified:
         return "Can't book yet: confirm their date of birth with verify_identity first."
+    if is_practice(lead) and (nxt := practice_next_question(lead)):
+        return f"Can't book yet: ask this first: {_question_line(nxt)}"
     d = current_decision(lead)
-    if not d.may_offer_slots:
+    if not is_practice(lead) and not d.may_offer_slots:
         return "Can't book: the screening doesn't show a fit. Follow the last record_answer instructions."
     slot = s.get(Slot, int(slot_id))
     if slot is None or slot.campaign_id != campaign.id or slot.practice_id != lead.practice_id:
@@ -359,8 +365,9 @@ def tool_book_visit(s: Session, lead: Lead, slot_id: int) -> str:
         (
             campaign.coordinator_phone,
             sms.coordinator_booked(
-                lead.first_name, lead.last_name, when, campaign, d.answered, d.total,
-                d.flags + [f["detail"] for f in lead.flags if f["type"] == "escalation"],
+                lead.first_name, lead.last_name, when, campaign,
+                *((len({a.question_id for a in lead.answers}), len(campaign.prescreen_questions)) if is_practice(lead) else (d.answered, d.total)),
+                d.flags + [f["detail"] for f in lead.flags if f["type"] in ("escalation", "screening_note")],
                 None if is_practice(lead) else seconds_to_first_call(lead), record_link(lead),
             ),
             "coordinator",
@@ -472,19 +479,46 @@ def tool_verify_identity(s: Session, lead: Lead, date_of_birth: str) -> str:
 def _study_briefing(s: Session, lead: Lead) -> str:
     campaign = campaign_for(lead)
     facts = "\n".join(f"- {f.fact}" for f in campaign.approved_facts)
-    d = current_decision(lead)
-    if d.state == "in_progress" and d.next_question:
-        nxt = f"When they're interested, ask: {_question_line(d.next_question)}"
-    elif d.may_offer_slots:
-        nxt = "When they're interested, call get_open_slots and offer two or three times for a screening visit."
+    q = practice_next_question(lead)
+    if q:
+        nxt = f"When they're interested, ask: {_question_line(q)}"
     else:
-        nxt = "Follow the last instruction you were given."
+        nxt = "When they're interested, call get_open_slots and offer two or three times for a screening visit."
     touch = f"Personal line (say it naturally): {lead.personal_touch}\n" if lead.personal_touch else ""
     return (
         f"{touch}Study one-liner: {campaign.one_liner}\n"
         f"APPROVED FACTS (the only study information you may share; ClinicalTrials.gov {campaign.nct_id}):\n{facts}\n"
         f"{nxt}"
     )
+
+
+def practice_next_question(lead: Lead):
+    """Practice calls ask each question once (a second time only if the answer was unclear).
+    Answers never block booking: the in-person screening visit decides eligibility."""
+    tries: dict[str, list[str]] = {}
+    for a in lead.answers:
+        tries.setdefault(a.question_id, []).append(a.verdict)
+    for q in campaign_for(lead).prescreen_questions:
+        verdicts = tries.get(q.id, [])
+        if not verdicts or (verdicts[-1] == "unsure" and len(verdicts) < 2):
+            return q
+    return None
+
+
+def _practice_answer(s: Session, lead: Lead, q, answer: str, verdict: str) -> str:
+    asked_before = sum(1 for a in lead.answers if a.question_id == q.id) - 1
+    log_event(s, lead, "answer", question_id=q.id, answer=answer, verdict=verdict)
+    if verdict == "unsure" and asked_before == 0:
+        return f"Recorded, but the answer wasn't clear. Gently ask again, for a yes or no: {_question_line(q)}"
+    if verdict in ("disqualify", "unsure"):
+        # A note for staff to go over at the screening visit, never a reason to stop the call.
+        add_flag(lead, "screening_note", f"{q.id.replace('_', ' ')}: {answer[:160]}")
+    nxt = practice_next_question(lead)
+    if nxt:
+        return f"Recorded. Ask next: {_question_line(nxt)}"
+    log_event(s, lead, "screening_complete", result="booking", notes=[f["detail"] for f in lead.flags if f["type"] == "screening_note"])
+    return ("Thanks, that's all the questions. Don't comment on their answers or on eligibility. Call get_open_slots now, "
+            "offer two or three times for the screening visit at the office, and book the one they pick with book_visit.")
 
 
 def tool_schedule_callback(s: Session, lead: Lead, when: str) -> str:
@@ -545,6 +579,9 @@ def call_ended(
     if lead.status == LeadStatus.CALLING:
         if voicemail or not user_spoke:
             _no_answer(s, lead, reason="voicemail left" if voicemail else "no answer")
+        elif is_practice(lead) and not lead.identity_verified:
+            # Hung up before we knew who we were talking to: same as a missed call (text + retry).
+            _no_answer(s, lead, reason="hung up before identity was confirmed")
         else:
             add_flag(lead, "incomplete", "call ended before screening finished")
             set_status(s, lead, LeadStatus.NEEDS_HUMAN, "call ended before screening finished")

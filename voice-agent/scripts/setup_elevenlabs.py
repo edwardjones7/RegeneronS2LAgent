@@ -18,11 +18,12 @@ import httpx
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.campaigns import get_campaign  # noqa: E402
-from app.config import ROOT, get_settings  # noqa: E402
+from app.config import REPO, ROOT, get_settings  # noqa: E402
 from app.prompt import PRACTICE_VOICEMAIL, practice_first_message, practice_system_prompt  # noqa: E402
 
-STATE_FILE = ROOT / ".elevenlabs.json"
-ENV_FILE = ROOT / ".env"
+# Keys live in the repo-root .env (shared with site/); fall back to voice-agent/.env.
+STATE_FILE = (REPO if (REPO / ".env").exists() else ROOT) / ".elevenlabs.json"
+ENV_FILE = REPO / ".env" if (REPO / ".env").exists() else ROOT / ".env"
 DEFAULT_LLM = "claude-sonnet-5-5"
 DEFAULT_VOICE = "cgSgspJ2msm6clMCkdW9"  # "Jessica": warm, conversational stock voice
 
@@ -87,7 +88,7 @@ def tool_defs(base: str) -> list[dict]:
             "Save the person's answer to a pre-screening question. Call after EVERY answer. The result says which question to ask next or that screening is complete.",
             {
                 "question_id": s("The question_id of the question they just answered, exactly as given (e.g. age, height, weight, diabetes)."),
-                "answer": s("Their answer in their own words. For numbers include units they used, e.g. '5 foot 7', '220 pounds', '61'."),
+                "answer": s("Their answer in their own words. For yes/no questions START with 'yes' or 'no', e.g. 'yes, gained about 15 pounds'. For numbers include units they used, e.g. '5 foot 7', '220 pounds', '61'."),
             },
             ["question_id", "answer"],
         ),
@@ -172,6 +173,10 @@ def main():
 
     http = httpx.Client(base_url="https://api.elevenlabs.io", headers={"xi-api-key": settings.elevenlabs_api_key}, timeout=30)
     state = load_state()
+    if state.get("agent_id") and http.get(f"/v1/convai/agents/{state['agent_id']}").status_code != 200:
+        # Saved state is from another ElevenLabs account (or was deleted): start fresh.
+        print("! the saved agent isn't on this API key's account; creating a new agent, tools and number import")
+        state = {}
 
     # 1. Shared secret ElevenLabs sends on every tool call.
     tool_secret = settings.tool_secret

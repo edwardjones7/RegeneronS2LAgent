@@ -1,12 +1,16 @@
 import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { AppShell, Badge, type BadgeTone, Button, EmptyRow, LinkButton, PageHeader, StatCard, StatGrid, Table, Tabs, Td, Th, Tr } from '@/components/ui';
-import { getOutreachOverview, type OutreachOverview, type OutreachPatient, type OutreachStatus } from '@/lib/caller';
+import { AppShell, Button, LinkButton, PageHeader, Tabs } from '@/components/ui';
+import { getOutreachOverview, type OutreachOverview, type OutreachPatient } from '@/lib/caller';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { fetchJson, getErrorMessage } from '@/lib/utils/api';
-import { cn } from '@/lib/utils/cn';
 import { formatDate } from '@/lib/utils/format';
+
+/**
+ * The doctor's view of outreach: is it working, who's coming in, and does anything need them.
+ * Everything else (every patient, every try) is one click away at /outreach/patients.
+ */
 
 interface OutreachPageProps {
   nct: string | null;
@@ -18,91 +22,28 @@ export const getServerSideProps: GetServerSideProps<OutreachPageProps> = async (
   return { props: { nct, initial: await getOutreachOverview(nct ?? undefined) } };
 };
 
-const STATUS: Record<OutreachStatus, { label: string; tone: BadgeTone }> = {
-  booked: { label: 'Booked', tone: 'pass' },
-  calling: { label: 'On a call', tone: 'accent' },
-  queued: { label: 'Up next', tone: 'neutral' },
-  no_answer: { label: 'Trying again', tone: 'neutral' },
-  needs_human: { label: 'Needs a person', tone: 'unknown' },
-  emergency: { label: 'Urgent', tone: 'fail' },
-  chart_review: { label: 'Chart review', tone: 'unknown' },
-  not_a_fit: { label: 'Office follow-up', tone: 'neutral' },
-  closed: { label: 'Not interested', tone: 'neutral' },
-  opted_out: { label: 'Opted out', tone: 'neutral' },
-  dropped: { label: 'Dropped', tone: 'neutral' },
-  new: { label: 'New', tone: 'neutral' },
-};
+const first = (name: string) => name.split(' ')[0];
 
-const ACTIVITY: Record<string, string> = {
-  call_started: 'Ava called',
-  call_ended: 'Call ended',
-  sms_sent: 'Texted times',
-  sms_received: 'Texted back',
-  slots_offered: 'Texted times',
-  visit_booked: 'Booked a visit',
-  visit_confirmed: 'Confirmed the visit',
-  visit_rescheduled: 'Rescheduled',
-  retry_scheduled: 'Retry scheduled',
-  identity_verified: 'Identity confirmed',
-  inbound_call: 'Called back',
-  call_window_set: 'Asked for a later time',
-  lead_received: 'Added from the pre-screen',
-  chart_review_cleared: 'Chart cleared',
-  staff_contacted: 'Reached by staff',
-  status: 'Updated',
-};
-
-function timeAgo(iso: string | null | undefined): string {
-  if (!iso) return '';
-  const min = Math.round((Date.now() - new Date(iso.endsWith('Z') ? iso : `${iso}Z`).getTime()) / 60000);
-  if (min < 1) return 'just now';
-  if (min < 60) return `${min}m ago`;
-  const h = Math.round(min / 60);
-  return h < 24 ? `${h}h ago` : `${Math.round(h / 24)}d ago`;
+/** What happened, in one plain sentence, for a patient Ava handed to the office. */
+function whatHappened(p: OutreachPatient): string {
+  const r = p.reason.trim();
+  if (p.status === 'emergency') return `${p.name} mentioned something that could be an emergency. Ava told them to call 911.`;
+  if (/^no answer after/.test(r)) return `${p.name} didn’t pick up after 3 tries.`;
+  if (/requested a person/i.test(r)) return `${p.name} wants to talk to someone at the office.`;
+  if (/^medical question:/i.test(r)) return `${p.name} has a medical question: “${r.replace(/^medical question:\s*/i, '')}”`;
+  if (/^callback requested:/i.test(r)) return `${p.name} asked to be called back ${r.replace(/^callback requested:\s*/i, '')}.`;
+  if (/identity/i.test(r) || /date of birth/i.test(r)) return `Ava couldn’t confirm she was talking to ${p.name}.`;
+  if (/texted/i.test(r) || r.startsWith('"')) return `${p.name} texted back: ${r.replace(/^texted back; a person should reply$/i, 'a message for the office.')}`;
+  if (/language/i.test(r)) return `${p.name} would rather talk in another language.`;
+  if (/talk (it over )?(with|to) the doctor/i.test(r)) return `${p.name} wants to talk it over with you first.`;
+  return `${p.name}: ${r.charAt(0).toLowerCase()}${r.slice(1)}.`.replace(/\.\.$/, '.');
 }
 
-const visitTime = (local: string) =>
-  new Date(local).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-
-/** One dot per try (3 max); the last one shows where it ended. */
-function Tries({ p }: { p: OutreachPatient }) {
-  const tries = Math.min(p.attempts, 3);
-  return (
-    <span className="inline-flex gap-1" title={`${tries} of 3 tries`} aria-label={`${tries} of 3 tries`}>
-      {[0, 1, 2].map((i) => {
-        const last = i === tries - 1;
-        return (
-          <span
-            key={i}
-            className={cn(
-              'size-2.5 rounded-full border',
-              i >= tries && 'border-dashed border-ink-3/40',
-              i < tries && !last && 'border-accent/40 bg-accent-weak',
-              last && p.status === 'booked' && 'border-pass bg-pass',
-              last && p.status === 'calling' && 'animate-pulse border-accent bg-accent',
-              last && (p.status === 'needs_human' || p.status === 'emergency') && 'border-unk bg-unk-bg',
-              last && !['booked', 'calling', 'needs_human', 'emergency'].includes(p.status) && 'border-accent/60 bg-accent-weak'
-            )}
-          />
-        );
-      })}
-    </span>
-  );
-}
-
-function PatientLink({ p }: { p: OutreachPatient }) {
-  return (
-    <Link href={`/patients?patient=${encodeURIComponent(p.patientId)}`} className="font-medium hover:text-accent">
-      {p.name}
-    </Link>
-  );
-}
-
-function QueueItem({ p, onDone }: { p: OutreachPatient; onDone: () => void }) {
-  const [busy, setBusy] = useState(false);
+function NeedsYouItem({ p, onDone }: { p: OutreachPatient; onDone: () => void }) {
+  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const act = async (action: 'restart' | 'contacted' | 'drop' | 'clear') => {
-    setBusy(true);
+  const act = async (action: 'restart' | 'contacted') => {
+    setBusy(action);
     setError(null);
     try {
       const res = await fetch(`/api/outreach/leads/${p.id}/${action}`, { method: 'POST' });
@@ -112,97 +53,80 @@ function QueueItem({ p, onDone }: { p: OutreachPatient; onDone: () => void }) {
     } catch (err) {
       setError(getErrorMessage(err, 'That didn’t work'));
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
-  const review = p.status === 'chart_review';
   return (
-    <li className="border-b border-line-2 px-4 py-3 last:border-b-0">
-      <div className="flex items-baseline justify-between gap-2">
-        <PatientLink p={p} />
-        <span className="shrink-0 text-xs text-ink-3">{timeAgo(p.lastActivity?.at)}</span>
-      </div>
-      <p className="mt-0.5 line-clamp-2 text-[12.5px] text-ink-2">{p.reason}</p>
-      <div className="mt-2 flex flex-wrap gap-1.5">
-        {review ? (
-          <Button className="px-2.5 py-1" disabled={busy} onClick={() => act('clear')}>
-            Chart checked, call
-          </Button>
-        ) : (
-          <>
-            {p.status !== 'emergency' && (
-              <Button variant="secondary" className="px-2.5 py-1" disabled={busy} onClick={() => act('restart')}>
-                Have Ava call again
-              </Button>
-            )}
-            <Button variant="secondary" className="px-2.5 py-1" disabled={busy} onClick={() => act('contacted')}>
-              I reached them
-            </Button>
-          </>
-        )}
-        <Button variant="secondary" className="px-2.5 py-1 text-ink-3" disabled={busy} onClick={() => act('drop')}>
-          Drop
+    <li className="border-b border-line-2 py-3.5 last:border-b-0">
+      <p className="text-[13.5px] leading-snug">{whatHappened(p)}</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Button className="px-3 py-1.5" disabled={busy !== null} onClick={() => act('contacted')}>
+          {busy === 'contacted' ? 'Saving…' : `I’ll call ${first(p.name)}`}
         </Button>
+        {p.status !== 'emergency' && (
+          <Button variant="secondary" className="px-3 py-1.5" disabled={busy !== null} onClick={() => act('restart')}>
+            {busy === 'restart' ? 'Saving…' : 'Ava, try again'}
+          </Button>
+        )}
       </div>
       {error && <p className="mt-1.5 text-xs text-fail">{error}</p>}
     </li>
   );
 }
 
-function Panel({ title, count, children }: { title: string; count?: number; children: React.ReactNode }) {
-  return (
-    <section className="overflow-hidden rounded-[10px] border border-line bg-surface">
-      <h2 className="flex items-center justify-between border-b border-line bg-surface-2 px-4 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-3">
-        {title}
-        {count !== undefined && <span className="tabular-nums">{count}</span>}
-      </h2>
-      {children}
-    </section>
-  );
+function visitTime(local: string) {
+  return new Date(local).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
-
-const FILTERS = [
-  { key: 'all', label: 'All', match: () => true },
-  { key: 'booked', label: 'Booked', match: (p: OutreachPatient) => p.status === 'booked' },
-  { key: 'progress', label: 'In progress', match: (p: OutreachPatient) => ['calling', 'queued', 'no_answer'].includes(p.status) },
-  { key: 'closed', label: 'Closed', match: (p: OutreachPatient) => ['closed', 'opted_out', 'dropped', 'not_a_fit'].includes(p.status) },
-] as const;
 
 export default function OutreachPage({ nct, initial }: OutreachPageProps) {
   const [data, setData] = useState(initial);
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]['key']>('all');
+  const [now, setNow] = useState(() => Date.now());
   const url = `/api/outreach${nct ? `?nct=${nct}` : ''}`;
-  const refresh = () => fetchJson<OutreachOverview>(url).then(setData).catch(() => {});
+  const load = () =>
+    fetchJson<OutreachOverview>(url)
+      .then((d) => {
+        setData(d);
+        setNow(Date.now());
+      })
+      .catch(() => {});
+  const refresh = () => void load();
 
-  // Ava works in the background; keep the page live while it's open.
+  // Ava works in the background; keep the page current while it's open.
   useEffect(() => {
-    const id = setInterval(() => !document.hidden && fetchJson<OutreachOverview>(url).then(setData).catch(() => {}), 4000);
+    const tick = () =>
+      !document.hidden &&
+      fetchJson<OutreachOverview>(url)
+        .then((d) => {
+          setData(d);
+          setNow(Date.now());
+        })
+        .catch(() => {});
+    const id = setInterval(tick, 5000);
     return () => clearInterval(id);
   }, [url]);
 
   const t = data.totals;
-  const staff = data.patients.filter((p) => p.status === 'needs_human' || p.status === 'emergency');
-  const review = data.patients.filter((p) => p.status === 'chart_review');
+  const trial = nct ? data.trials.find((x) => x.nctId === nct) : null;
+  const callable = t.patients - t.chartReview;
+  const needsYou = data.patients
+    .filter((p) => p.status === 'needs_human' || p.status === 'emergency')
+    .sort((a, b) => Number(b.status === 'emergency') - Number(a.status === 'emergency'));
+  const charts = data.patients.filter((p) => p.status === 'chart_review');
   const tests = data.patients.filter((p) => p.testBirthDate);
-  const now = new Date();
-  const upcoming = data.visits.filter((v) => new Date(v.startsAt) >= new Date(now.getTime() - 3600_000)).slice(0, 8);
-  const match = FILTERS.find((f) => f.key === filter)!.match;
-  const rows = data.patients
-    .filter(match)
-    .sort((a, b) => (b.lastActivity?.at ?? '').localeCompare(a.lastActivity?.at ?? ''));
+  const comingIn = data.visits.filter((v) => new Date(v.startsAt).getTime() >= now - 3600_000);
+  const everyone = `/outreach/patients${nct ? `?nct=${nct}` : ''}`;
 
   return (
     <AppShell title="Outreach" active="outreach">
       <PageHeader
-        title="Outreach"
-        description={`Ava is calling your pre-screened patients from ${DEMO_PRACTICE.doctor}’s office and booking screening visits here.`}
+        title={trial ? `Outreach · ${trial.title}` : 'Outreach'}
         tabs={
-          data.trials.length > 0 ? (
+          data.trials.length > 1 ? (
             <Tabs
               active={nct ?? 'all'}
               items={[
                 { key: 'all', label: 'All trials', href: '/outreach' },
-                ...data.trials.map((x) => ({ key: x.nctId, label: x.title, href: `/outreach?nct=${x.nctId}`, count: x.booked })),
+                ...data.trials.map((x) => ({ key: x.nctId, label: x.title, href: `/outreach?nct=${x.nctId}` })),
               ]}
             />
           ) : undefined
@@ -211,13 +135,13 @@ export default function OutreachPage({ nct, initial }: OutreachPageProps) {
 
       {!data.available ? (
         <p className="mt-8 rounded-[10px] border border-line p-6 text-[13px] text-ink-3">
-          The outreach caller isn&rsquo;t reachable right now. Calls already in progress keep going; this page will catch up when it&rsquo;s back.
+          Can&rsquo;t reach Ava right now. Calls already underway keep going; this page catches up when she&rsquo;s back.
         </p>
       ) : data.trials.length === 0 ? (
         <div className="mt-8 rounded-[10px] border border-line p-8 text-center">
-          <h2 className="text-base font-semibold">No outreach yet</h2>
+          <h2 className="text-base font-semibold">Nothing to follow yet</h2>
           <p className="mx-auto mt-1.5 max-w-md text-[13px] text-ink-2">
-            Accept a trial and Ava starts calling its pre-screened patients from your office. There&rsquo;s nothing else to set up.
+            Accept a trial and Ava calls its pre-screened patients from your office and books them in. You don&rsquo;t need to do anything else.
           </p>
           <LinkButton href="/trials" className="mt-4">
             See recommended trials
@@ -225,131 +149,85 @@ export default function OutreachPage({ nct, initial }: OutreachPageProps) {
         </div>
       ) : (
         <>
-          {tests.length > 0 && (
-            <div className="mt-5 rounded-lg border border-line border-l-[3px] border-l-accent bg-surface-2 px-4 py-3 text-[13px] text-ink-2">
-              <span className="font-semibold text-ink">Test call.</span> When your phone rings, you&rsquo;re{' '}
-              {tests.map((p, i) => (
-                <span key={p.id}>
-                  {i > 0 && ' or '}
-                  <span className="font-semibold text-ink">{p.name}</span>, born {formatDate(p.testBirthDate!)}
-                </span>
-              ))}
-              . Ava will ask you to confirm that birthday before she says anything about the study.
+          <section className="mt-6">
+            <p className="text-[19px] font-semibold leading-snug tracking-[-0.015em]">
+              Ava has called {t.called} of your {callable} patients.{' '}
+              <span className="text-pass">
+                {t.booked} {t.booked === 1 ? 'is' : 'are'} coming in.
+              </span>
+            </p>
+            <div className="mt-3 h-2 max-w-2xl overflow-hidden rounded-full bg-surface-2" role="img" aria-label={`${t.called} of ${callable} called, ${t.booked} booked`}>
+              <div className="flex h-full">
+                <div className="h-full bg-pass transition-[width] duration-700" style={{ width: `${callable ? (t.booked / callable) * 100 : 0}%` }} />
+                <div className="h-full bg-accent/40 transition-[width] duration-700" style={{ width: `${callable ? (Math.max(0, t.called - t.booked) / callable) * 100 : 0}%` }} />
+              </div>
             </div>
-          )}
+            {tests.length > 0 && (
+              <p className="mt-3 text-[12.5px] text-ink-3">
+                Test call: when your phone rings, you&rsquo;re {tests.map((p) => `${p.name}, born ${formatDate(p.testBirthDate!)}`).join(' or ')}.
+              </p>
+            )}
+          </section>
 
-          <div className="mt-6">
-            <StatGrid>
-              <StatCard label="Called" value={t.called} suffix={`/ ${t.patients}`} hint={`${t.inProgress} on a call now`} />
-              <StatCard label="Reached" value={t.called ? `${Math.round((t.reached / t.called) * 100)}%` : '—'} hint={`${t.texted} texted after a missed call`} />
-              <StatCard label="Booked" value={t.booked} hint="Screening visits here" selected />
-              <StatCard label="Needs a person" value={t.needsStaff + t.chartReview} hint={`${t.chartReview} waiting on a chart check`} />
-            </StatGrid>
+          <div className="mt-8 grid gap-10 lg:grid-cols-2">
+            <section>
+              <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-3">Coming in</h2>
+              {comingIn.length === 0 ? (
+                <p className="mt-3 text-[13.5px] text-ink-3">No one&rsquo;s booked yet. Ava is still calling.</p>
+              ) : (
+                <ul className="mt-2">
+                  {comingIn.slice(0, 12).map((v) => (
+                    <li key={v.leadId} className="flex items-baseline justify-between gap-4 border-b border-line-2 py-2.5 text-[13.5px] last:border-b-0">
+                      <span className="font-medium">{v.name}</span>
+                      <span className="shrink-0 tabular-nums text-ink-2">{visitTime(v.startsAt)}</span>
+                    </li>
+                  ))}
+                  {comingIn.length > 12 && (
+                    <li className="pt-2.5 text-[12.5px] text-ink-3">and {comingIn.length - 12} more</li>
+                  )}
+                </ul>
+              )}
+            </section>
+
+            <section>
+              <h2 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+                Needs you{needsYou.length + (charts.length ? 1 : 0) > 0 && ` · ${needsYou.length + (charts.length ? 1 : 0)}`}
+              </h2>
+              {needsYou.length === 0 && charts.length === 0 ? (
+                <p className="mt-3 text-[13.5px] text-ink-3">Nothing needs you right now.</p>
+              ) : (
+                <ul className="mt-1">
+                  {needsYou.slice(0, 6).map((p) => (
+                    <NeedsYouItem key={p.id} p={p} onDone={refresh} />
+                  ))}
+                  {needsYou.length > 6 && (
+                    <li className="border-b border-line-2 py-3 text-[13px] last:border-b-0">
+                      <Link href={everyone} className="font-semibold text-accent hover:underline">
+                        {needsYou.length - 6} more people need a call →
+                      </Link>
+                    </li>
+                  )}
+                  {charts.length > 0 && (
+                    <li className="border-b border-line-2 py-3.5 last:border-b-0">
+                      <p className="text-[13.5px] leading-snug">
+                        {charts.length} {charts.length === 1 ? 'chart needs' : 'charts need'} a quick look before Ava calls. The records
+                        couldn&rsquo;t settle everything.
+                      </p>
+                      <LinkButton href={`${everyone}${nct ? '&' : '?'}show=review`} variant="secondary" className="mt-2 px-3 py-1.5">
+                        Check charts
+                      </LinkButton>
+                    </li>
+                  )}
+                </ul>
+              )}
+            </section>
           </div>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
-            <div className="min-w-0">
-              <div className="mb-3 flex gap-1.5">
-                {FILTERS.map((f) => (
-                  <button
-                    key={f.key}
-                    onClick={() => setFilter(f.key)}
-                    className={cn(
-                      'rounded-full border px-3 py-1 text-[12px] font-semibold',
-                      filter === f.key ? 'border-accent-line bg-accent-weak text-accent' : 'border-line text-ink-2 hover:border-ink-3'
-                    )}
-                  >
-                    {f.label} <span className="ml-0.5 tabular-nums text-ink-3">{data.patients.filter(f.match).length}</span>
-                  </button>
-                ))}
-              </div>
-              <Table>
-                <thead>
-                  <tr>
-                    <Th>Patient</Th>
-                    <Th>Status</Th>
-                    <Th>Tries</Th>
-                    <Th>Last activity</Th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.slice(0, 150).map((p) => (
-                    <Tr key={p.id}>
-                      <Td>
-                        <PatientLink p={p} />
-                        <div className="text-xs text-ink-3">
-                          {p.simulated ? 'Simulated' : 'Real phone'}
-                          {p.callWindow ? ` · prefers ${p.callWindow}` : ''}
-                          {p.callbacks ? ` · called back ${p.callbacks}×` : ''}
-                        </div>
-                      </Td>
-                      <Td>
-                        <Badge tone={STATUS[p.status]?.tone ?? 'neutral'}>{STATUS[p.status]?.label ?? p.status}</Badge>
-                      </Td>
-                      <Td>
-                        <Tries p={p} />
-                      </Td>
-                      <Td className="text-ink-2">
-                        {p.lastActivity ? (
-                          <>
-                            {ACTIVITY[p.lastActivity.type] ?? p.lastActivity.type.replaceAll('_', ' ')}{' '}
-                            <span className="text-xs text-ink-3">· {timeAgo(p.lastActivity.at)}</span>
-                          </>
-                        ) : (
-                          '—'
-                        )}
-                      </Td>
-                    </Tr>
-                  ))}
-                  {rows.length === 0 && <EmptyRow colSpan={4}>No patients here.</EmptyRow>}
-                </tbody>
-              </Table>
-            </div>
-
-            <div className="flex flex-col gap-5">
-              <Panel title="Coming up" count={data.visits.length}>
-                {upcoming.length === 0 ? (
-                  <p className="px-4 py-6 text-center text-[13px] text-ink-3">No visits booked yet.</p>
-                ) : (
-                  <ul>
-                    {upcoming.map((v) => (
-                      <li key={v.leadId} className="flex items-baseline justify-between gap-3 border-b border-line-2 px-4 py-2.5 text-[13px] last:border-b-0">
-                        <span className="font-medium">{v.name}</span>
-                        <span className="shrink-0 text-xs tabular-nums text-ink-2">{visitTime(v.startsAt)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </Panel>
-
-              <Panel title="Needs a person" count={staff.length}>
-                {staff.length === 0 ? (
-                  <p className="px-4 py-6 text-center text-[13px] text-ink-3">Nothing waiting. Ava hands patients over here.</p>
-                ) : (
-                  <ul>
-                    {staff.map((p) => (
-                      <QueueItem key={p.id} p={p} onDone={refresh} />
-                    ))}
-                  </ul>
-                )}
-              </Panel>
-
-              {review.length > 0 && (
-                <Panel title="Chart review before calling" count={review.length}>
-                  <ul>
-                    {review.map((p) => (
-                      <QueueItem key={p.id} p={p} onDone={refresh} />
-                    ))}
-                  </ul>
-                </Panel>
-              )}
-
-              {data.dashboardUrl && (
-                <a href={data.dashboardUrl} target="_blank" rel="noreferrer" className="text-[12px] text-ink-3 hover:text-ink-2">
-                  Call transcripts and recordings ↗
-                </a>
-              )}
-            </div>
+          <div className="mt-10 flex items-center gap-5 border-t border-line pt-4 text-[13px]">
+            <Link href={everyone} className="font-semibold text-accent hover:underline">
+              See every patient →
+            </Link>
+            <span className="text-ink-3">Patients stay with {DEMO_PRACTICE.name}. Sponsors only see counts.</span>
           </div>
         </>
       )}
