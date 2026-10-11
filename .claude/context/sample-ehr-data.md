@@ -1,184 +1,156 @@
 # Sample Patient Data for the Demo
 
-How to get, load and use patient data for the matching engine. Follows `AGENTS.md` (section 5: privacy and browser-only; section 6: three-state criteria; section 7: data).
+How the patient data is made, what's in it, and how the matching engine should use it. Follows `.claude/AGENTS.MD` (section 5: privacy; section 6: three-state criteria; section 7: data).
 
-**Decision:** the demo runs on the **CDISC SDTM/ADaM pilot dataset** (`CDISCPILOT01`). No backend, no database, no LLM matching. Synthea, MIMIC and FHIR are out of hackathon scope; see the last section.
+**Decision (2026-10-10):** the demo runs on synthetic patients from **Synthea**. This replaces the earlier plan to use the CDISC SDTM pilot dataset, which had only 254 elderly Alzheimer's patients, MedDRA codes, mostly uncoded medications, no practices, dates fixed to 2012–2014, and an educational-only license.
 
-Everything below was checked against the actual files on 2026-10-10.
+Every number below was checked against `data/synthea-nj.json` on 2026-10-10.
 
 ---
 
 ## 1. Source and license
 
-- Repo: https://github.com/cdisc-org/sdtm-adam-pilot-project
-- **Not MIT. Do not commit the data.** CDISC terms of use (repo `README.md`) say:
-  - attribution back to CDISC is required
-  - no selling or distributing it for a fee
-  - no modifying or altering the data
-- Handling:
-  1. A setup script downloads the files into `/data/cdisc/`. That folder is in `.gitignore`.
-  2. Keep the downloaded files byte-for-byte as published. Reshape them into patient records **in memory at load time**, not as edited copies on disk.
-  3. Write the provenance and attribution in `/docs/data.md`: source URL, CDISC credit, terms of use, date fetched.
+- Synthea: https://github.com/synthetichealth/synthea (Apache-2.0). It simulates patients' lives from birth, with realistic disease progression, medications, labs and visits.
+- **No real people.** Names, addresses and records are all generated.
+- The generated patients are ours, so the trimmed bundle is **committed**: `data/synthea-nj.json`.
+- The Synthea jar and its raw output (about 1.7 GB of CSV) are gitignored under `data/synthea/`.
 
 ---
 
-## 2. Fetching
+## 2. Generating
 
-The repo ships every SDTM domain as **CDISC Dataset-JSON 1.1**, next to the `.xpt` files. Use the JSON. No SAS transport parser is needed, so no extra dependency.
-
-Base URL:
-
-```
-https://raw.githubusercontent.com/cdisc-org/sdtm-adam-pilot-project/master/updated-pilot-submission-package/900172/m5/datasets/cdiscpilot01/tabulations/sdtm/
+```bash
+./data/generate.sh
 ```
 
-| File | Size | Load? | What it is |
-|---|---|---|---|
-| `dm.json` | 78 KB | yes | Demographics, one row per subject |
-| `mh.json` | 396 KB | yes | Medical history (diagnoses) |
-| `cm.json` | 1.3 MB | yes | Concomitant medications |
-| `lb.json` | 10.5 MB | yes | Labs, every visit |
-| `ti.json` | 5 KB | as a fixture | The pilot trial's own 31 inclusion/exclusion criteria |
-| `ts.json` | 4 KB | optional | Trial summary (indication, phase, age limits) |
-| `vs.json` | 6 MB | optional | Vital signs (blood pressure, weight, height) |
-| `qs.json` | 24 MB | no | Questionnaires (ADAS-Cog, NPI-X). Too large and not needed. |
+This downloads the Synthea jar, generates the patients, and trims them into the bundle. Needs Java 17+ (`brew install openjdk@17`) and Python 3.9+. Generating takes about a minute and trimming about 3 seconds.
 
-About 12 MB in the browser for `dm`, `mh`, `cm` and `lb`. Parse in the Web Worker, not on the main thread.
+The exact Synthea command:
 
-**Dataset-JSON shape:** column definitions and rows are stored separately. Zip them into objects:
-
-```ts
-const cols = json.columns.map((c: { name: string }) => c.name);
-const records = json.rows.map((r: unknown[]) => Object.fromEntries(cols.map((c, i) => [c, r[i]])));
+```bash
+java -jar synthea-with-dependencies.jar -s 42 -cs 42 -p 2000 \
+  --exporter.csv.export=true --exporter.fhir.export=false "New Jersey"
 ```
 
-Join every domain on `USUBJID`.
+- `-s 42 -cs 42`: fixed seeds, so the same jar gives the same patients.
+- `-p 2000`: 2,000 living patients. Synthea also generates patients who died; the trim step drops them.
+- `"New Jersey"`: patients get New Jersey towns and counties.
+
+**Reproducibility caveat:** the script downloads Synthea's always-updating `master-branch-latest` build. A newer build can produce different patients from the same seed. That's why the bundle itself is committed.
+
+`data/build_synthea_bundle.py` does the trimming. It keeps demographics, conditions, medications, procedures, acute-care visits, a year of weights and about 20 labs and vitals. It drops addresses, SSNs, claims, costs and insurance.
+
+**Supabase:** `supabase/seed_patients.py` loads the same bundle into the `patients` table, each patient linked to their practice. Run `supabase/migrations/` in the Supabase SQL editor first.
 
 ---
 
-## 3. What's in it (verified)
+## 3. What's in it
 
 | Fact | Value |
 |---|---|
-| Subjects in `DM` | 306 |
-| **Usable subjects** | **254**. The 52 with `ARM = "Screen Failure"` have DM rows only, with no MH, CM or LB. Exclude them and say so in `/docs`. |
-| Sites (`SITEID`) | 17 |
-| Age | 50–89 (the pilot trial enrolled only patients aged 50+) |
-| Sex | 179 F / 127 M (all 306 subjects) |
-| Race | 273 White, 29 Black, 2 American Indian, 2 Asian |
-| Primary diagnosis | **Everyone has Alzheimer's disease** (`MHCAT = PRIMARY DIAGNOSIS`) |
-| Data dates | 2012–2014 |
-| Country | USA only |
-
-This is a population of elderly Alzheimer's patients, not a general practice panel. The demo protocols have to target conditions that actually appear in it (section 7).
+| Patients | 2,000, all living |
+| Adults (18+) | 1,553 |
+| Age | 0–110 (Synthea's simulation sometimes runs past 100). Cap at 90 anywhere ages leave the practice |
+| Sex | 1,033 F / 967 M |
+| Race | 1,446 white, 286 Black, 205 Asian, 33 other, 21 Native Hawaiian, 9 Native American |
+| Ethnicity | 359 Hispanic |
+| As-of date | 2026-10-10 (generation date). Records run up to that date, so "within the last N months" checks work against today |
+| Size | 6 MB JSON, about 1 MB gzipped |
 
 ---
 
-## 4. Domain → criterion type mapping
+## 4. Record shape
 
-Matches the computable list in AGENTS.md section 6.
+```json
+{
+  "id": "4eae15cd-…",
+  "name": "Adell Metz",
+  "birthDate": "1961-11-29",
+  "sex": "F", "race": "black", "ethnicity": "nonhispanic",
+  "group": "Atlantic County",
+  "conditions":  [["<SNOMED>", "start", "end or null"]],
+  "medications": [["<RxNorm>", "start", "end or null"]],
+  "procedures":  [["<SNOMED>", "latest date"]],
+  "observations": { "bmi": { "value": 31.2, "unit": "kg/m2", "date": "2025-10-09" } },
+  "weights":     [["date", kg]],
+  "acuteVisits": [["date", "emergency | urgentcare | inpatient", "visit description", "reason or null"]]
+}
+```
 
-| Criterion type | Domain and fields | Notes |
+- Code names are in the bundle's top-level `codes` object (`snomed`, `rxnorm`, `loinc`) and in the Supabase `codes` table.
+- A condition or medication with a `null` end date is still active.
+- `observations` hold the **latest** value only. Fields: `bmi`, `height_cm`, `weight_kg`, `systolic_bp`, `diastolic_bp`, `hba1c`, `glucose`, `cholesterol`, `ldl`, `hdl`, `triglycerides`, `creatinine`, `egfr`, `alt`, `ast`, `bilirubin`, `wbc`, `hemoglobin`, `platelets`, `fev1_fvc`, `eosinophils`, `smoking_status`.
+- Units are US (mg/dL), as Synthea records them. Synthea has no reference ranges.
+
+---
+
+## 5. Criterion type → data
+
+| Criterion type | Where | Notes |
 |---|---|---|
-| Age | `DM.AGE` (years) | Clean, always present |
-| Sex | `DM.SEX` (`M`/`F`) | Clean. "Postmenopausal" is not recorded → `UNKNOWN` for women unless age-based rules are hand-authored |
-| Diagnosis | `MH.MHDECOD` (MedDRA preferred term), `MH.MHBODSYS` (body system), `MH.MHSTDTC` (start date) | **MedDRA, not ICD-10.** See gotcha 1 |
-| Labs vs threshold | `LB.LBTESTCD`, `LB.LBSTRESN` (SI result), `LB.LBSTNRLO` / `LB.LBSTNRHI` (reference limits), `LB.LBBLFL` (baseline flag), `LB.LBDTC` | Reference limits present on every row. The Hy's Law ratio pattern works directly |
-| Medications | `CM.CMDECOD` (WHO Drug name), `CM.CMTRT` (as reported), `CM.CMCLAS` (ATC class), `CM.CMSTDTC` / `CM.CMENDTC` | 81% uncoded. See gotcha 3 |
-| Date windows | `MH.MHSTDTC`, `CM.CMSTDTC`, `LB.LBDTC` | Partial dates. See gotcha 2 |
-| Vitals (optional) | `VS.VSTESTCD` (e.g. `SYSBP`, `DIABP`, `WEIGHT`, `HEIGHT`), `VS.VSSTRESN` | Repeated by visit and position |
-
-**Lab tests available (`LBTESTCD`):** ALB, ALP, ALT, AST, BASO, BILI, BUN, CA, CHOL, CK, CL, CREAT, EOS, GGT, GLUC, HBA1C, HCT, HGB, K, LYM, MCH, MCHC, MCV, MONO, PHOS, PLAT, PROT, RBC, SODIUM, TSH, URATE, VITB12, WBC, plus urinalysis and cell-morphology codes.
-- Not present: folate, eGFR, LDL, troponin.
-- eGFR is computable from `CREAT` (µmol/L ÷ 88.4 = mg/dL) plus age and sex using CKD-EPI 2021. Write it as one function in `/engine` and test it.
+| Age and sex | `birthDate`, `sex` | Always present |
+| Diagnosis | `conditions` (SNOMED CT) | Match on codes or names. ICD-10 isn't in Synthea's CSV export |
+| Medications | `medications` (RxNorm) | Match on ingredient names, not codes, so every strength and brand matches |
+| Procedures | `procedures` (SNOMED CT) | Surgeries, spirometry, chemotherapy |
+| Labs and vitals | `observations` | Latest value. Check its date against the criterion's window |
+| Weight change | `weights` | Most patients are weighed about once a year |
+| Exacerbations, attacks | `acuteVisits` + `medications` | "Emergency hospital admission for asthma" is explicit. Many urgent care visits have no reason |
+| Smoking | `observations.smoking_status` | Text: "Never smoked tobacco", "Ex-smoker", "Smokes tobacco daily". No pack-years |
 
 ---
 
-## 5. Gotchas the engine has to handle
+## 6. Gotchas
 
-1. **Diagnoses are MedDRA, not ICD-10.** AGENTS.md section 6 says "Diagnosis codes (ICD-10)". For this dataset, protocol JSON should match on MedDRA preferred terms (`MHDECOD`, e.g. `"HYPERTENSION"`, `"DIABETES MELLITUS NON-INSULIN-DEPENDENT"`) or on body system (`MHBODSYS`). Leave room for an `icd10` field for the FHIR path later. **Team should update AGENTS.md section 6 to match.**
-2. **Partial or missing dates.** `MHSTDTC`: 859 of 1,818 rows empty, 517 year only, 131 year-month, 311 full date. `CMSTDTC` is mostly year only. A date-window criterion ("within the last 5 years") must:
-   - decide when even the partial date settles it (e.g. `"2001"` is clearly more than 5 years before a 2013 as-of date)
-   - return `UNKNOWN` when it doesn't, or when the date is missing.
-
-   This produces real `UNKNOWN`s for the demo, which is what AGENTS.md wants.
-3. **Medications are 81% uncoded** (6,085 of 7,510 rows have `CMDECOD = "UNCODED"`). Raw names look like `"TYLENOL"` and `"NEOSPORIN /USA/"`. Each medication criterion in a protocol should list both generic and brand names and match case-insensitively on `CMTRT` and `CMDECOD`.
-   - Decide as a team: does having no CM record for a drug count as "not taking it" (a pass)? Pre-screening usually treats it that way. Whatever the choice, write it in the README limits.
-4. **Anchor "as-of" to the data, not today.** All dates are 2012–2014. Measured from 2026, every "within N months" check fails. Use each subject's screening date (`DM.DMDTC`) as their as-of date, and pick labs from on or before it. In practice that means the baseline labs (`LBBLFL = "Y"`, which 253 subjects have).
-5. **HbA1c is nearly absent.** Only 8 subjects have it, stored as a fraction (upper limit `0.112`, i.e. 11.2%). HbA1c criteria will be `UNKNOWN` for almost everyone. That's honest, but don't build the headline demo trial around HbA1c. `GLUC` (mmol/L) has full coverage.
-6. **Lab units are SI** in `LBSTRESN` (bilirubin and creatinine in µmol/L, glucose and cholesterol in mmol/L). Write protocol thresholds in SI or as multiples of the upper limit of normal (`LBSTRESN / LBSTNRHI`), never in US units.
-7. **Everyone was in a trial.** `DM.ARM` and the `EX` domain hold the pilot's own xanomeline or placebo assignment. Don't load `EX` or show the arm. It isn't practice data.
+1. **Coverage varies a lot by field.** Height, weight, blood pressure, blood counts and smoking status: everyone. BMI: 1,945. Lipids: 1,224. Glucose and creatinine: 891. HbA1c: 794. eGFR: 440. Liver tests: about 297. FEV1/FVC: 41. Eosinophils: 25. A missing measurement is `UNKNOWN`, never a pass.
+2. **Things Synthea doesn't model at all:** LAMA inhalers (tiotropium etc.), FeNO, family history, pack-years, cancer staging beyond stage 1 lung cancer, PD-L1, pregnancy plans. Protocol criteria that need them are `review` items (see `protocols/README.md`).
+3. **Weights are sparse.** Only 109 patients have 2+ weights in the last 4 months. Weight-change criteria should exclude only when the record proves a change, otherwise confirm at screening.
+4. **Visits often lack a reason.** Most urgent care visits record no reason. Jev questions about attacks or flare-ups should answer `UNKNOWN` for those, not guess.
+5. **Some patients are children.** 447 are under 18. Most trial age criteria exclude them.
+6. **Missing record = pass, for exclusions only.** No diabetes diagnosis on file is read as not diabetic. Never apply this to inclusions.
 
 ---
 
-## 6. Practices = sites
+## 7. Practices = county groups
 
-There's no practice or doctor data in SDTM. Use `SITEID` as the practice. That supports both the doctor view and the sponsor rollup.
+Synthea assigns each patient to a real New Jersey hospital or clinic, about 1,300 of them, with at most 29 patients each. Using those would spread patients too thin and put claims about real organizations in the demo. Instead, **each patient's county is their practice**:
 
-**Usable patients per site** (screen failures excluded):
+| County | Patients | | County | Patients |
+|---|---|---|---|---|
+| Middlesex | 200 | | Somerset | 90 |
+| Bergen | 194 | | Atlantic | 73 |
+| Monmouth | 166 | | Mercer | 72 |
+| Essex | 164 | | Gloucester | 65 |
+| Ocean | 138 | | Sussex | 39 |
+| Hudson | 134 | | Cape May | 29 |
+| Passaic | 117 | | Cumberland | 29 |
+| Burlington | 110 | | Hunterdon | 28 |
+| Camden | 107 | | Warren | 27 |
+| Union | 107 | | Salem | 9 |
+| Morris | 102 | | | |
 
-| Site | 701 | 710 | 704 | 708 | 716 | 709 | 703 | 705 | 718 | 713 | 715 | 717 | 714 | 711 | 706 | 707 | 702 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Patients | 41 | 31 | 25 | 25 | 24 | 21 | 18 | 16 | 13 | 9 | 8 | 7 | 6 | 4 | 3 | 2 | 1 |
-
-- **Doctor view:** use site 701 (41 patients), or all 254 pooled as one larger practice if per-trial counts are too thin. Say which one in the demo.
-- **Sponsor rollup:** per-site counts. With small-cell suppression at 5, most sites will show as suppressed for anything but common conditions. That demonstrates the privacy rule working.
-- Practice names, doctor names and locations are not in the data. Any names or map locations added for the demo must be made up and labelled illustrative in `/docs`.
-
----
-
-## 7. Choosing the 3–5 demo protocols
-
-Hand-author them as JSON (AGENTS.md section 7). Pick conditions that exist in this population so the counts are real.
-
-**Subjects per MedDRA term (`MHDECOD`):**
-
-| Condition | Subjects |
-|---|---|
-| Hypertension | 62 |
-| Myocardial infarction | 22 |
-| Hypothyroidism | 21 |
-| Osteoarthritis | 20 |
-| Glaucoma | 19 |
-| Benign prostatic hyperplasia | 18 |
-| Hypercholesterolaemia | 16 |
-| Diabetes (all diabetes terms) | 14 |
-| COPD | 7 |
-| Depression | 7 |
-| Asthma | 4 |
-| Psoriasis | 2 |
-| Atopic dermatitis | 1 |
-
-**Suggested mix,** to land the "five trials, you can fill two" beat from the demo script (AGENTS.md section 11):
-- **2 that fill:** e.g. a cardiometabolic trial (hypertension or hypercholesterolaemia, using `CHOL` and creatinine/eGFR thresholds) and a hypothyroidism or osteoarthritis trial.
-- **1–2 that partly fill:** many patients blocked by `UNKNOWN`. Use a date-window or HbA1c criterion to drive the "needs chart review" count.
-- **1 that can't fill:** e.g. a Dupixent-style atopic dermatitis trial (1 subject). It shows the engine filtering trials out instead of just ranking them.
-
-If a protocol is modelled on a real NCT trial, cite the NCT ID and label it "simplified for demo, not the real protocol" (AGENTS.md section 8: claims discipline).
-
-**Free test fixture:** `ti.json` is the pilot trial's real criteria list: 8 inclusion and 23 exclusion criteria. It's a ready-made worked example of AGENTS.md section 6's computable vs human split:
-
-| Criterion | Text | Engine result |
-|---|---|---|
-| INCL01 | Males and postmenopausal females ≥ 50 | Age and sex computable; "postmenopausal" → `UNKNOWN` |
-| INCL03 | MMSE score 10–23 | `UNKNOWN`, MMSE not in the loaded domains |
-| EXCL15 | Syncope within 5 years | MH date window, often `UNKNOWN` (partial dates) |
-| EXCL27 | Creatinine, bilirubin, AST, ALT above reference range | Computable from `LB` vs `LBSTNRHI` |
-| EXCL28 | B12 and thyroid tests out of range | Computable (`VITB12`, `TSH`); folate missing → `UNKNOWN` |
-| EXCL30 | HbA1c above range (insulin-dependent diabetics only) | Mostly `UNKNOWN` (HbA1c on 8 subjects) |
-| INCL06, INCL08, EXCL26 | Consent, caregiver, communication | Human only |
-
-Since all 254 usable subjects were enrolled in this trial, running it is also a sanity check: the engine should return **no `NO_MATCH`** on the computable criteria. Any `NO_MATCH` means a bug or a data-quality issue worth looking at.
+- **Doctor view:** pick one county, e.g. Middlesex (200 patients). Say in the demo that practices are county groups of synthetic patients.
+- **Sponsor rollup:** per-county counts. With small-cell suppression at 5, small counties (Salem) show as suppressed for most trials, which demonstrates the privacy rule.
+- No practice or doctor names are invented. If any are added for the demo, label them illustrative.
 
 ---
 
-## 8. Out of hackathon scope (for "what's next")
+## 8. Patients per demo trial
 
-These line up with the honest limits in AGENTS.md section 12. Mention them in the README and the deck; don't build them now.
+The four trials are in `protocols/`. These counts are from the plain-code criteria across all 2,000 patients (Jev criteria still pending):
+
+| Trial | Candidates | Needs chart review | Waiting on Jev | Demo role |
+|---|---|---|---|---|
+| NCT07685808 olatorepatide, obesity | 760 | 109 | – | Fills |
+| NCT07309614 dupilumab, asthma | – | – | 75 | Fills, with chart review |
+| NCT07053423 dupilumab, COPD | – | – | 20 | Partly fills |
+| NCT06931717 cemiplimab, lung cancer after surgery | 0 | 0 | 0 | Can't fill |
+
+---
+
+## 9. Out of hackathon scope (for "what's next")
 
 | Next step | Resource |
 |---|---|
-| Real EHR shape (FHIR R4, ICD-10/SNOMED, RxNorm, LOINC) | **Synthea** synthetic patients: https://synthetichealth.github.io/synthea-sample-data/. Java 17 is installed locally if someone wants to try it. |
+| Real EHR integration (FHIR R4) | Synthea can also export FHIR (`--exporter.fhir.export=true`) to prototype against. **SMART Health IT launcher** (https://launch.smarthealthit.org/) and the **Epic sandbox** (https://fhir.epic.com/) for real EHR APIs |
 | Real-world messy data | **MIMIC-IV demo**, 100 de-identified patients, open access: https://physionet.org/content/mimic-iv-demo/ (FHIR version: https://physionet.org/content/mimic-iv-fhir-demo/) |
 | Benchmark against expert review | **TREC Clinical Trials 2021/2022**: 125 patient cases with expert eligibility labels against real trials. https://www.trec-cds.org/2021.html, https://www.trec-cds.org/2022.html. Processed copies in https://github.com/ncbi-nlp/TrialGPT |
-| EHR integration | **SMART Health IT launcher** (https://launch.smarthealthit.org/) and **Epic sandbox** (https://fhir.epic.com/) |
