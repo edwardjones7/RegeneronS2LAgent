@@ -1,4 +1,4 @@
-.PHONY: setup web dev test mock text-test elevenlabs docker
+.PHONY: setup web dev test mock text-test elevenlabs docker data
 
 setup:            ## install Python + web deps, copy .env, build the web app
 	uv sync
@@ -26,3 +26,13 @@ elevenlabs:       ## create/update the ElevenLabs agent, tools, webhook, number
 
 docker:           ## build + run everything in one container
 	docker compose up --build
+
+SYNTHEA_JAR = data/synthea/synthea-with-dependencies.jar
+
+data:             ## regenerate the synthetic patients (needs Java 17+): 2,000 in New Jersey, seed 42
+	mkdir -p data/synthea
+	[ -f $(SYNTHEA_JAR) ] || curl -sSL -o $(SYNTHEA_JAR) https://github.com/synthetichealth/synthea/releases/download/master-branch-latest/synthea-with-dependencies.jar
+	cd data/synthea && java -jar synthea-with-dependencies.jar -s 42 -cs 42 -p 2000 \
+		--exporter.baseDirectory=./output --exporter.csv.export=true --exporter.fhir.export=false \
+		--exporter.hospital.fhir.export=false --exporter.practitioner.fhir.export=false "New Jersey"
+	uv run python scripts/build_synthea_bundle.py data/synthea/output/csv data/synthea-nj.json
