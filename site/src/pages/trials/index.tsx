@@ -4,7 +4,7 @@ import { FilterMenu } from '@/components/trials/FilterMenu';
 import { TrialCard } from '@/components/trials/TrialCard';
 import { TrialModal } from '@/components/trials/TrialModal';
 import { AppShell } from '@/components/ui';
-import { getAcceptedTrials } from '@/lib/caller';
+import { getAcceptedTrials, getPracticeTrials, type TrialOutreach } from '@/lib/caller';
 import { getPatientStats } from '@/lib/patients';
 import { DEMO_PRACTICE, greeting } from '@/lib/practice';
 import { listOpenTrials, type TrialListItem } from '@/lib/trials';
@@ -21,11 +21,13 @@ interface TrialsPageProps {
   practicePatients: number;
   /** Trials this practice accepted, with Ava's progress. */
   outreach: Record<string, { booked: number; called: number }>;
+  /** Ava's status per callable trial, for the modal's accept card. Null when the caller isn't running. */
+  prescreen: Record<string, TrialOutreach> | null;
 }
 
 export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ query }) => {
   const filters = parseFilters(query);
-  const [all, outreach] = await Promise.all([listOpenTrials(), getAcceptedTrials()]);
+  const [all, outreach, prescreen] = await Promise.all([listOpenTrials(), getAcceptedTrials(), getPracticeTrials()]);
 
   const inScope = all.filter((t) => matchesMenuFilters(t, filters));
   // Biggest areas first, so they're the ones that keep their labels when the row is tight.
@@ -41,12 +43,13 @@ export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ 
       total: inScope.length,
       greeting: greeting(),
       outreach,
+      prescreen,
       practicePatients: getPatientStats().counties.find((c) => c.name === DEMO_PRACTICE.county)?.count ?? 0,
     },
   };
 };
 
-export default function TrialsPage({ filters, trials, areaCounts, total, greeting, practicePatients, outreach }: TrialsPageProps) {
+export default function TrialsPage({ filters, trials, areaCounts, total, greeting, practicePatients, outreach, prescreen }: TrialsPageProps) {
   return (
     <AppShell title="Trials" active="trials">
       <header>
@@ -82,7 +85,7 @@ export default function TrialsPage({ filters, trials, areaCounts, total, greetin
         </div>
       )}
 
-      <TrialModal order={trials.map((t) => t.nctId)} />
+      <TrialModal order={trials.map((t) => t.nctId)} prescreen={prescreen} />
     </AppShell>
   );
 }

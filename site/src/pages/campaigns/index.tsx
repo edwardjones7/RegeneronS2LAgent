@@ -1,7 +1,7 @@
 import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { AppShell, Badge, type BadgeTone, Button, EmptyRow, LinkButton, PageHeader, StatCard, StatGrid, Table, Tabs, Td, Th, Tr } from '@/components/ui';
+import { AppShell, Badge, type BadgeTone, Button, EmptyRow, PageIntro, StatCard, StatGrid, Table, Tabs, Td, Th, Tr } from '@/components/ui';
 import { getOutreachOverview, type OutreachOverview, type OutreachPatient, type OutreachStatus } from '@/lib/caller';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { fetchJson, getErrorMessage } from '@/lib/utils/api';
@@ -192,17 +192,21 @@ export default function OutreachPage({ nct, initial }: OutreachPageProps) {
     .sort((a, b) => (b.lastActivity?.at ?? '').localeCompare(a.lastActivity?.at ?? ''));
 
   return (
-    <AppShell title="Outreach" active="outreach">
-      <PageHeader
-        title="Outreach"
-        description={`Ava is calling your pre-screened patients from ${DEMO_PRACTICE.doctor}’s office and booking screening visits here.`}
+    <AppShell title="Campaigns" active="campaigns">
+      <PageIntro
+        title="Campaigns"
+        description={
+          data.trials.length > 0
+            ? `Ava is calling your pre-screened patients from ${DEMO_PRACTICE.doctor}’s office and booking screening visits.`
+            : `Each trial you accept becomes a campaign: Ava calls its candidates from ${DEMO_PRACTICE.doctor}’s office.`
+        }
         tabs={
           data.trials.length > 0 ? (
             <Tabs
               active={nct ?? 'all'}
               items={[
-                { key: 'all', label: 'All trials', href: '/outreach' },
-                ...data.trials.map((x) => ({ key: x.nctId, label: x.title, href: `/outreach?nct=${x.nctId}`, count: x.booked })),
+                { key: 'all', label: 'All trials', href: '/campaigns' },
+                ...data.trials.map((x) => ({ key: x.nctId, label: x.title, href: `/campaigns?nct=${x.nctId}`, count: x.booked })),
               ]}
             />
           ) : undefined
@@ -214,14 +218,20 @@ export default function OutreachPage({ nct, initial }: OutreachPageProps) {
           The outreach caller isn&rsquo;t reachable right now. Calls already in progress keep going; this page will catch up when it&rsquo;s back.
         </p>
       ) : data.trials.length === 0 ? (
-        <div className="mt-8 rounded-[10px] border border-line p-8 text-center">
-          <h2 className="text-base font-semibold">No outreach yet</h2>
-          <p className="mx-auto mt-1.5 max-w-md text-[13px] text-ink-2">
+        <div className="mt-8 rounded-2xl border border-line-2 bg-surface px-8 py-12 text-center shadow-[0_1px_2px_rgba(30,36,48,0.04)]">
+          <h2 className="text-[19px] font-semibold tracking-[-0.02em]">No campaigns yet</h2>
+          <p className="mx-auto mt-2 max-w-md text-[14px] leading-relaxed text-ink-2">
             Accept a trial and Ava starts calling its pre-screened patients from your office. There&rsquo;s nothing else to set up.
           </p>
-          <LinkButton href="/trials" className="mt-4">
+          <Link
+            href="/trials"
+            className="mt-6 inline-flex h-10 items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-white transition-colors hover:bg-ink/85"
+          >
             See recommended trials
-          </LinkButton>
+            <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </Link>
         </div>
       ) : (
         <>

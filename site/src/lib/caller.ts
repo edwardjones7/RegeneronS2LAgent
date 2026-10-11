@@ -100,6 +100,38 @@ export async function getTrialOutreach(nctId: string): Promise<TrialOutreach> {
   }
 }
 
+/**
+ * Every callable trial's status for this practice, in one request, so the trials page can hand
+ * them to the trial modal up front. Call totals for accepted trials come from the per-trial
+ * endpoint. Returns null when the caller isn't configured or isn't running.
+ */
+export async function getPracticeTrials(): Promise<Record<string, TrialOutreach> | null> {
+  const c = config();
+  if (!c) return null;
+  try {
+    const trials = await call<CallerTrial[]>(`/practices/${practice}/trials`);
+    return Object.fromEntries(
+      trials.map((t) => [
+        t.nct_id,
+        {
+          available: true,
+          callable: t.callable,
+          candidates: t.candidates,
+          chartReview: t.chart_review,
+          accepted: t.accepted,
+          acceptedBy: t.accepted_by,
+          acceptedAt: t.accepted_at,
+          totals: null,
+          dashboardUrl: `${c.publicUrl}/dashboard`,
+        },
+      ])
+    );
+  } catch (err) {
+    console.error('[caller] trials failed:', err);
+    return null;
+  }
+}
+
 /** The doctor said yes: the caller starts calling this practice's pre-screen candidates. */
 export async function acceptTrial(nctId: string): Promise<void> {
   const doctor = DEMO_PRACTICE.doctor.replace(/^Dr\.?\s+/i, '');
