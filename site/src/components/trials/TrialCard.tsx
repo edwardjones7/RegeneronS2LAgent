@@ -4,6 +4,7 @@ import type { TrialListItem } from '@/lib/trials';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { cn } from '@/lib/utils/cn';
 import { formatAgeRange, formatDate, formatStatus } from '@/lib/utils/format';
+import { AreaArt } from './AreaArt';
 import { AreaIcon } from './AreaIcon';
 import { AREA_STYLES } from './areaStyles';
 import { PhaseBadge } from './PhaseBadge';
@@ -36,6 +37,7 @@ export function TrialCard({ trial, href, outreach, prescreen }: TrialCardProps) 
         )}
       />
       <div className="absolute inset-x-0 top-0 h-3/4 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.7),transparent_50%)]" />
+      <AreaArt area={trial.area} className="transition-transform duration-500 ease-out group-hover:rotate-0 group-hover:scale-105" />
 
       <div className="relative flex items-start justify-between gap-2">
         <span className="flex h-7 min-w-0 items-center gap-1.5 rounded-full bg-white/80 px-2.5 text-[11px] font-semibold text-ink shadow-[0_1px_2px_rgba(30,36,48,0.06)] ring-1 ring-white/70 backdrop-blur-md">

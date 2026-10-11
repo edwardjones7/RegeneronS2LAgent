@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AreaArt } from '@/components/trials/AreaArt';
 import { AreaIcon } from '@/components/trials/AreaIcon';
 import { AREA_STYLES } from '@/components/trials/areaStyles';
 import { PhaseBadge } from '@/components/trials/PhaseBadge';
@@ -156,6 +157,7 @@ function MatchCard({ trial, i, age }: { trial: TrialListItem; i: number; age: nu
   return (
     <div className="relative flex h-[440px] flex-col overflow-hidden rounded-3xl border border-line-2 bg-surface p-5 shadow-[0_16px_40px_-20px_rgba(30,36,48,0.3)]">
       <div className={cn('absolute inset-x-0 top-0 h-48 bg-linear-to-br [mask-image:linear-gradient(to_bottom,black_20%,transparent)]', style.gradient)} />
+      <AreaArt area={trial.area} />
       <div className="relative flex items-start justify-between gap-2">
         <span className="flex h-7 items-center gap-1.5 rounded-full bg-white/80 px-2.5 text-[11px] font-semibold ring-1 ring-white/70 backdrop-blur-md">
           <AreaIcon area={trial.area} className={cn('size-3.5', style.text)} />
