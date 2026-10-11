@@ -31,8 +31,10 @@ const NAV: { key: NavKey; label: string; href: string; icon: ReactNode }[] = [
     href: '/trials',
     icon: (
       <svg {...ICON_PROPS}>
-        <path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z" />
-        <path d="M18 15l.8 1.9 1.9.8-1.9.8L18 20.4l-.8-1.9-1.9-.8 1.9-.8z" />
+        {/* A trial protocol your patients fit: a clipboard with a check. */}
+        <path d="M15 4.5h1.5A2.5 2.5 0 0119 7v11.5a2.5 2.5 0 01-2.5 2.5h-9A2.5 2.5 0 015 18.5V7a2.5 2.5 0 012.5-2.5H9" />
+        <rect x="9" y="3" width="6" height="3.5" rx="1.2" />
+        <path d="M9 13.5l2.2 2.2L15.5 11" />
       </svg>
     ),
   },
