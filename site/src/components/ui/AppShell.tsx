@@ -63,14 +63,17 @@ export function AppShell({ title, active, children }: AppShellProps) {
       <Head>
         <title>{`${title} · trialmatch`}</title>
       </Head>
-      <div className="flex min-h-screen">
-        <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-line-2 bg-surface px-3 py-5">
+      <div className="relative isolate flex min-h-screen">
+        {/* Soft wash of the area colors across the top, behind the sidebar and the page. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(640px_260px_at_6%_0%,#FFD9C7,transparent),radial-gradient(640px_240px_at_42%_0%,#D4E9FB,transparent),radial-gradient(600px_220px_at_78%_0%,#E0F2D3,transparent)] [mask-image:linear-gradient(to_bottom,black_35%,transparent)]" />
+
+        <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col border-r border-ink/[0.06] px-3 py-5">
           <Link href="/" className="flex items-center gap-2 px-2">
             <span className="size-6 rounded-lg bg-linear-to-br from-[#FF9F80] via-[#F7B6CF] to-[#78B4F4]" />
             <span className="text-[15px] font-semibold tracking-[-0.02em]">trialmatch</span>
           </Link>
 
-          <div className="mt-6 flex items-center gap-2.5 rounded-2xl border border-line-2 p-2.5">
+          <div className="mt-6 flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/60 p-2.5 backdrop-blur-sm">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#A3CEF6] to-[#E0F2D3] text-[12px] font-semibold text-ink">
               {initials(DEMO_PRACTICE.doctor)}
             </span>
@@ -87,7 +90,7 @@ export function AppShell({ title, active, children }: AppShellProps) {
                 href={item.href}
                 className={cn(
                   'flex h-9 items-center gap-2.5 rounded-xl px-2.5 text-[13.5px] transition-colors',
-                  item.key === active ? 'bg-surface-2 font-semibold text-ink' : 'font-medium text-ink-2 hover:bg-surface-2'
+                  item.key === active ? 'bg-ink/[0.05] font-semibold text-ink' : 'font-medium text-ink-2 hover:bg-ink/[0.04]'
                 )}
               >
                 {item.icon}

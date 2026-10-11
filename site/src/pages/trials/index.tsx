@@ -82,9 +82,7 @@ function AreaPill({ area, count, href: to, active }: { area: TherapeuticArea; co
 export default function TrialsPage({ filters, trials, areaCounts, total, greeting, practicePatients }: TrialsPageProps) {
   return (
     <AppShell title="Trials" active="trials">
-      <header className="relative isolate">
-        {/* Soft wash of the area colors behind the greeting. */}
-        <div className="pointer-events-none absolute -inset-x-8 -top-7 -z-10 h-64 bg-[radial-gradient(520px_200px_at_8%_0%,#FFD9C7,transparent),radial-gradient(520px_200px_at_40%_0%,#D4E9FB,transparent),radial-gradient(480px_180px_at_70%_0%,#E0F2D3,transparent)] [mask-image:linear-gradient(to_bottom,black_40%,transparent)]" />
+      <header>
         <p className="text-[13px] font-medium text-ink-2">
           {DEMO_PRACTICE.name} · {practicePatients.toLocaleString()} patients
         </p>
