@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getPatientStats } from '@/lib/patients';
 import { DEMO_PRACTICE } from '@/lib/practice';
-import { listOpenTrials } from '@/lib/trials';
+import { listOpenTrials, type TrialListItem } from '@/lib/trials';
 import type { TherapeuticArea } from '@/lib/trials/areas';
 
 export interface WalkthroughTrial {
@@ -16,6 +16,8 @@ export interface WalkthroughData {
   trialCount: number;
   /** A spread of open trials, demo protocols (the ones that can be matched) first. */
   trials: WalkthroughTrial[];
+  /** Full card data for the trials that can be matched (they have written criteria), for the final grid. */
+  matched: TrialListItem[];
   patientCount: number;
 }
 
@@ -41,6 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const data: WalkthroughData = {
       trialCount: trials.length,
       trials: sample.map((t) => ({ nctId: t.nctId, indication: t.indication, drug: t.drug, area: t.area, hasProtocol: t.hasProtocol })),
+      matched: trials.filter((t) => t.hasProtocol),
       patientCount: getPatientStats(DEMO_PRACTICE.county).total,
     };
     return res.status(200).json({ success: true, data });

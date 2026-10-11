@@ -14,9 +14,11 @@ interface TrialCardProps {
   href: { pathname: string; query: Record<string, string> };
   /** Set once the practice accepted this trial: Ava's call progress. */
   outreach?: { booked: number; called: number };
+  /** Pre-screen results for this practice's patients, once matching has run. */
+  prescreen?: { candidates: number; review: number };
 }
 
-export function TrialCard({ trial, href, outreach }: TrialCardProps) {
+export function TrialCard({ trial, href, outreach, prescreen }: TrialCardProps) {
   const style = AREA_STYLES[trial.area];
 
   return (
@@ -36,13 +38,13 @@ export function TrialCard({ trial, href, outreach }: TrialCardProps) {
       <div className="absolute inset-x-0 top-0 h-3/4 bg-[radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.7),transparent_50%)]" />
 
       <div className="relative flex items-start justify-between gap-2">
-        <span className="flex items-center h-7 gap-1.5 rounded-full bg-white/80 px-2.5 text-[11px] font-semibold text-ink shadow-[0_1px_2px_rgba(30,36,48,0.06)] ring-1 ring-white/70 backdrop-blur-md">
+        <span className="flex h-7 min-w-0 items-center gap-1.5 rounded-full bg-white/80 px-2.5 text-[11px] font-semibold text-ink shadow-[0_1px_2px_rgba(30,36,48,0.06)] ring-1 ring-white/70 backdrop-blur-md">
           <AreaIcon area={trial.area} className={cn('size-3.5 shrink-0', style.text)} />
-          {AREA_LABELS[trial.area]}
+          <span className="truncate">{AREA_LABELS[trial.area]}</span>
         </span>
         <PhaseBadge
           phases={trial.phases}
-          className="h-7 rounded-full bg-white/80 px-2.5 shadow-[0_1px_2px_rgba(30,36,48,0.06)] ring-1 ring-white/70 backdrop-blur-md"
+          className="h-7 shrink-0 whitespace-nowrap rounded-full bg-white/80 px-2.5 shadow-[0_1px_2px_rgba(30,36,48,0.06)] ring-1 ring-white/70 backdrop-blur-md"
         />
       </div>
 
@@ -55,6 +57,12 @@ export function TrialCard({ trial, href, outreach }: TrialCardProps) {
           <span className="mb-2 flex items-center gap-1 text-xs font-semibold text-accent">
             <span className="size-1.5 animate-pulse rounded-full bg-accent" />
             Ava calling · {outreach.booked} booked
+          </span>
+        ) : prescreen ? (
+          <span className="mb-2 flex items-center gap-1 text-xs font-semibold">
+            <span className="text-pass">{prescreen.candidates} candidates</span>
+            <span className="text-ink-3">·</span>
+            <span className="text-unk">{prescreen.review} to review</span>
           </span>
         ) : (
           trial.hasProtocol && (

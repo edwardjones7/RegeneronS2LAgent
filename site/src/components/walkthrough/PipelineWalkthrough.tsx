@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AreaIcon } from '@/components/trials/AreaIcon';
 import { AREA_STYLES } from '@/components/trials/areaStyles';
+import { TrialCard } from '@/components/trials/TrialCard';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { fetchJson } from '@/lib/utils/api';
 import { cn } from '@/lib/utils/cn';
@@ -217,57 +218,38 @@ function MatchScene({ data, t }: { data: WalkthroughData; t: number }) {
   );
 }
 
-/** Large card for the final grid. */
-/** `i` keys the illustrative counts (same as in step 2); `order` is the position in the grid. */
-function GridCard({ trial, i, order, shown }: { trial: WalkthroughTrial; i: number; order: number; shown: boolean }) {
-  const style = AREA_STYLES[trial.area];
-  return (
-    <div
-      className={cn(
-        STAGGER[order] ?? 'delay-0',
-        'relative h-44 overflow-hidden rounded-2xl border border-line-2 bg-surface p-4 shadow-[0_1px_2px_rgba(30,36,48,0.05)] transition-[opacity,translate,scale] duration-500 ease-out',
-        shown ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-95 opacity-0'
-      )}
-    >
-      <div className={cn('absolute inset-0 bg-linear-to-br opacity-70 [mask-image:linear-gradient(to_bottom,black,transparent)]', style.gradient)} />
-      <div className="relative flex h-full flex-col justify-between">
-        <span className="flex w-fit items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-semibold">
-          <AreaIcon area={trial.area} className={cn('size-3.5', style.text)} />
-          {AREA_LABELS[trial.area]}
-        </span>
-        <span>
-          <span className="block text-[16px] font-semibold leading-snug">{trial.indication}</span>
-          <span className="mt-1 block text-[12.5px]">
-            <CountsLine i={i} short />
-          </span>
-        </span>
-      </div>
-    </div>
-  );
-}
-
-/** Stagger for the grid cards, as full class names so Tailwind generates them. */
+/** Stagger for the final cards, as full class names so Tailwind generates them. */
 const STAGGER = ['delay-0', 'delay-[90ms]', 'delay-[180ms]', 'delay-[270ms]'];
 
 function RecommendScene({ data, t }: { data: WalkthroughData; t: number }) {
-  // Ranked by candidates, most first, keeping each trial's index so its counts match step 2.
-  const ranked = data.trials
-    .filter((trial) => trial.hasProtocol)
-    .map((trial, i) => ({ trial, i }))
-    .sort((a, b) => mockCounts(b.i).candidates - mockCounts(a.i).candidates);
+  // Same order and illustrative counts as step 2 (keyed by position among the matchable trials),
+  // then ranked by candidates, most first.
+  const matchable = data.trials.filter((trial) => trial.hasProtocol);
+  const ranked = data.matched
+    .map((trial) => ({ trial, counts: mockCounts(matchable.findIndex((m) => m.nctId === trial.nctId)) }))
+    .sort((a, b) => b.counts.candidates - a.counts.candidates);
+
   return (
-    <div className="mx-auto grid w-full max-w-5xl animate-modal-in grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-16">
-      <div className="grid grid-cols-2 gap-3">
-        {ranked.map(({ trial, i }, order) => (
-          <GridCard key={trial.nctId} trial={trial} i={i} order={order} shown={t > 120} />
+    <div className="mx-auto w-full max-w-6xl animate-modal-in">
+      <h2 className="text-[34px] font-semibold leading-tight tracking-[-0.03em]">Recommended for your practice</h2>
+      <p className="mt-2 text-[15px] leading-relaxed text-ink-2">
+        The trials your patients could fill, ranked by candidates.{' '}
+        <span className="text-ink-3">Counts are illustrative until Jev&apos;s results are in.</span>
+      </p>
+      {/* The dashboard's own card; not clickable here. */}
+      <div className="pointer-events-none mt-8 grid grid-cols-4 gap-5">
+        {ranked.map(({ trial, counts }, order) => (
+          <div
+            key={trial.nctId}
+            className={cn(
+              STAGGER[order] ?? 'delay-0',
+              'transition-[opacity,translate,scale] duration-500 ease-out',
+              t > 120 ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-95 opacity-0'
+            )}
+          >
+            <TrialCard trial={trial} href={{ pathname: '/trials', query: { trial: trial.nctId } }} prescreen={counts} />
+          </div>
         ))}
-      </div>
-      <div>
-        <h2 className="text-[34px] font-semibold leading-tight tracking-[-0.03em]">Recommended for your practice</h2>
-        <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-ink-2">
-          The trials your patients could fill, ranked by candidates. Open one to see who passed which criteria.
-        </p>
-        <p className="mt-3 text-[12px] text-ink-3">Candidate counts are illustrative until Jev&apos;s results are in.</p>
       </div>
     </div>
   );
