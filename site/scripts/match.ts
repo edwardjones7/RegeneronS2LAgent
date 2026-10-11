@@ -17,14 +17,19 @@
 // Otherwise patients come from data/synthea-nj.json and trials from the
 // ClinicalTrials.gov API.
 //
+// --write upserts results into Supabase prescreen_results (migration 0003). Each row carries
+// an input hash (patient state + criteria version + model); with --write, pairs whose hash
+// is unchanged are skipped, so reruns only pay for what changed.
+//
 // --dry-run builds every request and estimates calls, tokens and cost without calling Jev.
 // --max-cost stops starting new Jev calls once the reported spend passes it (default $0.25);
 // pairs not reached are left out and the report says stoppedAtBudget.
 
+import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { bucketOf, confidenceOf, toResult } from '../src/engine/decide.ts';
+import { bucketOf, CONFIDENT, confidenceOf, REJECT_THRESHOLD, toResult } from '../src/engine/decide.ts';
 import { combine, filterState, planPatient } from '../src/engine/preprocess/toJev.ts';
 import type { TrialCriteria } from '../src/engine/preprocess/schema.ts';
 import { ageOn } from '../src/engine/state.ts';
@@ -50,6 +55,7 @@ const { values: args } = parseArgs({
     'max-cost': { type: 'string', default: '0.25' },
     'as-of': { type: 'string', default: '2026-10-10' },
     out: { type: 'string' },
+    write: { type: 'boolean', default: false },
   },
 });
 
@@ -77,14 +83,37 @@ async function supabaseGet<T>(path: string): Promise<T[]> {
   }
 }
 
+async function supabaseUpsert(table: string, rows: object[]) {
+  const key = process.env.SUPABASE_SECRET_KEY!;
+  for (let i = 0; i < rows.length; i += 500) {
+    const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: {
+        apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(rows.slice(i, i + 500)),
+    });
+    if (!res.ok) throw new Error(`Supabase upsert ${table}: ${res.status} ${await res.text()}`);
+  }
+}
+
 const useSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY);
+if (args.write && !useSupabase) throw new Error('--write needs SUPABASE_URL and SUPABASE_SECRET_KEY');
 const TRIAL_COLS =
   'nct_id,brief_title,conditions,condition_meshes,eligibility_criteria,sex,minimum_age_years,maximum_age_years,healthy_volunteers';
 
-async function loadTrials(ids: string[] | undefined): Promise<Trial[]> {
+type LoadedTrial = Trial & { criteria_questions?: TrialCriteria | null };
+
+async function loadTrials(ids: string[] | undefined): Promise<LoadedTrial[]> {
   if (useSupabase) {
     const filter = ids ? `&nct_id=in.(${ids.join(',')})` : '';
-    return supabaseGet<Trial>(`trials?select=${TRIAL_COLS}${filter}`);
+    try {
+      return await supabaseGet<LoadedTrial>(`trials?select=${TRIAL_COLS},criteria_questions${filter}`);
+    } catch {
+      // Before migration 0002 there is no criteria_questions column.
+      return supabaseGet<LoadedTrial>(`trials?select=${TRIAL_COLS}${filter}`);
+    }
   }
   if (!ids) throw new Error('Without Supabase, pass --trials');
   return Promise.all(ids.map(fetchCtgovTrial));
@@ -177,15 +206,26 @@ const concurrency = Number(args.concurrency);
 const tLoad = performance.now();
 
 const criteriaByTrial = new Map(trials.map((t) => [t.nct_id, splitEligibility(t.eligibility_criteria)]));
-// Gemini-structured criteria, when the trial has been preprocessed.
-const structuredFor = (nct: string): TrialCriteria | null => {
+// Gemini-structured criteria, when the trial has been preprocessed: the trials column
+// (migration 0002), else the local file written by scripts/preprocess-criteria.ts.
+const structuredFor = (t: LoadedTrial): TrialCriteria | null => {
+  if (t.criteria_questions) return t.criteria_questions;
   try {
-    return JSON.parse(readFileSync(resolve(REPO, `data/criteria/${nct}.json`), 'utf8')).criteria_questions;
+    return JSON.parse(readFileSync(resolve(REPO, `data/criteria/${t.nct_id}.json`), 'utf8')).criteria_questions;
   } catch {
     return null;
   }
 };
-const structuredByTrial = new Map(trials.map((t) => [t.nct_id, structuredFor(t.nct_id)]));
+const structuredByTrial = new Map(trials.map((t) => [t.nct_id, structuredFor(t)]));
+
+// Cache key per pair: what Jev would see plus how the answers are read. Same hash = same result.
+const sha = (x: string) => createHash('sha256').update(x).digest('hex').slice(0, 32);
+const criteriaKey = new Map(trials.map((t) => {
+  const tc = structuredByTrial.get(t.nct_id);
+  return [t.nct_id, tc ? `${tc.source_version}/p${tc.prompt_version}/${tc.model}` : `naive/${sha(t.eligibility_criteria ?? '')}`];
+}));
+const inputHash = (p: Patient, t: Trial) =>
+  sha(JSON.stringify([buildState(p, codes, asOf), criteriaKey.get(t.nct_id), JEV_MODEL, REJECT_THRESHOLD, CONFIDENT, order]));
 const conditionMap: TrialConditionMap = JSON.parse(readFileSync(resolve(REPO, 'data/conditions/trial_condition_codes.json'), 'utf8'));
 
 // 1. Demographics.
@@ -200,11 +240,24 @@ const matched = pairs.flatMap(({ p, t }) => {
   return why ? [{ p, t, why }] : [];
 });
 const afterCondition = matched.length;
+
+// With --write, skip pairs whose stored result was computed from the same inputs.
+const hashes = new Map(matched.map(({ p, t }) => [`${p.id}|${t.nct_id}`, inputHash(p, t)]));
+let todo = matched;
+if (args.write) {
+  const filter = `nct_id=in.(${trials.map((t) => t.nct_id).join(',')})${args.practice ? `&practice_id=eq.${args.practice}` : ''}`;
+  const stored = await supabaseGet<{ patient_id: string; nct_id: string; input_hash: string }>(
+    `prescreen_results?select=patient_id,nct_id,input_hash&${filter}`,
+  );
+  const same = new Set(stored.filter((r) => hashes.get(`${r.patient_id}|${r.nct_id}`) === r.input_hash).map((r) => `${r.patient_id}|${r.nct_id}`));
+  todo = matched.filter(({ p, t }) => !same.has(`${p.id}|${t.nct_id}`));
+}
+const unchanged = matched.length - todo.length;
 const tCondition = performance.now();
 
 // 3. Eligibility, one call per (patient, trial) with every criterion.
 const results: MatchResult[] = [];
-await pool(matched, concurrency, async ({ p, t, why }) => {
+await pool(todo, concurrency, async ({ p, t, why }) => {
   const tc = structuredByTrial.get(t.nct_id);
   if (tc) {
     results.push(...(await matchStructured(p, t, tc, why)));
@@ -284,7 +337,7 @@ const meta = {
     const tc = structuredByTrial.get(t.nct_id);
     return { nct_id: t.nct_id, title: t.brief_title, criteria: tc ? `${tc.criteria.length} (gemini)` : `${criteriaByTrial.get(t.nct_id)!.length} (naive split)` };
   }),
-  pairs: { total: patients.length * trials.length, afterDemographics, afterCondition },
+  pairs: { total: patients.length * trials.length, afterDemographics, afterCondition, unchanged },
   calls,
   estimatedInputTokens: estTokens,
   estimatedCostUsd: +(estTokens * JEV_PRICE_PER_TOKEN).toFixed(4),
@@ -316,3 +369,23 @@ writeFileSync(
   JSON.stringify({ meta, summary, criteria: Object.fromEntries(criteriaByTrial), results }, null, 1),
 );
 console.log(`Wrote ${out}`);
+
+// Upsert into prescreen_results. Only pairs Jev actually answered: a budget stop leaves the rest untouched.
+if (args.write && !dryRun) {
+  await supabaseUpsert('prescreen_results', results.map((r) => ({
+    patient_id: r.patient_id,
+    nct_id: r.nct_id,
+    practice_id: r.practice_id,
+    bucket: r.bucket,
+    score: r.score,
+    condition_match: r.condition_match,
+    criteria: r.criteria,
+    review_items: r.review_items,
+    min_confidence: r.min_confidence,
+    uncertain_criteria: r.uncertain_criteria,
+    input_hash: hashes.get(`${r.patient_id}|${r.nct_id}`),
+    model: JEV_MODEL,
+    evaluated_at: new Date().toISOString(),
+  })));
+  console.log(`Upserted ${results.length} rows into prescreen_results (${unchanged} unchanged pairs skipped)`);
+}
