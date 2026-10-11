@@ -83,8 +83,8 @@ export function FilterMenu({ filters, resultCount }: { filters: TrialFilters; re
         <div className="absolute right-0 top-full z-20 mt-2 w-[340px] rounded-2xl border border-line bg-surface p-4 shadow-[0_16px_40px_-16px_rgba(30,36,48,0.3)]">
           <div className="space-y-4">
             <Section label="Show only">
-              <Chip active={filters.ready} onClick={() => apply({ ...filters, ready: !filters.ready })}>
-                Criteria ready
+              <Chip active={filters.candidates} onClick={() => apply({ ...filters, candidates: !filters.candidates })}>
+                Has candidates
               </Chip>
               <Chip active={filters.nj} onClick={() => apply({ ...filters, nj: !filters.nj })}>
                 Recruiting in NJ

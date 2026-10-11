@@ -1,14 +1,17 @@
 import { useRouter } from 'next/router';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import type { TrialOutreach } from '@/lib/caller';
+import type { StructuredCriterion } from '@/engine/preprocess/schema';
 import type { ProtocolCriterion } from '@/lib/protocols';
 import type { TrialArm, TrialDetail, TrialLocation } from '@/lib/trials';
+import type { PrescreenCounts } from '@/lib/trials/prescreen';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { fetchJson, getErrorMessage } from '@/lib/utils/api';
 import { cn } from '@/lib/utils/cn';
 import { formatAgeRange, formatDate, formatStatus } from '@/lib/utils/format';
 import type { TrialDetailResponse } from '@/pages/api/trials/[nctId]';
 import { AcceptCard } from './AcceptCard';
+import { CandidateReview } from './CandidateReview';
 import { AreaIcon } from './AreaIcon';
 import { AREA_STYLES } from './areaStyles';
 import { PhaseBadge } from './PhaseBadge';
@@ -204,6 +207,75 @@ function CriteriaGroup({ title, criteria }: { title: string; criteria: ProtocolC
   );
 }
 
+/** A structured criterion, in the protocol's words, with what it applies to. */
+function StructuredItem({ criterion }: { criterion: StructuredCriterion }) {
+  const include = criterion.kind === 'inclusion';
+  return (
+    <li className="flex items-start gap-3 py-3">
+      <span
+        className={cn('mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full', include ? 'bg-pass-bg text-pass' : 'bg-fail-bg text-fail')}
+        aria-label={include ? 'Required' : 'Excluded'}
+        title={include ? 'Required' : 'Excluded'}
+      >
+        <svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+          <path d={include ? 'M5 12.5l4.5 4.5L19 7.5' : 'M7 7l10 10M17 7L7 17'} />
+        </svg>
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[14.5px] leading-snug">{criterion.original_text}</div>
+        {(criterion.group || criterion.applies_to) && (
+          <div className="mt-0.5 text-[12px] text-ink-3">
+            {criterion.group && 'One of a set of alternatives; any one is enough.'}
+            {criterion.group && criterion.applies_to && ' '}
+            {criterion.applies_to && `Only for: ${criterion.applies_to.description}`}
+          </div>
+        )}
+      </div>
+    </li>
+  );
+}
+
+function StructuredGroup({ title, note, criteria }: { title: string; note: string; criteria: StructuredCriterion[] }) {
+  if (!criteria.length) return null;
+  // Inclusions first, then exclusions, each in protocol order.
+  const ordered = [...criteria.filter((c) => c.kind === 'inclusion'), ...criteria.filter((c) => c.kind === 'exclusion')];
+  return (
+    <div className="mt-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <div className="text-[12.5px] font-semibold uppercase tracking-[0.06em] text-ink-3">{title}</div>
+        <div className="text-[12px] text-ink-3">{criteria.length}</div>
+      </div>
+      <p className="mt-0.5 text-[12.5px] text-ink-3">{note}</p>
+      <ul className="divide-y divide-line-2">
+        {ordered.map((c) => (
+          <StructuredItem key={c.id} criterion={c} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Age and sex are already in the "Who can join" line. */
+const isAgeOrSex = (c: StructuredCriterion) => c.code_check?.type === 'age' || c.code_check?.type === 'sex';
+
+function StructuredCriteria({ criteria }: { criteria: StructuredCriterion[] }) {
+  const shown = criteria.filter((c) => !isAgeOrSex(c));
+  return (
+    <>
+      <StructuredGroup
+        title="Checked against the chart"
+        note="The pre-screen answers these from each patient's record."
+        criteria={shown.filter((c) => c.class === 'record')}
+      />
+      <StructuredGroup
+        title="Confirmed at screening or on the call"
+        note="No chart can answer these: tests, consent, or the investigator's judgement. Every candidate still needs them checked."
+        criteria={shown.filter((c) => c.class !== 'record')}
+      />
+    </>
+  );
+}
+
 function LocationList({ locations }: { locations: TrialLocation[] }) {
   return (
     <ul className="divide-y divide-line-2">
@@ -285,7 +357,7 @@ function AtAGlance({ trial }: { trial: TrialDetail }) {
 }
 
 /** The doctor's yes, above the facts. Loaded fresh each time (not cached): it changes once accepted. */
-function AcceptPanel({ nctId }: { nctId: string }) {
+function AcceptPanel({ nctId, counts }: { nctId: string; counts: PrescreenCounts | null }) {
   const [outreach, setOutreach] = useState<{ id: string; data: TrialOutreach } | null>(null);
   useEffect(() => {
     let live = true;
@@ -297,7 +369,7 @@ function AcceptPanel({ nctId }: { nctId: string }) {
     };
   }, [nctId]);
   if (outreach?.id !== nctId) return <div className="h-40 animate-pulse rounded-2xl bg-surface-2" />;
-  return <AcceptCard key={nctId} nctId={nctId} initial={outreach.data} />;
+  return <AcceptCard key={nctId} nctId={nctId} initial={outreach.data} counts={counts} />;
 }
 
 function Skeleton() {
@@ -382,7 +454,8 @@ export function TrialModal({ order }: TrialModalProps) {
   if (!nctId) return null;
 
   const trial = state?.data?.trial;
-  const protocol = state?.data?.protocol;
+  const structured = state?.data?.criteria ?? null;
+  const protocol = structured ? null : state?.data?.protocol;
   const homeLocations = trial?.locations.filter((l) => l.state === HOME_STATE) ?? [];
   const otherLocations = trial?.locations.filter((l) => l.state !== HOME_STATE) ?? [];
   const criteria = protocol?.criteria.filter((c) => !COVERED_BY_SUMMARY.has(c.id)) ?? [];
@@ -482,6 +555,15 @@ export function TrialModal({ order }: TrialModalProps) {
 
               <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
                 <div className="min-w-0">
+                  {trial.prescreen && (
+                    <Section
+                      title="Your pre-screened patients"
+                      aside={`${(trial.prescreen.candidates + trial.prescreen.review + trial.prescreen.notAMatch).toLocaleString()} checked`}
+                    >
+                      <CandidateReview nctId={trial.nctId} />
+                    </Section>
+                  )}
+
                   <Section title="About the study">
                     <p className="max-w-[68ch] whitespace-pre-line text-[15px] leading-7 text-ink-2">
                       {trial.summary ?? 'No summary provided.'}
@@ -510,10 +592,12 @@ export function TrialModal({ order }: TrialModalProps) {
                       <span className="font-semibold text-ink">Ages {formatAgeRange(trial.minimumAge, trial.maximumAge)}</span>
                       {trial.sex && `, ${SEX_TEXT[trial.sex] ?? formatStatus(trial.sex).toLowerCase()}`}
                       {trial.healthyVolunteers ? ', healthy volunteers accepted' : ''}.
-                      {protocol && ' Key criteria from the protocol:'}
+                      {(structured || protocol) && ' Key criteria from the protocol:'}
                     </p>
 
-                    {protocol ? (
+                    {structured ? (
+                      <StructuredCriteria criteria={structured} />
+                    ) : protocol ? (
                       <>
                         <CriteriaGroup title="Must have" criteria={criteria.filter((c) => c.type === 'inclusion')} />
                         <CriteriaGroup title="Must not have" criteria={criteria.filter((c) => c.type === 'exclusion')} />
@@ -524,7 +608,7 @@ export function TrialModal({ order }: TrialModalProps) {
                         No pre-screening criteria written for this trial yet. The full registry text is below.
                       </p>
                     )}
-                    <Disclosure title="Full eligibility text from ClinicalTrials.gov" open={!protocol}>
+                    <Disclosure title="Full eligibility text from ClinicalTrials.gov" open={!structured && !protocol}>
                       <p className="whitespace-pre-line text-[13.5px] leading-relaxed text-ink-2">{trial.eligibilityCriteria ?? 'Not provided.'}</p>
                     </Disclosure>
                   </Section>
@@ -546,7 +630,7 @@ export function TrialModal({ order }: TrialModalProps) {
                 </div>
 
                 <aside className="flex flex-col gap-4 lg:sticky lg:top-16 lg:self-start">
-                  <AcceptPanel nctId={trial.nctId} />
+                  <AcceptPanel nctId={trial.nctId} counts={trial.prescreen} />
                   <AtAGlance trial={trial} />
                 </aside>
               </div>

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Badge, Button } from '@/components/ui';
 import type { TrialOutreach } from '@/lib/caller';
+import type { PrescreenCounts } from '@/lib/trials/prescreen';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { fetchJson, getErrorMessage } from '@/lib/utils/api';
 
@@ -17,11 +18,26 @@ function Num({ value, label, tone }: { value: number; label: string; tone?: 'pas
   );
 }
 
+function YourPatients({ candidates, review }: { candidates: number; review: number }) {
+  return (
+    <>
+      <div className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-accent">Your patients</div>
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <Num value={candidates} label="pre-screen candidates" />
+        <Num value={review} label="need chart review" tone="unk" />
+      </div>
+    </>
+  );
+}
+
 /**
  * The doctor's yes. Accepting hands the trial's pre-screened patients to Ava, who calls them from
  * this office and books screening visits. The doctor doesn't do anything else.
+ *
+ * `counts` are the practice's pre-screen counts (the matcher's results) and are the numbers shown;
+ * the caller's own state supplies acceptance and call totals.
  */
-export function AcceptCard({ nctId, initial }: { nctId: string; initial: TrialOutreach }) {
+export function AcceptCard({ nctId, initial, counts }: { nctId: string; initial: TrialOutreach; counts: PrescreenCounts | null }) {
   const router = useRouter();
   const [state, setState] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -37,12 +53,23 @@ export function AcceptCard({ nctId, initial }: { nctId: string; initial: TrialOu
     return () => clearInterval(id);
   }, [nctId, state.accepted]);
 
+  const candidates = counts?.candidates ?? state.candidates;
+  const review = counts?.review ?? state.chartReview;
+  const fits = candidates + review > 0;
+
   if (!state.available || !state.callable) {
     return (
-      <div className="rounded-2xl border border-line p-4 text-[12.5px] text-ink-3">
-        {state.available
-          ? 'Outreach isn’t set up for this trial yet.'
-          : 'The outreach caller isn’t running, so this trial can’t be accepted from here right now.'}
+      <div className="rounded-2xl border border-line p-4">
+        {fits && (
+          <div className="mb-3">
+            <YourPatients candidates={candidates} review={review} />
+          </div>
+        )}
+        <p className="text-[12.5px] leading-snug text-ink-3">
+          {state.available
+            ? 'Outreach isn’t set up for this trial yet, so it can’t be accepted from here.'
+            : 'The outreach caller isn’t reachable right now, so this trial can’t be accepted from here. Nothing has been sent; try again later.'}
+        </p>
       </div>
     );
   }
@@ -90,16 +117,21 @@ export function AcceptCard({ nctId, initial }: { nctId: string; initial: TrialOu
 
   return (
     <div className="rounded-2xl border border-accent-line bg-accent-weak/50 p-4">
-      <div className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-accent">Your patients</div>
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        <Num value={state.candidates} label="pre-screen candidates" />
-        <Num value={state.chartReview} label="need chart review" tone="unk" />
-      </div>
+      <YourPatients candidates={candidates} review={review} />
       <p className="mt-3 text-[12.5px] leading-snug text-ink-2">
-        Accept and Ava calls your candidates from {DEMO_PRACTICE.doctor}&rsquo;s office. She confirms who she&rsquo;s talking to
-        before saying anything about the study, and books screening visits here. Chart-review patients wait for your staff.
+        {candidates > 0 ? (
+          <>
+            Accept and Ava calls your candidates from {DEMO_PRACTICE.doctor}&rsquo;s office. She confirms who she&rsquo;s talking
+            to before saying anything about the study, and books screening visits here. Chart-review patients wait for your
+            staff.
+          </>
+        ) : fits ? (
+          <>Accept and your chart-review patients go to your staff first. Ava only calls the ones they clear.</>
+        ) : (
+          <>None of your patients pre-screened for this trial, so there&rsquo;s no one to call.</>
+        )}
       </p>
-      <Button className="mt-3 w-full" onClick={accept} disabled={busy || state.candidates === 0}>
+      <Button className="mt-3 w-full" onClick={accept} disabled={busy || !fits}>
         {busy ? 'Starting…' : 'Accept trial'}
       </Button>
       {error && <p className="mt-2 text-[12px] text-fail">{error}</p>}

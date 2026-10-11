@@ -1,6 +1,9 @@
+import type { StructuredCriterion, TrialCriteria } from '@/engine/preprocess/schema';
 import supabase from '@/lib/utils/db/client';
-import { listProtocolIds } from '@/lib/protocols';
 import { classifyTrial, type TherapeuticArea } from './areas';
+import type { PrescreenCounts } from './prescreen';
+
+export { canFill, type PrescreenCounts } from './prescreen';
 
 /** Statuses a practice can still join or refer into. */
 const OPEN_STATUSES = ['RECRUITING', 'NOT_YET_RECRUITING'];
@@ -29,7 +32,8 @@ export interface TrialListItem {
   primaryCompletion: string | null;
   njLocations: number;
   njRecruiting: number;
-  hasProtocol: boolean;
+  /** This practice's pre-screen results for the trial; null until the matcher has run on it. */
+  prescreen: PrescreenCounts | null;
 }
 
 export interface TrialLocation {
@@ -132,7 +136,11 @@ function toBlurb(summary: string | null): string | null {
 /** "Asthma (Moderate-to-Severe)" → "Asthma" */
 const stripParenthetical = (s: string) => s.replace(/\s*\([^)]*\)\s*$/, '').trim();
 
-function toListItem(row: TrialRowSubset, nj: { total: number; recruiting: number }, protocolIds: Set<string>): TrialListItem {
+function toListItem(
+  row: TrialRowSubset,
+  nj: { total: number; recruiting: number },
+  prescreen: PrescreenCounts | null
+): TrialListItem {
   const meshTerms = [...(row.condition_meshes ?? []), ...(row.condition_mesh_ancestors ?? [])].map((m) => m.term);
   return {
     nctId: row.nct_id,
@@ -152,7 +160,7 @@ function toListItem(row: TrialRowSubset, nj: { total: number; recruiting: number
     primaryCompletion: row.primary_completion_date,
     njLocations: nj.total,
     njRecruiting: nj.recruiting,
-    hasProtocol: protocolIds.has(row.nct_id),
+    prescreen,
   };
 }
 
@@ -179,26 +187,77 @@ export async function countOpenTrials(): Promise<number> {
   return count ?? 0;
 }
 
-/** Open trials, demo protocols first, then most locations in New Jersey. */
-export async function listOpenTrials(): Promise<TrialListItem[]> {
-  const [{ data, error }, njCounts] = await Promise.all([
+interface CountRow {
+  nct_id: string;
+  candidates: number;
+  chart_review: number;
+  not_a_match: number;
+  evaluated_at: string;
+}
+
+const PAGE = 1000;
+
+/**
+ * One practice's pre-screen counts per trial, from the `prescreen_trial_counts` view.
+ * The server client bypasses RLS, so the practice filter here is the only thing keeping
+ * one practice's counts from another's. Emits aggregate counts only.
+ */
+export async function getPrescreenCounts(practiceId: string, nctId?: string): Promise<Map<string, PrescreenCounts>> {
+  const counts = new Map<string, PrescreenCounts>();
+  for (let from = 0; ; from += PAGE) {
+    let query = supabase
+      .from('prescreen_trial_counts')
+      .select('nct_id, candidates, chart_review, not_a_match, evaluated_at')
+      .eq('practice_id', practiceId);
+    if (nctId) query = query.eq('nct_id', nctId);
+    const { data, error } = await query.order('nct_id').range(from, from + PAGE - 1);
+    if (error) throw new Error(`Failed to load pre-screen counts: ${error.message}`);
+    for (const r of data as CountRow[]) {
+      counts.set(r.nct_id, {
+        candidates: Number(r.candidates),
+        review: Number(r.chart_review),
+        notAMatch: Number(r.not_a_match),
+        evaluatedAt: r.evaluated_at,
+      });
+    }
+    if (data.length < PAGE) return counts;
+  }
+}
+
+/** Most candidates first, then most chart-review patients, then most recruiting NJ sites. */
+function byFit(a: TrialListItem, b: TrialListItem): number {
+  return (
+    (b.prescreen?.candidates ?? 0) - (a.prescreen?.candidates ?? 0) ||
+    (b.prescreen?.review ?? 0) - (a.prescreen?.review ?? 0) ||
+    b.njRecruiting - a.njRecruiting ||
+    a.title.localeCompare(b.title)
+  );
+}
+
+/** Open trials with this practice's pre-screen counts, ranked by how many of its patients fit. */
+export async function listOpenTrials(practiceId: string): Promise<TrialListItem[]> {
+  const [{ data, error }, njCounts, prescreen] = await Promise.all([
     supabase.from('trials').select(LIST_COLUMNS).in('overall_status', OPEN_STATUSES),
     getHomeStateLocationCounts(),
+    getPrescreenCounts(practiceId),
   ]);
   if (error) throw new Error(`Failed to load trials: ${error.message}`);
 
-  const protocolIds = new Set(listProtocolIds());
   return (data as TrialRowSubset[])
-    .map((row) => toListItem(row, njCounts.get(row.nct_id) ?? { total: 0, recruiting: 0 }, protocolIds))
-    .sort(
-      (a, b) =>
-        Number(b.hasProtocol) - Number(a.hasProtocol) ||
-        b.njRecruiting - a.njRecruiting ||
-        a.title.localeCompare(b.title)
-    );
+    .map((row) => toListItem(row, njCounts.get(row.nct_id) ?? { total: 0, recruiting: 0 }, prescreen.get(row.nct_id) ?? null))
+    .sort(byFit);
 }
 
-export async function getTrialDetail(nctId: string): Promise<TrialDetail | null> {
+/** The trial's structured criteria (`trials.criteria_questions`), or null if not built yet. Trial data only. */
+export async function getTrialCriteria(nctId: string): Promise<StructuredCriterion[] | null> {
+  const { data, error } = await supabase.from('trials').select('criteria_questions').eq('nct_id', nctId).maybeSingle();
+  if (error) throw new Error(`Failed to load trial criteria: ${error.message}`);
+  const doc = data?.criteria_questions as TrialCriteria | null | undefined;
+  return doc?.criteria?.length ? doc.criteria : null;
+}
+
+/** One trial's registry record, with `practiceId`'s pre-screen counts when given. */
+export async function getTrialDetail(nctId: string, practiceId?: string): Promise<TrialDetail | null> {
   const [{ data, error }, { data: locations, error: locationsError }] = await Promise.all([
     supabase
       .from('trials')
@@ -210,6 +269,7 @@ export async function getTrialDetail(nctId: string): Promise<TrialDetail | null>
     supabase.from('trial_locations').select('facility, status, city, state, country').eq('nct_id', nctId),
   ]);
   if (error) throw new Error(`Failed to load trial: ${error.message}`);
+  const prescreen = practiceId ? ((await getPrescreenCounts(practiceId, nctId)).get(nctId) ?? null) : null;
   if (locationsError) throw new Error(`Failed to load trial locations: ${locationsError.message}`);
   if (!data) return null;
   const row = data as unknown as DetailRow;
@@ -225,7 +285,7 @@ export async function getTrialDetail(nctId: string): Promise<TrialDetail | null>
     ...toListItem(
       row,
       { total: nj.length, recruiting: nj.filter((l) => l.status === 'RECRUITING').length },
-      new Set(listProtocolIds())
+      prescreen
     ),
     officialTitle: row.official_title,
     summary: row.brief_summary,

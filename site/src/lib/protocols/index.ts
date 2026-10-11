@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 /**
@@ -38,6 +38,8 @@ let protocols: Map<string, Protocol> | null = null;
 function load(): Map<string, Protocol> {
   if (!protocols) {
     protocols = new Map();
+    // The folder is optional: without it there are no hand-authored protocols, not a crash.
+    if (!existsSync(PROTOCOLS_DIR)) return protocols;
     for (const file of readdirSync(PROTOCOLS_DIR).filter((f) => f.endsWith('.json'))) {
       const raw = JSON.parse(readFileSync(path.join(PROTOCOLS_DIR, file), 'utf8'));
       const protocol: Protocol = {
