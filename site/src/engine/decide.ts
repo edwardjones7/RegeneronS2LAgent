@@ -18,7 +18,7 @@ export function toResult(c: Criterion, a: JevChoiceAnswer | undefined): Criterio
     ? ANSWERS.reduce((best, k) => (probabilities[k] > probabilities[best] ? k : best), 'unknown' as Answer)
     : 'unknown';
   if (answer === 'reject' && probabilities.reject < REJECT_THRESHOLD) answer = 'unknown';
-  return { id: c.id, kind: c.kind, answer, probabilities };
+  return { id: c.id, kind: c.kind, answer, probabilities, text: c.text };
 }
 
 export function bucketOf(results: CriterionResult[]): {

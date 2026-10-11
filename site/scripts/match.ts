@@ -243,7 +243,7 @@ const afterDemographics = pairs.length;
 
 // 2. Condition prefilter: a lookup, no Jev calls.
 const unmapped = trials.filter((t) => !conditionMap[t.nct_id]).map((t) => t.nct_id);
-if (unmapped.length) console.warn(`Not in the condition map, so not prefiltered: ${unmapped.join(', ')}`);
+if (unmapped.length) console.warn(`Not in the condition map, so skipped (rebuild data/conditions): ${unmapped.join(', ')}`);
 const matched = pairs.flatMap(({ p, t }) => {
   const why = conditionMatch(p, conditionMap[t.nct_id]);
   return why ? [{ p, t, why }] : [];
@@ -301,6 +301,7 @@ function prepare(p: Patient, t: Trial, why: string): Prepared | null {
         id, kind: byId.get(id)!.kind, answer,
         probabilities: { accept: 0, reject: 0, unknown: 0, [answer]: 1 },
         decided_by: plan.decidedBy[id],
+        text: byId.get(id)!.question,
       }));
       if (call && res) {
         for (const id of Object.keys(call.questions)) {
@@ -410,6 +411,7 @@ console.log(`Wrote ${out}`);
 
 // Upsert into prescreen_results. Only pairs Jev actually answered: a budget stop leaves the rest untouched.
 if (args.write && !dryRun) {
+  if (budgetHit) console.warn('Budget stop: only part of the pairs were evaluated, so counts in the app are partial until a full run.');
   await supabaseUpsert('prescreen_results', results.map((r) => ({
     patient_id: r.patient_id,
     nct_id: r.nct_id,

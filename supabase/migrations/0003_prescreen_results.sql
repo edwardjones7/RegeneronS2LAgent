@@ -9,10 +9,15 @@
 -- same row-level security. Only aggregate counts leave a practice.
 -- Runs after 0001_practices_patients.sql (name order), so patients and practices exist.
 
+-- Lets a result's practice_id be tied to its patient's practice (composite key below).
+alter table public.patients drop constraint if exists patients_id_practice_key;
+alter table public.patients add constraint patients_id_practice_key unique (id, practice_id);
+
 create table if not exists public.prescreen_results (
-  patient_id         uuid not null references public.patients (id) on delete cascade,
+  patient_id         uuid not null,
   nct_id             text not null references public.trials (nct_id) on delete cascade,
-  practice_id        text not null references public.practices (id),
+  -- Always the patient's own practice: RLS and the counts view filter on it.
+  practice_id        text not null,
   -- Same names as the caller: candidate | chart_review | not_a_match.
   bucket             text not null check (bucket in ('candidate', 'chart_review', 'not_a_match')),
   -- Mean probability of 'accept' over the record criteria; ranks patients in a bucket.
@@ -31,11 +36,15 @@ create table if not exists public.prescreen_results (
   input_hash         text not null,
   model              text not null,
   evaluated_at       timestamptz not null default now(),
-  primary key (patient_id, nct_id)
+  primary key (patient_id, nct_id),
+  foreign key (patient_id, practice_id) references public.patients (id, practice_id) on delete cascade
 );
 
-create index if not exists prescreen_results_practice_trial_idx
-  on public.prescreen_results (practice_id, nct_id, bucket);
+-- Leads with nct_id so it also covers the trials foreign key.
+create index if not exists prescreen_results_trial_practice_idx
+  on public.prescreen_results (nct_id, practice_id, bucket);
+create index if not exists prescreen_results_practice_idx
+  on public.prescreen_results (practice_id);
 
 alter table public.prescreen_results enable row level security;
 
@@ -43,10 +52,12 @@ alter table public.prescreen_results enable row level security;
 -- No insert/update/delete policies: only the server (secret key) writes.
 drop policy if exists "members read own prescreen results" on public.prescreen_results;
 create policy "members read own prescreen results" on public.prescreen_results for select to authenticated
-  using (practice_id = (select practice_id from public.practice_members where user_id = auth.uid()));
+  using (practice_id = (select practice_id from public.practice_members where user_id = (select auth.uid())));
 
 -- Per-trial counts for one practice's trial cards ("14 candidates, 6 need chart review").
--- Runs with the caller's rights, so RLS limits it to the member's own practice.
+-- Runs with the caller's rights, so RLS limits it to the member's own practice. A server
+-- reader using the secret key bypasses RLS and must filter practice_id itself. No small-cell
+-- suppression: never use this for a cross-practice (sponsor) view.
 create or replace view public.prescreen_trial_counts
 with (security_invoker = true) as
   select practice_id,

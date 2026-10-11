@@ -62,6 +62,8 @@ export type CriterionResult = {
   probabilities: Record<Answer, number>;
   /** Who decided it. Code answers carry probability 1 on their answer. */
   decided_by?: 'jev' | 'code' | 'not_applicable';
+  /** The question or criterion text, for the drill-down and the caller's review reasons. */
+  text?: string;
 };
 
 /** Same names as the outreach caller (voice-agent/app/prescreen.py). */

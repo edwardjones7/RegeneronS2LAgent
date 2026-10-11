@@ -27,10 +27,12 @@ function meets(rule: MeasurementRule, patient: Patient): boolean {
 
 /**
  * Why the patient passes the trial's condition prefilter, or null if they don't.
- * A trial missing from the map passes everyone (no prefilter), so new trials are never silently empty.
+ * A trial missing from the map passes no one: sending every age/sex-eligible patient to
+ * Jev would cost far more than the trial is worth. The matcher warns about such trials;
+ * rebuild the map (data/conditions/README.md) to include them.
  */
 export function conditionMatch(patient: Patient, entry: TrialConditionEntry | undefined): string | null {
-  if (!entry) return 'trial not in condition map';
+  if (!entry) return null;
   if (entry.flags.includes('healthy_volunteers_no_condition_filter')) return 'healthy-volunteer trial';
   const codes = new Set(patient.record.conditions.map(([code]) => code));
   const hit = entry.matched_patient_codes.find((c) => codes.has(c.code));
