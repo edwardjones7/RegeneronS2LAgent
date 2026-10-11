@@ -8,7 +8,7 @@ import { AreaIcon } from './AreaIcon';
 import { AREA_STYLES } from './areaStyles';
 import { PhaseBadge } from './PhaseBadge';
 
-export function TrialCard({ trial }: { trial: TrialListItem }) {
+export function TrialCard({ trial, outreach }: { trial: TrialListItem; outreach?: { booked: number; called: number } }) {
   const style = AREA_STYLES[trial.area];
 
   return (
@@ -41,11 +41,18 @@ export function TrialCard({ trial }: { trial: TrialListItem }) {
         On hover the whole block slides up, so the details rise out of the card's own edge.
       */}
       <div className="absolute inset-x-4 bottom-4 translate-y-16 transition-transform duration-300 ease-out group-hover:translate-y-0 group-focus-visible:translate-y-0">
-        {trial.hasProtocol && (
-          <span className="mb-2 flex items-center gap-1 text-xs font-semibold text-pass">
-            <span className="size-1.5 rounded-full bg-pass" />
-            Criteria ready
+        {outreach ? (
+          <span className="mb-2 flex items-center gap-1 text-xs font-semibold text-accent">
+            <span className="size-1.5 animate-pulse rounded-full bg-accent" />
+            Ava calling · {outreach.booked} booked
           </span>
+        ) : (
+          trial.hasProtocol && (
+            <span className="mb-2 flex items-center gap-1 text-xs font-semibold text-pass">
+              <span className="size-1.5 rounded-full bg-pass" />
+              Criteria ready
+            </span>
+          )
         )}
         <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug tracking-[-0.015em]">{trial.indication}</h3>
         <p className="mt-0.5 truncate text-[13px] text-ink-3">{trial.drug ?? 'Intervention not listed'}</p>

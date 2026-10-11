@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 
 from app import db, messaging, outreach, prescreen, service, simulate_practice, sms, voice
+from app import slots as outreach_slots
 from app.main import app
 from app.models import Call, InboxMessage, Lead, LeadStatus
 from app.prompt import practice_first_message, practice_system_prompt
@@ -327,3 +328,32 @@ def test_call_me_after_5_during_a_call_schedules_the_next_try(s):
     call = lead.calls[-1]
     service.call_ended(s, call, transcript=[{"role": "user", "message": "after 5 please"}])
     assert lead.status == LeadStatus.NO_ANSWER  # not "call ended before screening finished"
+
+
+def test_patient_outreach_api_shows_one_patients_thread(client):
+    client.post(f"/practices/{PRACTICE}/trials/{TRIAL}/accept", json={"doctor_name": "Rivera"}, headers=READ)
+    with db.session_scope() as s:
+        lead = first_candidate(s)
+        pid = lead.patient_id
+    rows = client.get(f"/practices/{PRACTICE}/patients/{pid}/outreach", headers=READ).json()
+    assert len(rows) == 1 and rows[0]["status"] == "queued" and rows[0]["trial_title"] == "weight management"
+    assert rows[0]["test_birth_date"] is None  # simulated patients never expose it
+    assert client.get(f"/practices/bergen/patients/{pid}/outreach", headers=READ).json() == []  # other practices see nothing
+
+
+def test_new_slots_never_repeat_a_time(s):
+    accept(s)
+    from app.models import Slot
+
+    campaign = service.campaign_for(first_candidate(s))
+    for _ in range(3):  # book everything, forcing new slots each round
+        for sl in slots_open(s, campaign):
+            sl.booked_lead_id = first_candidate(s).id
+        s.flush()
+        outreach_slots.seed_slots(s, campaign, practice_id=PRACTICE)
+    times = [x.starts_at for x in s.scalars(select(Slot).where(Slot.practice_id == PRACTICE))]
+    assert len(times) == len(set(times))
+
+
+def slots_open(s, campaign):
+    return outreach_slots.open_slots(s, campaign, n=100, practice_id=PRACTICE)

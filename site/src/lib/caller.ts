@@ -108,3 +108,170 @@ export async function acceptTrial(nctId: string): Promise<void> {
     body: { doctor_name: doctor },
   });
 }
+
+/* ————————— The Outreach tab ————————— */
+
+export type OutreachStatus =
+  | 'queued' | 'calling' | 'no_answer' | 'booked' | 'needs_human' | 'emergency' | 'chart_review'
+  | 'not_a_fit' | 'closed' | 'opted_out' | 'dropped' | 'new';
+
+export interface OutreachPatient {
+  id: number;
+  patientId: string;
+  name: string;
+  status: OutreachStatus;
+  reason: string;
+  attempts: number;
+  nextAttemptAt: string | null;
+  lastActivity: { type: string; at: string } | null;
+  texts: number;
+  callbacks: number;
+  verified: boolean;
+  callWindow: string | null;
+  simulated: boolean;
+  /** Only for test patients on a teammate's real phone: the birth date they'll be asked for. */
+  testBirthDate: string | null;
+  nctId: string | null;
+}
+
+export interface OutreachVisit {
+  leadId: number;
+  name: string;
+  startsAt: string;
+  status: OutreachStatus;
+}
+
+export interface OutreachOverview {
+  available: boolean;
+  totals: { patients: number; called: number; reached: number; texted: number; booked: number; needsStaff: number; chartReview: number; inProgress: number };
+  patients: OutreachPatient[];
+  visits: OutreachVisit[];
+  trials: { nctId: string; title: string; booked: number }[];
+  dashboardUrl: string | null;
+}
+
+interface CallerRow {
+  id: number;
+  patient_id?: string;
+  first_name: string;
+  last_name: string;
+  status: OutreachStatus;
+  status_reason: string;
+  flags: { type: string; detail: string }[];
+  attempts: number;
+  next_attempt_at: string | null;
+  last_activity: { type: string; at: string } | null;
+  texts: number;
+  inbound_calls: number;
+  identity_verified: boolean;
+  call_window: string | null;
+  simulated: boolean;
+  test_birth_date: string | null;
+  nct_id: string | null;
+}
+
+const toPatient = (r: CallerRow): OutreachPatient => ({
+  id: r.id,
+  patientId: r.patient_id ?? '',
+  name: `${r.first_name} ${r.last_name}`.trim(),
+  status: r.status,
+  reason: r.flags.at(-1)?.detail || r.status_reason,
+  attempts: r.attempts,
+  nextAttemptAt: r.next_attempt_at,
+  lastActivity: r.last_activity,
+  texts: r.texts,
+  callbacks: r.inbound_calls,
+  verified: r.identity_verified,
+  callWindow: r.call_window,
+  simulated: r.simulated,
+  testBirthDate: r.test_birth_date,
+  nctId: r.nct_id,
+});
+
+const EMPTY_TOTALS = { patients: 0, called: 0, reached: 0, texted: 0, booked: 0, needsStaff: 0, chartReview: 0, inProgress: 0 };
+
+/** Everything the Outreach tab shows, for this practice only. Optionally one trial. */
+export async function getOutreachOverview(nctId?: string): Promise<OutreachOverview> {
+  const c = config();
+  if (!c) return { available: false, totals: EMPTY_TOTALS, patients: [], visits: [], trials: [], dashboardUrl: null };
+  try {
+    const q = nctId ? `?nct_id=${encodeURIComponent(nctId)}` : '';
+    const [overview, visits, trials] = await Promise.all([
+      call<{ totals: Record<string, number>; patients: CallerRow[] }>(`/practices/${practice}/outreach${q}`),
+      call<{ lead_id: number; first_name: string; last_name: string; starts_at_local: string; status: OutreachStatus }[]>(
+        `/practices/${practice}/visits`
+      ),
+      call<(CallerTrial & { title: string })[]>(`/practices/${practice}/trials`),
+    ]);
+    const t = overview.totals;
+    const patients = overview.patients.map(toPatient);
+    const ids = new Set(patients.map((p) => p.id));
+    return {
+      available: true,
+      totals: {
+        patients: t.patients, called: t.called, reached: t.reached, texted: t.texted, booked: t.booked,
+        needsStaff: t.needs_staff, chartReview: t.chart_review, inProgress: t.in_progress,
+      },
+      patients,
+      visits: visits
+        .filter((v) => ids.has(v.lead_id))
+        .map((v) => ({ leadId: v.lead_id, name: `${v.first_name} ${v.last_name}`.trim(), startsAt: v.starts_at_local, status: v.status })),
+      trials: trials
+        .filter((x) => x.accepted)
+        .map((x) => ({ nctId: x.nct_id, title: x.title, booked: overview.patients.filter((p) => p.nct_id === x.nct_id && p.status === 'booked').length })),
+      dashboardUrl: `${c.publicUrl}/dashboard`,
+    };
+  } catch (err) {
+    console.error('[caller] overview failed:', err);
+    return { available: false, totals: EMPTY_TOTALS, patients: [], visits: [], trials: [], dashboardUrl: null };
+  }
+}
+
+/** Accepted trials with their booked count, for the trial cards. Empty if the caller isn't running. */
+export async function getAcceptedTrials(): Promise<Record<string, { booked: number; called: number }>> {
+  if (!config()) return {};
+  try {
+    const overview = await call<{ patients: CallerRow[] }>(`/practices/${practice}/outreach`);
+    const out: Record<string, { booked: number; called: number }> = {};
+    for (const p of overview.patients) {
+      if (!p.nct_id) continue;
+      const t = (out[p.nct_id] ??= { booked: 0, called: 0 });
+      if (p.status === 'booked') t.booked += 1;
+      if (p.attempts > 0) t.called += 1;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+export interface PatientOutreach {
+  nctId: string | null;
+  trialTitle: string | null;
+  status: OutreachStatus;
+  attempts: number;
+  visit: string | null;
+  timeline: { at: string; type: string; body: string | null }[];
+}
+
+/** One patient's outreach at this practice (empty if they aren't being contacted). */
+export async function getPatientOutreach(patientId: string): Promise<PatientOutreach[]> {
+  if (!config()) return [];
+  try {
+    const rows = await call<(CallerRow & { trial_title: string | null; visit: string | null; timeline: PatientOutreach['timeline'] })[]>(
+      `/practices/${practice}/patients/${encodeURIComponent(patientId)}/outreach`
+    );
+    return rows.map((r) => ({ nctId: r.nct_id, trialTitle: r.trial_title, status: r.status, attempts: r.attempts, visit: r.visit, timeline: r.timeline }));
+  } catch {
+    return [];
+  }
+}
+
+const STAFF_ACTIONS = ['restart', 'contacted', 'drop', 'clear'] as const;
+export type StaffAction = (typeof STAFF_ACTIONS)[number];
+export const isStaffAction = (a: string): a is StaffAction => (STAFF_ACTIONS as readonly string[]).includes(a);
+
+/** Office staff act on a patient Ava handed over (or a chart they checked). */
+export async function staffAction(leadId: number, action: StaffAction): Promise<void> {
+  await call(`/leads/${leadId}/${action}`, { method: 'POST', body: {} });
+}

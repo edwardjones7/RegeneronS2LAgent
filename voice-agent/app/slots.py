@@ -3,7 +3,7 @@
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.campaigns import Campaign
@@ -22,15 +22,16 @@ def seed_slots(
 ) -> int:
     """Create slots for the next `days` business days if the campaign (at this practice) has none open."""
     now_local = datetime.now(ZoneInfo(campaign.timezone)).replace(tzinfo=None)
+    ours = (Slot.campaign_id == campaign.id, _at_practice(practice_id))
+    # Same horizon open_slots uses: a slot that can't be offered doesn't count as open.
     existing = session.scalars(
-        select(Slot).where(
-            Slot.campaign_id == campaign.id, _at_practice(practice_id),
-            Slot.starts_at > now_local, Slot.booked_lead_id.is_(None),
-        )
+        select(Slot).where(*ours, Slot.starts_at > now_local + timedelta(hours=12), Slot.booked_lead_id.is_(None))
     ).first()
     if existing:
         return 0
-    d = start or (now_local.date() + timedelta(days=1))
+    # Continue after the last slot we already made, so a time is never created twice.
+    last = session.scalar(select(func.max(Slot.starts_at)).where(*ours))
+    d = start or max(now_local.date() + timedelta(days=1), (last.date() + timedelta(days=1)) if last else date.min)
     made = 0
     while made < days * len(SLOT_TIMES):
         if d.weekday() < 5:

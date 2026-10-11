@@ -157,6 +157,7 @@ def _outreach_row(lead: Lead) -> dict:
     return {
         **lead_summary(lead),
         "practice_id": lead.practice_id,
+        "patient_id": lead.patient_id,
         "nct_id": (get_campaign(lead.campaign_id).nct_id if get_campaign(lead.campaign_id) else None),
         "simulated": bool(lead.simulated),
         "identity_verified": bool(lead.identity_verified),
@@ -164,6 +165,8 @@ def _outreach_row(lead: Lead) -> dict:
         "last_activity": {"type": last.type, "at": _iso(last.at)} if last else None,
         "texts": sum(1 for e in lead.events if e.type == "sms_sent" and e.detail.get("to") == "patient"),
         "inbound_calls": sum(1 for c in lead.calls if c.direction == "inbound"),
+        # Test patients only (a teammate's real phone): the birth date they'll be asked to confirm.
+        "test_birth_date": lead.birth_date if not lead.simulated else None,
     }
 
 
@@ -237,3 +240,32 @@ def live(practice_id: str, s: Session = Depends(get_session)):
     return [{"call_id": c.id, "lead_id": c.lead_id, "first_name": c.lead.first_name, "last_name": c.lead.last_name,
              "direction": c.direction or "outbound", "simulated": bool(c.lead.simulated), "started_at": _iso(c.started_at),
              "attempt": c.attempt_no} for c in rows]
+
+
+@router.get("/practices/{practice_id}/patients/{patient_id}/outreach")
+def patient_outreach(practice_id: str, patient_id: str, s: Session = Depends(get_session)):
+    """One patient's outreach at this practice: one entry per trial they're being contacted about."""
+    _practice(practice_id)
+    leads = s.scalars(
+        select(Lead).where(Lead.practice_id == practice_id, Lead.patient_id == patient_id).order_by(Lead.id)
+    ).all()
+    out = []
+    for lead in leads:
+        slot = service.booked_slot(s, lead)
+        campaign = get_campaign(lead.campaign_id)
+        timeline = [
+            {"at": _iso(e.at), "type": e.type, "body": e.detail.get("body") if e.type in ("sms_sent", "sms_received") else None,
+             "to": e.detail.get("to")}
+            for e in lead.events
+            if e.type in ("call_started", "call_ended", "sms_sent", "sms_received", "visit_booked", "visit_confirmed",
+                          "visit_rescheduled", "identity_verified", "inbound_call", "call_window_set", "staff_contacted",
+                          "chart_review_cleared")
+            and (e.type not in ("sms_sent",) or e.detail.get("to") == "patient")
+        ]
+        out.append({
+            **_outreach_row(lead),
+            "trial_title": campaign.study_short_name if campaign else None,
+            "visit": slot.starts_at.isoformat() if slot else None,
+            "timeline": timeline,
+        })
+    return out

@@ -3,6 +3,7 @@ import { AreaFilter } from '@/components/trials/AreaFilter';
 import { FilterMenu } from '@/components/trials/FilterMenu';
 import { TrialCard } from '@/components/trials/TrialCard';
 import { AppShell } from '@/components/ui';
+import { getAcceptedTrials } from '@/lib/caller';
 import { getPatientStats } from '@/lib/patients';
 import { DEMO_PRACTICE, greeting } from '@/lib/practice';
 import { listOpenTrials, type TrialListItem } from '@/lib/trials';
@@ -17,11 +18,13 @@ interface TrialsPageProps {
   total: number;
   greeting: string;
   practicePatients: number;
+  /** Trials this practice accepted, with Ava's progress. */
+  outreach: Record<string, { booked: number; called: number }>;
 }
 
 export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ query }) => {
   const filters = parseFilters(query);
-  const all = await listOpenTrials();
+  const [all, outreach] = await Promise.all([listOpenTrials(), getAcceptedTrials()]);
 
   const inScope = all.filter((t) => matchesMenuFilters(t, filters));
   // Biggest areas first, so they're the ones that keep their labels when the row is tight.
@@ -37,11 +40,12 @@ export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ 
       total: inScope.length,
       greeting: greeting(),
       practicePatients: getPatientStats().counties.find((c) => c.name === DEMO_PRACTICE.county)?.count ?? 0,
+      outreach,
     },
   };
 };
 
-export default function TrialsPage({ filters, trials, areaCounts, total, greeting, practicePatients }: TrialsPageProps) {
+export default function TrialsPage({ filters, trials, areaCounts, total, greeting, practicePatients, outreach }: TrialsPageProps) {
   return (
     <AppShell title="Trials" active="trials">
       <header>
@@ -67,7 +71,7 @@ export default function TrialsPage({ filters, trials, areaCounts, total, greetin
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-5 lg:grid-cols-3">
           {trials.map((t) => (
-            <TrialCard key={t.nctId} trial={t} />
+            <TrialCard key={t.nctId} trial={t} outreach={outreach[t.nctId]} />
           ))}
         </div>
       )}

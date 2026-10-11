@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Badge, Button } from '@/components/ui';
 import type { TrialOutreach } from '@/lib/caller';
@@ -20,6 +22,7 @@ function Num({ value, label, tone }: { value: number; label: string; tone?: 'pas
  * this office and books screening visits. The doctor doesn't do anything else.
  */
 export function AcceptCard({ nctId, initial }: { nctId: string; initial: TrialOutreach }) {
+  const router = useRouter();
   const [state, setState] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +55,7 @@ export function AcceptCard({ nctId, initial }: { nctId: string; initial: TrialOu
       const json = await res.json();
       if (!res.ok || !json.success) throw new Error(json.error || 'Accept failed');
       setState(json.data);
+      router.push(`/outreach?nct=${nctId}`);
     } catch (err) {
       setError(getErrorMessage(err, 'Accept failed'));
     } finally {
@@ -77,11 +81,9 @@ export function AcceptCard({ nctId, initial }: { nctId: string; initial: TrialOu
             <Num value={t.needsStaff} label="need staff" tone="unk" />
           </div>
         )}
-        {state.dashboardUrl && (
-          <a href={state.dashboardUrl} target="_blank" rel="noreferrer" className="mt-3 inline-block text-[12.5px] font-semibold text-accent hover:underline">
-            Follow the outreach ↗
-          </a>
-        )}
+        <Link href={`/outreach?nct=${nctId}`} className="mt-3 inline-block text-[12.5px] font-semibold text-accent hover:underline">
+          Follow the outreach →
+        </Link>
       </div>
     );
   }

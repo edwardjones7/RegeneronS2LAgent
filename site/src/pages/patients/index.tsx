@@ -17,6 +17,7 @@ import {
   Tr,
 } from '@/components/ui';
 import { getPatient, getPatientStats, listPatients, type PatientDetail, type PatientListResult, type PatientStats } from '@/lib/patients';
+import { getPatientOutreach, type PatientOutreach } from '@/lib/caller';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { formatDate } from '@/lib/utils/format';
 
@@ -31,6 +32,8 @@ interface PatientsPageProps {
   filters: Filters;
   result: PatientListResult;
   selected: PatientDetail | null;
+  /** Ava's outreach to the selected patient, one entry per trial. */
+  outreach: PatientOutreach[];
 }
 
 const str = (v: string | string[] | undefined) => (typeof v === 'string' ? v : '');
@@ -47,6 +50,7 @@ export const getServerSideProps: GetServerSideProps<PatientsPageProps> = async (
       filters,
       result: listPatients({ county, query: filters.q || undefined, page: filters.page }),
       selected: patientId ? getPatient(patientId, county) : null,
+      outreach: patientId ? await getPatientOutreach(patientId) : [],
     },
   };
 };
@@ -62,13 +66,60 @@ function href(filters: Filters, changes: Partial<Filters> & { patient?: string }
   return qs ? `/patients?${qs}` : '/patients';
 }
 
-function PatientDrawer({ patient, closeHref }: { patient: PatientDetail; closeHref: string }) {
+const OUTREACH_EVENTS: Record<string, string> = {
+  call_started: 'Ava called',
+  call_ended: 'Call ended',
+  sms_sent: 'Texted',
+  sms_received: 'Replied',
+  visit_booked: 'Booked a screening visit',
+  visit_confirmed: 'Confirmed the visit',
+  visit_rescheduled: 'Rescheduled',
+  identity_verified: 'Confirmed their identity',
+  inbound_call: 'Called the office back',
+  call_window_set: 'Asked for a later time',
+  staff_contacted: 'Reached by staff',
+  chart_review_cleared: 'Chart checked',
+};
+
+function OutreachSection({ outreach }: { outreach: PatientOutreach[] }) {
+  if (!outreach.length) return null;
+  return (
+    <DrawerSection title="Outreach">
+      {outreach.map((o) => (
+        <div key={o.nctId ?? o.trialTitle} className="mb-3 rounded-lg border border-line p-3 last:mb-0">
+          <div className="flex items-center justify-between gap-2 text-[13px]">
+            <span className="font-medium capitalize">{o.trialTitle} study</span>
+            <Badge tone={o.status === 'booked' ? 'pass' : o.status === 'needs_human' || o.status === 'chart_review' ? 'unknown' : 'neutral'}>
+              {o.status === 'booked' && o.visit
+                ? `Visit ${new Date(o.visit).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`
+                : o.status.replaceAll('_', ' ')}
+            </Badge>
+          </div>
+          <ol className="mt-2 space-y-1">
+            {o.timeline.slice(-8).map((e, i) => (
+              <li key={`${e.at}-${i}`} className="flex gap-2 text-[12.5px]">
+                <span className="w-24 shrink-0 text-xs tabular-nums text-ink-3">{formatDate(e.at.slice(0, 10))}</span>
+                <span className="min-w-0 text-ink-2">
+                  {OUTREACH_EVENTS[e.type] ?? e.type.replaceAll('_', ' ')}
+                  {e.body && <span className="mt-0.5 block truncate text-xs text-ink-3">&ldquo;{e.body}&rdquo;</span>}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      ))}
+    </DrawerSection>
+  );
+}
+
+function PatientDrawer({ patient, outreach, closeHref }: { patient: PatientDetail; outreach: PatientOutreach[]; closeHref: string }) {
   return (
     <Drawer
       title={patient.name}
       subtitle={`${patient.age} ${patient.sex} · ${patient.county} · born ${formatDate(patient.birthDate)}`}
       closeHref={closeHref}
     >
+      <OutreachSection outreach={outreach} />
       <DrawerSection title={`Active conditions · ${patient.activeConditions.length}`}>
         <ul className="space-y-1.5 text-[13px]">
           {patient.activeConditions.map((c) => (
@@ -168,7 +219,7 @@ function PatientDrawer({ patient, closeHref }: { patient: PatientDetail; closeHr
   );
 }
 
-export default function PatientsPage({ stats, filters, result, selected }: PatientsPageProps) {
+export default function PatientsPage({ stats, filters, result, selected, outreach }: PatientsPageProps) {
   const first = (result.page - 1) * 50 + 1;
   const last = first + result.patients.length - 1;
 
@@ -267,7 +318,7 @@ export default function PatientsPage({ stats, filters, result, selected }: Patie
         </div>
       )}
 
-      {selected && <PatientDrawer patient={selected} closeHref={href(filters, {})} />}
+      {selected && <PatientDrawer patient={selected} outreach={outreach} closeHref={href(filters, {})} />}
     </AppShell>
   );
 }
