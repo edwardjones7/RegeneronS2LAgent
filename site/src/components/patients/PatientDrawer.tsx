@@ -1,9 +1,12 @@
-import type { ReactNode } from 'react';
+import { useRouter } from 'next/router';
+import { type ReactNode, useEffect, useState } from 'react';
 import { ConditionChip } from '@/components/patients/ConditionChip';
 import { PatientAvatar } from '@/components/patients/PatientAvatar';
 import { Drawer, DrawerSection } from '@/components/ui';
 import type { PatientOutreach } from '@/lib/caller';
 import type { PatientDetail } from '@/lib/patients';
+import type { PatientDetailResponse } from '@/pages/api/patients/[id]';
+import { fetchJson } from '@/lib/utils/api';
 import { cn } from '@/lib/utils/cn';
 import { formatDate } from '@/lib/utils/format';
 
@@ -188,7 +191,11 @@ function OutreachSection({ outreach }: { outreach: PatientOutreach[] }) {
                   <span className="w-20 shrink-0 tabular-nums text-ink-3">{formatDate(e.at.slice(0, 10))}</span>
                   <span className="min-w-0 text-ink-2">
                     {OUTREACH_EVENTS[e.type] ?? e.type.replaceAll('_', ' ')}
-                    {e.body && <span className="mt-0.5 block truncate text-[12px] text-ink-3">&ldquo;{e.body}&rdquo;</span>}
+                    {e.body && (
+                      <span className="mt-1 mb-1 block rounded-xl rounded-tl-sm bg-surface-2 px-3 py-2 text-[12.5px] leading-relaxed text-ink-2">
+                        {e.body}
+                      </span>
+                    )}
                   </span>
                 </li>
               ))}
@@ -200,8 +207,7 @@ function OutreachSection({ outreach }: { outreach: PatientOutreach[] }) {
   );
 }
 
-/** A patient's chart in the right-hand drawer. Used on Patients and Campaigns. */
-export function PatientDrawer({ patient, outreach, closeHref }: { patient: PatientDetail; outreach: PatientOutreach[]; closeHref: string }) {
+function PatientChart({ patient, outreach }: PatientDetailResponse) {
   const clinical = patient.activeConditions.filter((c) => c.clinical);
   const other = patient.activeConditions.filter((c) => !c.clinical);
   const obs = Object.fromEntries(patient.observations.map((o) => [o.key, o]));
@@ -214,12 +220,7 @@ export function PatientDrawer({ patient, outreach, closeHref }: { patient: Patie
       : null;
 
   return (
-    <Drawer
-      title={patient.name}
-      leading={<PatientAvatar id={patient.id} name={patient.name} size="lg" />}
-      subtitle={`${patient.age} · ${SEX_LABELS[patient.sex]} · born ${formatDate(patient.birthDate)}`}
-      closeHref={closeHref}
-    >
+    <>
       <OutreachSection outreach={outreach} />
       <DrawerSection title={`Active conditions · ${clinical.length}`}>
         {clinical.length === 0 ? (
@@ -317,6 +318,105 @@ export function PatientDrawer({ patient, outreach, closeHref }: { patient: Patie
           <DatedList items={patient.recentProcedures} />
         </Collapsible>
       )}
+    </>
+  );
+}
+
+/* ————————— Loading ————————— */
+
+// Charts already fetched (or on their way), so reopening or hovering first makes the drawer instant.
+// Entries go stale after a short while because Ava's outreach timeline keeps moving.
+const FRESH_MS = 15_000;
+const cache = new Map<string, { at: number; promise: Promise<PatientDetailResponse> }>();
+
+export function loadPatient(id: string): Promise<PatientDetailResponse> {
+  const hit = cache.get(id);
+  if (hit && Date.now() - hit.at < FRESH_MS) return hit.promise;
+  const promise = fetchJson<PatientDetailResponse>(`/api/patients/${encodeURIComponent(id)}`);
+  promise.catch(() => cache.delete(id));
+  cache.set(id, { at: Date.now(), promise });
+  return promise;
+}
+
+/** Start loading a patient's chart before it's opened, e.g. on hover. */
+export const prefetchPatient = (id: string) => void loadPatient(id).catch(() => {});
+
+function ChartSkeleton() {
+  return (
+    <div className="mt-1 animate-pulse">
+      <div className="h-3.5 w-32 rounded-full bg-surface-2" />
+      <div className="mt-3 flex gap-1.5">
+        <div className="h-6 w-28 rounded-full bg-surface-2" />
+        <div className="h-6 w-24 rounded-full bg-surface-2" />
+        <div className="h-6 w-20 rounded-full bg-surface-2" />
+      </div>
+      <div className="mt-8 h-3.5 w-28 rounded-full bg-surface-2" />
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {Array.from({ length: 6 }, (_, i) => (
+          <div key={i} className="h-[74px] rounded-xl bg-surface-2" />
+        ))}
+      </div>
+      <div className="mt-8 h-3.5 w-24 rounded-full bg-surface-2" />
+      <div className="mt-3 h-28 rounded-xl bg-surface-2" />
+    </div>
+  );
+}
+
+interface PatientDrawerProps {
+  patientId: string;
+  /** What the list already knows, so the header shows straight away. */
+  preview?: { name: string; subtitle?: string };
+  /** Server-rendered chart when the page was loaded with the drawer open. */
+  initial?: PatientDetailResponse | null;
+  closeHref: string;
+}
+
+/**
+ * A patient's chart in the right-hand drawer, used on Patients and Campaigns. It opens at once with
+ * the name from the list and fills in when the chart arrives, so opening never waits on a page load.
+ */
+export function PatientDrawer({ patientId, preview, initial, closeHref }: PatientDrawerProps) {
+  const [loaded, setLoaded] = useState<{ id: string; data: PatientDetailResponse } | null>(
+    initial?.patient.id === patientId ? { id: patientId, data: initial } : null
+  );
+  const [failed, setFailed] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    loadPatient(patientId)
+      .then((data) => alive && setLoaded({ id: patientId, data }))
+      .catch(() => alive && setFailed(patientId));
+    return () => {
+      alive = false;
+    };
+  }, [patientId]);
+
+  const data = loaded?.id === patientId ? loaded.data : null;
+  const p = data?.patient;
+  const name = p?.name ?? preview?.name ?? '';
+
+  return (
+    <Drawer
+      title={name}
+      leading={<PatientAvatar id={patientId} name={name} size="lg" />}
+      subtitle={p ? `${p.age} · ${SEX_LABELS[p.sex]} · born ${formatDate(p.birthDate)}` : (preview?.subtitle ?? '\u00a0')}
+      closeHref={closeHref}
+    >
+      {data ? (
+        <div className="motion-safe:animate-fade-in">
+          <PatientChart patient={data.patient} outreach={data.outreach} />
+        </div>
+      ) : failed === patientId ? (
+        <p className="mt-2 text-[13px] text-ink-3">This chart couldn&rsquo;t be loaded. Close and try again.</p>
+      ) : (
+        <ChartSkeleton />
+      )}
     </Drawer>
   );
+}
+
+/** The patient open in the drawer, read from the URL so it works with shallow routing. */
+export function useOpenPatient(): string | null {
+  const { query } = useRouter();
+  return typeof query.patient === 'string' && query.patient ? query.patient : null;
 }

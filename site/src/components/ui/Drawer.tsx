@@ -27,7 +27,7 @@ export function Drawer({ title, subtitle, leading, closeHref, children }: Drawer
   const close = () => {
     if (closing) return;
     setClosing(true);
-    timer.current = setTimeout(() => router.push(closeHref, undefined, { scroll: false }), CLOSE_MS);
+    timer.current = setTimeout(() => router.push(closeHref, undefined, { scroll: false, shallow: true }), CLOSE_MS);
   };
 
   useEffect(() => {

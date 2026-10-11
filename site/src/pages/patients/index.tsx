@@ -1,7 +1,16 @@
 import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { ConditionChip } from '@/components/patients/ConditionChip';
-import { a1cFlag, bmiFlag, bpFlag, PatientDrawer, SEX_LABELS, Value } from '@/components/patients/PatientDrawer';
+import {
+  a1cFlag,
+  bmiFlag,
+  bpFlag,
+  PatientDrawer,
+  prefetchPatient,
+  SEX_LABELS,
+  useOpenPatient,
+  Value,
+} from '@/components/patients/PatientDrawer';
 import { PatientAvatar } from '@/components/patients/PatientAvatar';
 import { PatientToolbar } from '@/components/patients/PatientToolbar';
 import { AppShell } from '@/components/ui';
@@ -96,6 +105,8 @@ function PatientRow({ patient, href: to, selected, pinned }: PatientRowProps) {
     <Link
       href={to}
       scroll={false}
+      shallow
+      onMouseEnter={() => prefetchPatient(patient.id)}
       className={cn(
         ROW_GRID,
         'border-t border-line-2 px-5 py-3 text-[13px] transition-colors first:border-t-0',
@@ -146,6 +157,8 @@ export default function PatientsPage({ filters, result, panelSize, conditions, s
   const first = (result.page - 1) * 50 + 1;
   const last = first + result.patients.length - 1;
   const filtered = Boolean(filters.conditions.length || filters.q);
+  const openId = useOpenPatient();
+  const openSummary = result.patients.find((p) => p.id === openId);
 
   return (
     <AppShell title="Patients" active="patients">
@@ -177,7 +190,7 @@ export default function PatientsPage({ filters, result, panelSize, conditions, s
               key={p.id}
               patient={p}
               href={href(filters, { patient: p.id })}
-              selected={selected?.id === p.id}
+              selected={openId === p.id}
               pinned={filters.conditions}
             />
           ))
@@ -204,7 +217,14 @@ export default function PatientsPage({ filters, result, panelSize, conditions, s
         )}
       </div>
 
-      {selected && <PatientDrawer patient={selected} outreach={outreach} closeHref={href(filters, {})} />}
+      {openId && (
+        <PatientDrawer
+          patientId={openId}
+          preview={openSummary && { name: openSummary.name, subtitle: `${openSummary.age} · ${SEX_LABELS[openSummary.sex]}` }}
+          initial={selected && { patient: selected, outreach }}
+          closeHref={href(filters, {})}
+        />
+      )}
     </AppShell>
   );
 }

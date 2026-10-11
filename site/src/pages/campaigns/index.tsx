@@ -2,7 +2,7 @@ import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { type ReactNode, useEffect, useState, useSyncExternalStore } from 'react';
 import { PatientAvatar } from '@/components/patients/PatientAvatar';
-import { PatientDrawer } from '@/components/patients/PatientDrawer';
+import { PatientDrawer, prefetchPatient, useOpenPatient } from '@/components/patients/PatientDrawer';
 import { AREA_STYLES } from '@/components/trials/areaStyles';
 import { AppShell, PageIntro } from '@/components/ui';
 import {
@@ -263,6 +263,8 @@ function PatientRow({ p, href, selected }: { p: OutreachPatient; href: string; s
     <Link
       href={href}
       scroll={false}
+      shallow
+      onMouseEnter={() => prefetchPatient(p.patientId)}
       className={cn(
         ROW_GRID,
         'border-t border-line-2 px-5 py-3 text-[13px] transition-colors first:border-t-0',
@@ -326,7 +328,13 @@ function QueueItem({ p, href, onDone }: { p: OutreachPatient; href: string; onDo
         <PatientAvatar id={p.patientId} name={p.name} />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
-            <Link href={href} scroll={false} className="truncate text-[14px] font-semibold hover:underline">
+            <Link
+              href={href}
+              scroll={false}
+              shallow
+              onMouseEnter={() => prefetchPatient(p.patientId)}
+              className="truncate text-[14px] font-semibold hover:underline"
+            >
               {p.name}
             </Link>
             <span className="shrink-0 text-[12px] text-ink-3">
@@ -476,6 +484,8 @@ export default function OutreachPage({ nct, initial, areas, selected, selectedOu
   const rows = data.patients.filter(match).sort((a, b) => (b.lastActivity?.at ?? '').localeCompare(a.lastActivity?.at ?? ''));
   const running = data.trials.length > 0;
   const hrefFor = (p: OutreachPatient) => campaignHref(nct, p.patientId);
+  const openId = useOpenPatient();
+  const openName = data.patients.find((p) => p.patientId === openId)?.name;
 
   return (
     <AppShell title="Campaigns" active="campaigns">
@@ -591,7 +601,7 @@ export default function OutreachPage({ nct, initial, areas, selected, selectedOu
                 {rows.length === 0 ? (
                   <p className="px-5 py-10 text-center text-[13px] text-ink-3">No patients here.</p>
                 ) : (
-                  rows.slice(0, 150).map((p) => <PatientRow key={p.id} p={p} href={hrefFor(p)} selected={selected?.id === p.patientId} />)
+                  rows.slice(0, 150).map((p) => <PatientRow key={p.id} p={p} href={hrefFor(p)} selected={openId === p.patientId} />)
                 )}
               </div>
             </div>
@@ -661,7 +671,14 @@ export default function OutreachPage({ nct, initial, areas, selected, selectedOu
         </>
       )}
 
-      {selected && <PatientDrawer patient={selected} outreach={selectedOutreach} closeHref={campaignHref(nct)} />}
+      {openId && (
+        <PatientDrawer
+          patientId={openId}
+          preview={openName ? { name: openName } : undefined}
+          initial={selected && { patient: selected, outreach: selectedOutreach }}
+          closeHref={campaignHref(nct)}
+        />
+      )}
     </AppShell>
   );
 }
