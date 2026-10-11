@@ -1,9 +1,7 @@
 import { useRouter } from 'next/router';
-import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AreaIcon } from '@/components/trials/AreaIcon';
 import { AREA_STYLES } from '@/components/trials/areaStyles';
-import type { CriterionCheck } from '@/lib/protocols';
-import { DEMO_PRACTICE } from '@/lib/practice';
 import { AREA_LABELS } from '@/lib/trials/areas';
 import { fetchJson } from '@/lib/utils/api';
 import { cn } from '@/lib/utils/cn';
@@ -12,20 +10,20 @@ import type { WalkthroughData, WalkthroughTrial } from '@/pages/api/walkthrough'
 /**
  * A motion walkthrough of the pipeline, for the demo: fetch trials → Jev matches them
  * against the practice's patients → the dashboard. Visual only; nothing is run.
- * Real numbers: trial count, protocol criteria, panel size. The patient sorting in
- * the Jev scene is illustrative until Jev's results are wired in.
+ * Real: the trial count, which trials have criteria, the panel size. Illustrative (and
+ * labelled so): the candidate and chart-review counts, until Jev's results are wired in.
  */
 
 const SCENES = [
-  { key: 'fetch', label: 'Fetch trials', ms: 9000 },
-  { key: 'match', label: 'Match with Jev', ms: 11500 },
-  { key: 'recommend', label: 'Recommend', ms: 4200 },
+  { key: 'fetch', label: 'Fetch trials', ms: 5500 },
+  { key: 'match', label: 'Match with Jev', ms: 6500 },
+  { key: 'recommend', label: 'Recommend', ms: 3800 },
 ] as const;
 
 type SceneKey = (typeof SCENES)[number]['key'];
 
 /** While a scene is being designed, play only it, on a loop. null plays the whole run. */
-const FOCUS: SceneKey | null = 'fetch';
+const FOCUS: SceneKey | null = null;
 
 const TOTAL_MS = SCENES.reduce((n, s) => n + s.ms, 0);
 /** Matches duration-700 on the overlay. */
@@ -33,7 +31,7 @@ const LEAVE_MS = 700;
 
 const easeOut = (x: number) => 1 - (1 - Math.min(Math.max(x, 0), 1)) ** 3;
 
-/** Stable 0–1 value per patient dot, so the sorting looks the same every run. */
+/** Stable 0–1 value per index, so illustrative numbers are the same every run. */
 function rand(i: number): number {
   let x = Math.imul(i + 1, 2654435761) >>> 0;
   x ^= x >>> 16;
@@ -45,58 +43,6 @@ function rand(i: number): number {
 }
 
 /* ————————— Pieces ————————— */
-
-/** Stagger for the recommended cards, as full class names so Tailwind generates them. */
-const STAGGER = ['delay-0', 'delay-[110ms]', 'delay-[220ms]', 'delay-[330ms]', 'delay-[440ms]', 'delay-[550ms]'];
-
-function MiniCard({ trial, shown, stagger, large = false }: { trial: WalkthroughTrial; shown: boolean; stagger?: number; large?: boolean }) {
-  const style = AREA_STYLES[trial.area];
-  return (
-    <div
-      className={cn(
-        stagger !== undefined && STAGGER[stagger],
-        'relative overflow-hidden rounded-2xl border border-line-2 bg-surface p-3 shadow-[0_1px_2px_rgba(30,36,48,0.05)] transition-all duration-500 ease-out',
-        large ? 'h-36' : 'h-24',
-        shown ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-4 scale-95 opacity-0'
-      )}
-    >
-      <div className={cn('absolute inset-0 bg-linear-to-br opacity-70 [mask-image:linear-gradient(to_bottom,black,transparent)]', style.gradient)} />
-      <div className="relative flex h-full flex-col justify-between">
-        <span className="flex items-center gap-1 text-[10.5px] font-semibold text-ink-2">
-          <AreaIcon area={trial.area} className={cn('size-3', style.text)} />
-          {AREA_LABELS[trial.area]}
-        </span>
-        <span>
-          {large && trial.hasProtocol && (
-            <span className="mb-1 flex items-center gap-1 text-[11px] font-semibold text-pass">
-              <span className="size-1.5 rounded-full bg-pass" />
-              Criteria ready
-            </span>
-          )}
-          <span className={cn('line-clamp-2 font-semibold leading-snug', large ? 'text-[15px]' : 'text-[12.5px]')}>{trial.indication}</span>
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function SceneTitle({ step, title, children }: { step: number; title: string; children: ReactNode }) {
-  return (
-    <div key={step} className="animate-modal-in text-center">
-      <div className="text-[12.5px] font-semibold uppercase tracking-[0.08em] text-ink-3">Step {step} of 3</div>
-      <h2 className="mt-2 text-[34px] font-semibold tracking-[-0.03em]">{title}</h2>
-      <p className="mx-auto mt-2 max-w-xl text-[15px] leading-relaxed text-ink-2">{children}</p>
-    </div>
-  );
-}
-
-const LANES: Record<CriterionCheck, { label: string; className: string }> = {
-  code: { label: 'Chart data', className: 'bg-accent-weak text-accent' },
-  jev: { label: 'Jev', className: 'bg-ink/[0.06] text-ink' },
-  review: { label: 'At screening', className: 'bg-unk-bg text-unk' },
-};
-
-/* ————————— Scenes ————————— */
 
 /** One trial in the vertical carousel. */
 function TrialRow({ trial }: { trial: WalkthroughTrial }) {
@@ -177,126 +123,147 @@ function FetchScene({ data, t }: { data: WalkthroughData; t: number }) {
   );
 }
 
-function MatchScene({ data, t, ms }: { data: WalkthroughData; t: number; ms: number }) {
-  const { criteria } = data.protocol;
-  const stepMs = (ms - 2200) / Math.max(criteria.length, 1);
-  const progress = Math.min(t / stepMs, criteria.length); // criteria done, fractional
-  const done = progress >= criteria.length;
-  // Share of patients ruled out so far: fast at first (age, diagnosis), slower later.
-  const ruledOut = 0.89 * (1 - (1 - progress / criteria.length) ** 2);
-  const style = AREA_STYLES[data.protocol.area];
+/** Illustrative pre-screen counts for a matched trial. Not real results; the UI says so. */
+function mockCounts(i: number) {
+  return { candidates: 6 + Math.floor(rand(i) * 11), review: 2 + Math.floor(rand(i + 50) * 6) };
+}
 
+function CountsLine({ i, short = false }: { i: number; short?: boolean }) {
+  const { candidates, review } = mockCounts(i);
   return (
-    <>
-      <SceneTitle step={2} title="Jev pre-screens your patients">
-        {data.patientCount} patients at {DEMO_PRACTICE.name}, checked against each of {data.protocolCount} protocols. Jev sees
-        de-identified summaries only, and records never leave the practice.
-      </SceneTitle>
-
-      <div className="mx-auto mt-8 grid max-w-5xl animate-modal-in grid-cols-[400px_minmax(0,1fr)] gap-6">
-        {/* The protocol, one criterion at a time. */}
-        <div className="relative overflow-hidden rounded-3xl border border-line-2 bg-surface p-5">
-          <div className={cn('absolute inset-x-0 top-0 h-28 bg-linear-to-br opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent)]', style.gradient)} />
-          <div className="relative">
-            <span className="flex items-center gap-1.5 text-[11.5px] font-semibold text-ink-2">
-              <AreaIcon area={data.protocol.area} className={cn('size-3.5', style.text)} />
-              Protocol
-            </span>
-            <div className="mt-1 text-[19px] font-semibold tracking-[-0.02em]">{data.protocol.indication}</div>
-            {data.protocol.drug && <div className="text-[13px] text-ink-3">{data.protocol.drug}</div>}
-            <ul className="mt-4 space-y-2">
-              {criteria.map((c, i) => {
-                const state = progress >= i + 1 ? 'done' : progress >= i ? 'active' : 'waiting';
-                return (
-                  <li
-                    key={i}
-                    className={cn(
-                      'flex items-start gap-2.5 rounded-xl px-2.5 py-2 transition-colors duration-300',
-                      state === 'active' ? 'bg-accent-weak/70' : 'bg-transparent'
-                    )}
-                  >
-                    <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center">
-                      {state === 'done' ? (
-                        <svg className={cn('size-4', c.type === 'inclusion' ? 'text-pass' : 'text-fail')} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                          <path d={c.type === 'inclusion' ? 'M5 12.5l4.5 4.5L19 7.5' : 'M7 7l10 10M17 7L7 17'} />
-                        </svg>
-                      ) : state === 'active' ? (
-                        <span className="size-3.5 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-                      ) : (
-                        <span className="size-2 rounded-full bg-ink/15" />
-                      )}
-                    </span>
-                    <span className={cn('min-w-0 flex-1 text-[12.5px] leading-snug transition-colors', state === 'waiting' ? 'text-ink-3' : 'text-ink')}>
-                      <span className="line-clamp-2">{c.text}</span>
-                    </span>
-                    <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold', LANES[c.check].className)}>
-                      {LANES[c.check].label}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
-
-        {/* The practice's patients, one dot each. */}
-        <div className="flex flex-col rounded-3xl border border-line-2 bg-surface p-5">
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-[13px] font-semibold">
-              <span className={cn('size-2 rounded-full', done ? 'bg-pass' : 'animate-pulse bg-accent')} />
-              Jev · {done ? 'done' : 'matching'}
-            </span>
-            <span className="flex items-center gap-1.5 text-[12px] text-ink-3">
-              <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                <rect x="5" y="11" width="14" height="9" rx="2" />
-                <path d="M8 11V8a4 4 0 018 0v3" />
-              </svg>
-              Inside {DEMO_PRACTICE.name}
-            </span>
-          </div>
-
-          <div className="mt-5 grid flex-1 grid-cols-20 content-center gap-1.5">
-            {Array.from({ length: data.patientCount }, (_, i) => {
-              const r = rand(i);
-              const out = r < ruledOut;
-              const tone = out ? 'bg-ink/[0.08]' : done ? (r > 0.945 ? 'bg-pass' : 'bg-unk') : 'bg-accent/60';
-              return <span key={i} className={cn('aspect-square rounded-full transition-colors duration-500', tone)} />;
-            })}
-          </div>
-
-          <div className="mt-5 flex items-center justify-between gap-3 text-[12px] text-ink-2">
-            <span className="flex items-center gap-4">
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-pass" /> Candidate
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-unk" /> Needs chart review
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-ink/15" /> Not a match
-              </span>
-            </span>
-            <span className="text-ink-3">Illustrative</span>
-          </div>
-        </div>
-      </div>
-    </>
+    <span className="text-ink-2">
+      <span className="font-semibold text-pass">{candidates} candidates</span> ·{' '}
+      <span className="text-unk">{short ? `${review} to review` : `${review} need chart review`}</span>
+    </span>
   );
 }
 
-function RecommendScene({ data, t }: { data: WalkthroughData; t: number }) {
-  const picks = data.trials.slice(0, 6);
+/** A trial Jev confirmed against the practice's patients. */
+function MatchRow({ trial, i }: { trial: WalkthroughTrial; i: number }) {
+  const style = AREA_STYLES[trial.area];
   return (
-    <>
-      <SceneTitle step={3} title="Recommended for your practice">
-        Trials ranked by how many of your patients could fill them. Open one to see who passed which criteria.
-      </SceneTitle>
-      <div className="mx-auto mt-8 grid max-w-4xl grid-cols-3 gap-4">
-        {picks.map((trial, i) => (
-          <MiniCard key={trial.nctId} trial={trial} shown={t > 150} stagger={i} large />
+    <div className="flex h-[72px] items-center gap-3 overflow-hidden rounded-2xl border border-line-2 bg-surface p-3 shadow-[0_1px_2px_rgba(30,36,48,0.05)]">
+      <span className={cn('flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br', style.gradient)}>
+        <AreaIcon area={trial.area} className="size-5 text-white" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[14.5px] font-semibold">{trial.indication}</span>
+        <span className="block truncate text-[12.5px]">
+          <CountsLine i={i} />
+        </span>
+      </span>
+      <span className="flex shrink-0 items-center gap-1 rounded-full bg-pass-bg px-2 py-0.5 text-[11.5px] font-semibold text-pass">
+        <svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12.5l4.5 4.5L19 7.5" />
+        </svg>
+        Matched
+      </span>
+    </div>
+  );
+}
+
+const MATCH_EVERY_MS = 1100;
+
+function MatchScene({ data, t }: { data: WalkthroughData; t: number }) {
+  const matchable = data.trials.filter((trial) => trial.hasProtocol);
+  const matched = Math.min(matchable.length, Math.max(0, Math.floor((t - 700) / MATCH_EVERY_MS) + 1));
+  const done = matched === matchable.length;
+
+  return (
+    <div className="mx-auto grid w-full max-w-5xl animate-modal-in grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-16">
+      {/* Matched trials stack up; the skeleton on top is Jev still checking. Once done, it fades and the stack moves up. */}
+      <div className="relative h-[408px]">
+        <SkeletonRow className={cn('absolute inset-x-0 top-0 transition-opacity duration-500', done ? 'opacity-0' : 'opacity-100')} />
+        {matchable.map((trial, i) => {
+          if (i > matched) return null; // not reached yet
+          const slot = i === matched ? 0 : matched - i - (done ? 1 : 0);
+          return (
+            <div
+              key={trial.nctId}
+              className={cn(
+                'absolute inset-x-0 top-0 transition-[translate,opacity] duration-500 ease-in-out',
+                SLOT_Y[slot],
+                i === matched ? 'opacity-0' : 'opacity-100'
+              )}
+            >
+              <MatchRow trial={trial} i={i} />
+            </div>
+          );
+        })}
+      </div>
+
+      <div>
+        <h2 className="flex items-center gap-3 text-[34px] font-semibold leading-tight tracking-[-0.03em]">
+          Matching with Jev
+          <span className={cn('size-2.5 rounded-full', done ? 'bg-pass' : 'animate-pulse bg-accent')} />
+        </h2>
+        <div className="mt-6 flex items-baseline gap-3">
+          <span className="text-[112px] font-semibold leading-none tabular-nums tracking-[-0.05em]">{matched}</span>
+          <span className="text-[17px] text-ink-3">{matched === 1 ? 'trial matches' : 'trials match'} your patients</span>
+        </div>
+        <p className="mt-6 max-w-sm text-[15px] leading-relaxed text-ink-2">
+          {data.patientCount} patients checked against each trial&apos;s criteria. Records stay in your practice; Jev sees
+          de-identified summaries only.
+        </p>
+        <p className="mt-3 text-[12px] text-ink-3">Candidate counts are illustrative until Jev&apos;s results are in.</p>
+      </div>
+    </div>
+  );
+}
+
+/** Large card for the final grid. */
+/** `i` keys the illustrative counts (same as in step 2); `order` is the position in the grid. */
+function GridCard({ trial, i, order, shown }: { trial: WalkthroughTrial; i: number; order: number; shown: boolean }) {
+  const style = AREA_STYLES[trial.area];
+  return (
+    <div
+      className={cn(
+        STAGGER[order] ?? 'delay-0',
+        'relative h-44 overflow-hidden rounded-2xl border border-line-2 bg-surface p-4 shadow-[0_1px_2px_rgba(30,36,48,0.05)] transition-[opacity,translate,scale] duration-500 ease-out',
+        shown ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-95 opacity-0'
+      )}
+    >
+      <div className={cn('absolute inset-0 bg-linear-to-br opacity-70 [mask-image:linear-gradient(to_bottom,black,transparent)]', style.gradient)} />
+      <div className="relative flex h-full flex-col justify-between">
+        <span className="flex w-fit items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 text-[11px] font-semibold">
+          <AreaIcon area={trial.area} className={cn('size-3.5', style.text)} />
+          {AREA_LABELS[trial.area]}
+        </span>
+        <span>
+          <span className="block text-[16px] font-semibold leading-snug">{trial.indication}</span>
+          <span className="mt-1 block text-[12.5px]">
+            <CountsLine i={i} short />
+          </span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** Stagger for the grid cards, as full class names so Tailwind generates them. */
+const STAGGER = ['delay-0', 'delay-[90ms]', 'delay-[180ms]', 'delay-[270ms]'];
+
+function RecommendScene({ data, t }: { data: WalkthroughData; t: number }) {
+  // Ranked by candidates, most first, keeping each trial's index so its counts match step 2.
+  const ranked = data.trials
+    .filter((trial) => trial.hasProtocol)
+    .map((trial, i) => ({ trial, i }))
+    .sort((a, b) => mockCounts(b.i).candidates - mockCounts(a.i).candidates);
+  return (
+    <div className="mx-auto grid w-full max-w-5xl animate-modal-in grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-16">
+      <div className="grid grid-cols-2 gap-3">
+        {ranked.map(({ trial, i }, order) => (
+          <GridCard key={trial.nctId} trial={trial} i={i} order={order} shown={t > 120} />
         ))}
       </div>
-    </>
+      <div>
+        <h2 className="text-[34px] font-semibold leading-tight tracking-[-0.03em]">Recommended for your practice</h2>
+        <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-ink-2">
+          The trials your patients could fill, ranked by candidates. Open one to see who passed which criteria.
+        </p>
+        <p className="mt-3 text-[12px] text-ink-3">Candidate counts are illustrative until Jev&apos;s results are in.</p>
+      </div>
+    </div>
   );
 }
 
@@ -395,7 +362,7 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
         {!data && !error && <div className="mx-auto size-6 animate-spin rounded-full border-2 border-ink/20 border-t-ink" />}
         {/* While focused on, the fetch scene runs on the total clock so its stream doesn't restart. */}
         {data && scene.key === 'fetch' && <FetchScene data={data} t={FOCUS === 'fetch' ? elapsed : t} />}
-        {data && scene.key === 'match' && <MatchScene data={data} t={t} ms={scene.ms} />}
+        {data && scene.key === 'match' && <MatchScene data={data} t={t} />}
         {data && scene.key === 'recommend' && <RecommendScene data={data} t={t} />}
       </div>
     </div>
