@@ -2,7 +2,7 @@
 
 How the patient data is made, what's in it, and how the matching engine should use it. Follows `.claude/AGENTS.MD` (section 5: privacy; section 6: three-state criteria; section 7: data).
 
-**Decision (2026-10-10):** the demo runs on synthetic patients from **Synthea**. This replaces the earlier plan to use the CDISC SDTM pilot dataset, which had only 254 elderly Alzheimer's patients, MedDRA codes, mostly uncoded medications, no practices, dates fixed to 2012–2014, and an educational-only license.
+**Decision (2026-10-10):** the demo runs on synthetic patients from **Synthea**.
 
 Every number below was checked against `data/synthea-nj.json` on 2026-10-10.
 

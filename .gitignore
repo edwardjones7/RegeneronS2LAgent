@@ -4,9 +4,6 @@
 !.env.example
 node_modules/
 
-# CDISC pilot data: educational license, fetched at setup, never committed.
-# See .claude/context/sample-ehr-data.md.
-/data/cdisc/
 # Supabase CLI local state (migrations in supabase/migrations/ are committed)
 /supabase/.temp/
 /supabase/.branches/

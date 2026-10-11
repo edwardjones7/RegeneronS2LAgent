@@ -33,4 +33,4 @@ Checks: `npm run typecheck` and `npm run lint` from `site/`.
 
 ## License
 
-Code: MIT (`LICENSE`). Third-party datasets keep their own licenses and are not committed.
+Code: MIT (`LICENSE`). Patient data is synthetic, generated with Synthea (Apache-2.0); no real people.
