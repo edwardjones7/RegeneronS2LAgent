@@ -5,6 +5,9 @@
 // constants, no runtime side effects.
 
 /** Bump when the prompt or the schema changes. Part of the skip-if-unchanged key. */
+// Kept at 3 on purpose: the stored criteria for all 147 trials are current (with Claude-authored
+// corrections on top), and bumping this would mark every trial stale and re-run Gemini on all of
+// them. Prompt improvements apply when a trial's registry text changes and it is re-processed.
 export const PROMPT_VERSION = 3;
 /** Version of the stored document shape. */
 export const SCHEMA_VERSION = 1;
@@ -91,7 +94,19 @@ export type StructuredCriterion = {
   group: string | null;
   original_text: string;
   code_check: CodeCheck | null;
+  /**
+   * What `code_check` covers. Absent or 'decides': the check is the whole criterion and
+   * code settles it. 'precondition': the criterion is "number AND clinical fact" ("BMI ≥27
+   * with a weight-related comorbidity"); the check covers the number and must hold, and
+   * `question` asks Jev only the clinical rest. Check false: the criterion's condition is
+   * false, no Jev. Check true: Jev's answer stands. Value missing: Jev still asks, and only
+   * an answer that the rest is false can settle it; anything else is unknown.
+   */
+  code_check_role?: CodeCheckRole;
 };
+
+export const CODE_CHECK_ROLES = ['decides', 'precondition'] as const;
+export type CodeCheckRole = (typeof CODE_CHECK_ROLES)[number];
 
 export type TrialCriteria = {
   schema_version: number;
@@ -126,6 +141,7 @@ export const LLM_JSON_SCHEMA = {
         additionalProperties: false,
         required: [
           'id', 'kind', 'class', 'applies_to', 'question', 'sections', 'group', 'original_text', 'code_check',
+          'code_check_role',
         ],
         properties: {
           id: { type: 'string', description: "'inc_1', 'inc_2', ... then 'exc_1', ..." },
@@ -165,6 +181,7 @@ export const LLM_JSON_SCHEMA = {
               max_age_months: nullable('number'),
             },
           },
+          code_check_role: nullable('string', { enum: [...CODE_CHECK_ROLES, null] }),
         },
       },
     },

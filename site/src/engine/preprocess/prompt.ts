@@ -38,6 +38,8 @@ Rules:
    - sex: {type:"sex", sex}.
    - lab: {type:"lab", field from the list above, gte/gt/lte/lt bounds in the record's unit for that field (convert the registry's threshold if needed, e.g. FEV1/FVC < 0.70 is lt 70), unit, max_age_months}. Only for an absolute threshold on one listed field; never for "x ULN" thresholds or fields not in the list. Body measurements (bmi, weight_kg, blood pressure) required "at screening" are still record items with a lab check on the latest value and max_age_months 24, because the record predicts them. Blood tests and biomarkers required "at screening" are screening items.
    Set every field that a type does not use to null.
+   code_check_role: "decides" when the code_check is the whole criterion; null when code_check is null.
+   "precondition" when one item needs a number AND a clinical fact together and splitting it would change its meaning: an alternative in an OR group ("BMI ≥27 with at least one weight-related comorbidity"), or an exclusion that applies only when both hold ("FEV1/FVC <0.7 and FEV1 <70% predicted"). Put the number in code_check and ask the question about the clinical rest only ("Does the patient have hypertension, dyslipidemia, prediabetes, ...?"); the sections are the ones the rest needs. A plain inclusion outside any group is split instead (rule 5). Never use "precondition" on an inclusion that has applies_to.condition and no group.
 12. Do not invent criteria, do not drop any, and do not add requirements the text does not state.`;
 
 export function userPrompt(t: PromptTrial): string {

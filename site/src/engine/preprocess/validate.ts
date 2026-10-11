@@ -132,7 +132,7 @@ export function validateCriteria(output: unknown, source = ''): Validation {
     const sections = Array.isArray(raw.sections) ? raw.sections : [];
     const unknown = sections.filter((s) => !SECTIONS.includes(s as Section));
     if (unknown.length) warnings.push(`${where}: dropped unknown sections ${unknown.join(', ')}`);
-    const codeCheck = cls === 'record' ? parseCodeCheck(raw.code_check, where, warnings) : null;
+    let codeCheck = cls === 'record' ? parseCodeCheck(raw.code_check, where, warnings) : null;
     let clean = [...new Set(sections.filter((s): s is Section => SECTIONS.includes(s as Section)))];
     // Age and sex are always in the state, so an age or sex check needs no section.
     const selfContained = codeCheck?.type === 'age' || codeCheck?.type === 'sex';
@@ -144,17 +144,38 @@ export function validateCriteria(output: unknown, source = ''): Validation {
 
     const appliesTo = parseAppliesTo(raw.applies_to, where, errors);
     if (cls === 'subgroup' && !appliesTo) errors.push(`${where}: subgroup item without applies_to`);
+    const group = str(raw.group) ?? null;
+
+    // A precondition's question asks only the clinical rest of the criterion. Where code
+    // can't hold up its end, ask Jev the registry wording instead, so the number isn't lost.
+    let q = question;
+    let precondition = cls === 'record' && raw.code_check_role === 'precondition';
+    if (precondition && !codeCheck) {
+      warnings.push(`${where}: precondition with no usable code_check; asking the registry wording`);
+      precondition = false;
+      q = original;
+      clean = [...SECTIONS]; // the number's section may not be among the rest's
+    } else if (precondition && kind === 'inclusion' && appliesTo?.condition && !group) {
+      // Outside the gate this inclusion passes whatever the number, so a failed check settles nothing.
+      warnings.push(`${where}: precondition on a gated inclusion outside a group; asking the registry wording`);
+      precondition = false;
+      codeCheck = null;
+      q = original;
+      clean = [...SECTIONS];
+    }
 
     criteria.push({
       id: str(raw.id) ?? '',
       kind,
       class: cls,
       applies_to: appliesTo,
-      question,
+      question: q,
       sections: clean,
-      group: str(raw.group) ?? null,
+      group,
       original_text: original,
       code_check: codeCheck,
+      // Stored only when set, so documents from before the field read as 'decides'.
+      ...(precondition ? { code_check_role: 'precondition' as const } : {}),
     });
   });
 

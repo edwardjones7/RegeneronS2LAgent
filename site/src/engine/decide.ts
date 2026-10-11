@@ -49,6 +49,10 @@ export function confidenceOf(results: CriterionResult[], questionText: (id: stri
     min_confidence: jev.length ? +Math.min(...jev.map(top)).toFixed(3) : null,
     uncertain_criteria: jev
       .filter((r) => top(r) < CONFIDENT)
-      .map((r) => `${r.id} ${r.answer} ${r.probabilities[r.answer].toFixed(2)}: ${questionText(r.id)}`),
+      .map((r) => {
+        // Show Jev's actual lean, not the answer after the reject threshold demoted it.
+        const lean = (['accept', 'reject', 'unknown'] as const).reduce((x, y) => (r.probabilities[y] > r.probabilities[x] ? y : x));
+        return `${r.id} leans ${lean} ${r.probabilities[lean].toFixed(2)}: ${questionText(r.id)}`;
+      }),
   };
 }

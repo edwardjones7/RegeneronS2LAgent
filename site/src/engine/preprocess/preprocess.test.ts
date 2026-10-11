@@ -11,7 +11,7 @@ import { geminiComplete } from '../../lib/gemini.ts';
 import { fallbackCriteria } from './fallback.ts';
 import { criteriaVersion, isCurrent, preprocessTrial, type Complete, type PreprocessTrial } from './preprocess.ts';
 import { LLM_JSON_SCHEMA, PROMPT_VERSION, type TrialCriteria } from './schema.ts';
-import { combine, evaluateCodeCheck, filterState, planPatient, structuredQuestion, type PatientFacts } from './toJev.ts';
+import { combine, evaluateCodeCheck, filterState, finalAnswer, planPatient, structuredQuestion, type PatientFacts } from './toJev.ts';
 import { unitMatches, validateCriteria } from './validate.ts';
 import { criterionQuestion } from '../questions.ts';
 import { splitEligibility } from '../eligibility.ts';
@@ -424,5 +424,131 @@ describe('gated alternatives', () => {
     assert.match(inGroup.criteria.reject, /not in the group/);
     const alone = structuredQuestion({ ...base, group: null });
     assert.match(alone.criteria.accept, /not in the group/);
+  });
+});
+
+describe('number AND clinical fact: a code precondition plus a Jev question', async () => {
+  const obesity = await structured(OBESITY);
+  const inc2 = obesity.criteria.find((c) => c.id === 'inc_2')!;
+  const bmi = (value: number) => ({ bmi: { value, unit: 'kg/m2', date: '2026-05-01' } });
+  /** Jev stand-in that answers every question with `a`, run through finalAnswer like scripts/match.ts. */
+  const run = (tc: TrialCriteria, f: PatientFacts, a: Answer) => {
+    const plan = planPatient(tc, f);
+    const answers: Record<string, Answer> = { ...plan.decided };
+    for (const call of plan.jevCalls) for (const id of Object.keys(call.questions)) {
+      answers[id] = finalAnswer(tc.criteria.find((c) => c.id === id)!, plan, a);
+    }
+    return { plan, answers, bucket: combine(tc, answers, plan.review).bucket };
+  };
+
+  it('validation keeps the precondition and the question asks only the clinical rest', () => {
+    assert.equal(inc2.code_check_role, 'precondition');
+    assert.deepEqual(inc2.code_check, { type: 'lab', field: 'bmi', gte: 27, unit: 'kg/m2', max_age_months: 24 });
+    assert.doesNotMatch(inc2.question, /BMI/);
+    assert.deepEqual(inc2.sections, ['conditions']);
+    // 'decides' is the default and isn't stored; documents from before the field read the same.
+    assert.equal(obesity.criteria.find((c) => c.id === 'inc_1')!.code_check_role, undefined);
+  });
+
+  it('BMI 28 with no comorbidity: Jev says no, so the patient is not a match (the live false candidates)', () => {
+    const r = run(obesity, facts(40, 'F', { observations: bmi(28) }), 'reject');
+    assert.ok('inc_2' in r.plan.jevCalls[0].questions);
+    assert.equal(r.answers.inc_1, 'reject');
+    assert.equal(r.answers.inc_2, 'reject');
+    assert.equal(r.bucket, 'not_a_match');
+  });
+
+  it('BMI 28 with hypertension: code passes the number, Jev the comorbidity, candidate', () => {
+    const r = run(obesity, facts(40, 'F', { conditions: [['59621000', '2020-01-01', null]], observations: bmi(28) }), 'accept');
+    assert.equal(r.answers.inc_2, 'accept');
+    assert.equal(r.bucket, 'candidate');
+  });
+
+  it('BMI 26: the precondition fails in code and inc_2 is never sent to Jev', () => {
+    const r = run(obesity, facts(40, 'F', { conditions: [['59621000', '2020-01-01', null]], observations: bmi(26) }), 'accept');
+    assert.equal(r.plan.decided.inc_2, 'reject');
+    assert.equal(r.plan.decidedBy.inc_2, 'code');
+    assert.ok(!('inc_2' in r.plan.jevCalls[0].questions));
+    assert.equal(r.bucket, 'not_a_match');
+  });
+
+  it('no BMI on record: a Jev yes is only unknown, a Jev no still settles it', () => {
+    const f = facts(40, 'F', { conditions: [['59621000', '2020-01-01', null]] });
+    const yes = run(obesity, f, 'accept');
+    assert.deepEqual(yes.plan.preconditionUnknown, ['inc_2']);
+    assert.equal(yes.answers.inc_2, 'unknown');
+    assert.equal(yes.bucket, 'chart_review');
+    assert.equal(run(obesity, f, 'reject').answers.inc_2, 'reject');
+    // A stale BMI is no better than none.
+    const old = run(obesity, facts(40, 'F', { observations: { bmi: { value: 28, unit: 'kg/m2', date: '2023-01-01' } } }), 'accept');
+    assert.equal(old.answers.inc_2, 'unknown');
+  });
+
+  const exclusion = (): TrialCriteria => ({
+    ...obesity,
+    criteria: [{
+      id: 'exc_1', kind: 'exclusion', class: 'record', applies_to: null, group: null,
+      question: 'Is FEV1 below 70% of predicted?', sections: ['labs'],
+      original_text: 'Obstructive lung disease defined as FEV1/FVC <0.7 and FEV1 <70% of the predicted value',
+      code_check: { type: 'lab', field: 'fev1_fvc', lt: 70, unit: '%', max_age_months: 24 },
+      code_check_role: 'precondition',
+    }],
+  });
+  const ratio = (value: number) => ({ fev1_fvc: { value, unit: '%', date: '2026-05-01' } });
+
+  it('an exclusion precondition: a normal ratio clears it in code, a low ratio leaves it to Jev', () => {
+    const normal = run(exclusion(), facts(50, 'M', { observations: ratio(78) }), 'reject');
+    assert.equal(normal.plan.decided.exc_1, 'accept');
+    assert.equal(normal.plan.jevCalls.length, 0);
+    assert.equal(normal.bucket, 'candidate');
+    assert.equal(run(exclusion(), facts(50, 'M', { observations: ratio(60) }), 'reject').bucket, 'not_a_match');
+    assert.equal(run(exclusion(), facts(50, 'M', { observations: ratio(60) }), 'accept').bucket, 'candidate');
+  });
+
+  it('an exclusion precondition with no ratio on record: only a Jev "absent" clears it', () => {
+    assert.equal(run(exclusion(), facts(50, 'M', {}), 'accept').answers.exc_1, 'accept');
+    assert.equal(run(exclusion(), facts(50, 'M', {}), 'reject').answers.exc_1, 'unknown');
+  });
+
+  it('a gated alternative in an OR group fails in code when its number fails', () => {
+    const tc: TrialCriteria = {
+      ...obesity,
+      criteria: [
+        { ...inc2, id: 'inc_1', question: 'Is the patient East Asian?', applies_to: { condition: 'East Asian ancestry', description: 'East Asians' },
+          code_check: { type: 'lab', field: 'bmi', gte: 23, lte: 40, unit: 'kg/m2', max_age_months: 24 } },
+        { ...obesity.criteria[0], id: 'inc_2', code_check: { type: 'lab', field: 'bmi', gte: 27, lte: 40, unit: 'kg/m2', max_age_months: 24 } },
+      ],
+    };
+    const low = run(tc, facts(40, 'F', { observations: bmi(21) }), 'accept');
+    assert.equal(low.plan.decided.inc_1, 'reject');
+    assert.equal(low.bucket, 'not_a_match');
+    // BMI 25: only the East Asian alternative can pass, and the record can't say, so chart review.
+    assert.equal(run(tc, facts(40, 'F', { observations: bmi(25) }), 'unknown').bucket, 'chart_review');
+  });
+
+  it('validation falls back to the registry wording when the precondition check is unusable', () => {
+    const items = structuredClone(OUTPUT.NCT07685808.criteria);
+    items[1].code_check.unit = 'lb/in2'; // not the record unit: check dropped
+    const v = validateCriteria({ criteria: items });
+    assert.ok(v.ok);
+    if (!v.ok) return;
+    assert.equal(v.criteria[1].code_check, null);
+    assert.equal(v.criteria[1].code_check_role, undefined);
+    assert.equal(v.criteria[1].question, items[1].original_text);
+    assert.equal(v.criteria[1].sections.length, 6);
+    assert.match(v.warnings.join(), /precondition with no usable code_check/);
+  });
+
+  it('validation refuses a precondition on a gated inclusion outside a group', () => {
+    const items = structuredClone(OUTPUT.NCT07685808.criteria);
+    items[1].group = null;
+    items[0].group = null;
+    items[1].applies_to = { sex: null, min_age: null, max_age: null, condition: 'adults with obesity', description: 'x' };
+    const v = validateCriteria({ criteria: items });
+    assert.ok(v.ok);
+    if (!v.ok) return;
+    assert.equal(v.criteria[1].code_check, null);
+    assert.equal(v.criteria[1].code_check_role, undefined);
+    assert.equal(v.criteria[1].question, items[1].original_text);
   });
 });
