@@ -101,7 +101,7 @@ def test_nothing_about_the_study_until_the_date_of_birth_matches(s):
     assert "verify_identity" in service.tool_get_open_slots(s, lead)
     assert "doesn't match" in service.tool_verify_identity(s, lead, "1900-01-01")
     out = service.tool_verify_identity(s, lead, lead.birth_date)
-    assert out.startswith("VERIFIED") and "olatorepatide" in out and "weight_change" in out
+    assert out.startswith("VERIFIED") and "olatorepatide" in out and "get_open_slots" in out
     assert lead.identity_verified
 
 
@@ -119,49 +119,16 @@ def test_date_of_birth_parsing(said):
     assert outreach.parse_date_of_birth(said) == date(1961, 11, 29)
 
 
-def test_verified_patient_answers_then_books(s):
+def test_verified_patient_is_booked_with_no_phone_questions(s):
     accept(s)
     lead = first_candidate(s)
     service.tool_verify_identity(s, lead, lead.birth_date)
-    assert "Ask next" in service.tool_record_answer(s, lead, "weight_change", "no")
-    assert "get_open_slots" in service.tool_record_answer(s, lead, "thyroid_cancer_history", "no")
     offer = service.tool_get_open_slots(s, lead)
     slot_id = int(offer.split("slot_id ")[1].split(":")[0])
     assert "Booked" in service.tool_book_visit(s, lead, slot_id)
     assert lead.status == LeadStatus.BOOKED and lead.next_attempt_at is None
-
-
-def test_answers_never_stop_booking_they_become_staff_notes(s):
-    accept(s)
-    lead = first_candidate(s)
-    service.tool_verify_identity(s, lead, lead.birth_date)
-    out = service.tool_record_answer(s, lead, "weight_change", "yes, gained about 15 pounds")
-    assert "Ask next" in out and "qualif" not in out.lower()
-    out = service.tool_record_answer(s, lead, "thyroid_cancer_history", "yes, my uncle")
-    assert "get_open_slots" in out and "eligib" in out.lower()  # told NOT to comment on eligibility
-    notes = [f["detail"] for f in lead.flags if f["type"] == "screening_note"]
-    assert len(notes) == 2
-    slot_id = int(service.tool_get_open_slots(s, lead).split("slot_id ")[1].split(":")[0])
-    assert "Booked" in service.tool_book_visit(s, lead, slot_id) and lead.status == LeadStatus.BOOKED
-
-
-def test_unclear_answer_is_asked_once_more_then_noted(s):
-    accept(s)
-    lead = first_candidate(s)
-    service.tool_verify_identity(s, lead, lead.birth_date)
-    assert "ask again" in service.tool_record_answer(s, lead, "weight_change", "hmm, up I guess")
-    assert "Ask next" in service.tool_record_answer(s, lead, "weight_change", "I really don't know")
-    assert any(f["type"] == "screening_note" for f in lead.flags)
-
-
-def test_no_booking_before_every_question_is_asked(s):
-    accept(s)
-    lead = first_candidate(s)
-    service.tool_verify_identity(s, lead, lead.birth_date)
-    assert "ask this first" in service.tool_get_open_slots(s, lead)
-
-
-# ---------------------------------------------------------------- the missed-call sequence
+    text = next(e for e in lead.events if e.type == "sms_sent" and e.detail.get("to") == "patient").detail["body"]
+    assert "booked" in text and "Dr. Rivera" in text  # the booking confirmation
 
 
 def _missed(s, lead, voicemail=True):
@@ -224,8 +191,6 @@ def test_callback_after_the_text_books_on_the_phone(s):
     outreach.start_inbound_call(s, lead, "CA_back")
     assert lead.status == LeadStatus.CALLING and lead.next_attempt_at is None  # pending retry cancelled
     service.tool_verify_identity(s, lead, lead.birth_date)
-    for q in ("weight_change", "thyroid_cancer_history"):
-        service.tool_record_answer(s, lead, q, "no")
     slot_id = int(service.tool_get_open_slots(s, lead).split("slot_id ")[1].split(":")[0])
     assert "Booked" in service.tool_book_visit(s, lead, slot_id) and lead.status == LeadStatus.BOOKED
 
@@ -394,3 +359,10 @@ def test_hanging_up_before_identity_counts_as_a_missed_call(s):
     service.call_ended(s, lead.calls[-1], transcript=[{"role": "user", "message": "Who is this?"}])
     assert lead.status == LeadStatus.NO_ANSWER and lead.next_attempt_at
     assert any(e.type == "callback_requested" for e in lead.events)
+
+
+def test_practice_scripts_ask_no_phone_questions():
+    from app.campaigns import file_campaigns
+
+    practice = [c for c in file_campaigns().values() if c.mode == "practice"]
+    assert practice and all(not c.prescreen_questions for c in practice)

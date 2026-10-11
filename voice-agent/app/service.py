@@ -480,15 +480,17 @@ def _study_briefing(s: Session, lead: Lead) -> str:
     campaign = campaign_for(lead)
     facts = "\n".join(f"- {f.fact}" for f in campaign.approved_facts)
     q = practice_next_question(lead)
-    if q:
-        nxt = f"When they're interested, ask: {_question_line(q)}"
-    else:
-        nxt = "When they're interested, call get_open_slots and offer two or three times for a screening visit."
-    touch = f"Personal line (say it naturally): {lead.personal_touch}\n" if lead.personal_touch else ""
+    nxt = (
+        f"If they'd like to come in, first ask: {_question_line(q)}"
+        if q
+        else "If they'd like to come in, call get_open_slots and offer two times."
+    )
+    touch = f"Personal line: {lead.personal_touch}\n" if lead.personal_touch else ""
     return (
-        f"{touch}Study one-liner: {campaign.one_liner}\n"
-        f"APPROVED FACTS (the only study information you may share; ClinicalTrials.gov {campaign.nct_id}):\n{facts}\n"
-        f"{nxt}"
+        f"{touch}One-liner: {campaign.one_liner}\n"
+        "Pitch in one or two sentences, then ask if they'd like to come in for a screening visit. "
+        f"{nxt}\n"
+        f"FACTS, only if they ask (the only study information you may share; ClinicalTrials.gov {campaign.nct_id}):\n{facts}"
     )
 
 

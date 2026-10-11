@@ -27,4 +27,6 @@ approved_facts:
   - fact: Taking part is completely voluntary, and they can stop at any time.
     source: demo
 
+# No phone questions: the practice's records already pre-screened these patients, and the
+# screening visit confirms anything the chart can't (protocols/*.json `review` criteria).
 prescreen_questions: []

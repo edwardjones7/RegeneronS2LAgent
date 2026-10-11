@@ -44,17 +44,6 @@ approved_facts:
   - fact: Taking part is completely voluntary, and they can stop at any time.
     source: demo
 
-# Only what the chart can't answer. The practice's records already covered the rest.
-prescreen_questions:
-  - id: weight_change
-    kind: yes_no
-    role: disqualify_if_yes
-    unsure_flags: true
-    ask: "In about the last three months, has your weight gone up or down by more than eleven pounds, that's five kilograms?"
-    criterion: "Exclusion: body weight change of more than 5 kg in about 3 months before screening"
-  - id: thyroid_cancer_history
-    kind: yes_no
-    role: disqualify_if_yes
-    unsure_flags: true
-    ask: "And have you, or has anyone in your family, had a rare thyroid cancer called medullary thyroid cancer, or a condition called MEN 2?"
-    criterion: "Exclusion: personal or family history of medullary thyroid carcinoma or multiple endocrine neoplasia type 2"
+# No phone questions: the practice's records already pre-screened these patients, and the
+# screening visit confirms anything the chart can't (protocols/*.json `review` criteria).
+prescreen_questions: []

@@ -24,7 +24,8 @@ from app.prompt import PRACTICE_VOICEMAIL, practice_first_message, practice_syst
 # Keys live in the repo-root .env (shared with site/); fall back to voice-agent/.env.
 STATE_FILE = (REPO if (REPO / ".env").exists() else ROOT) / ".elevenlabs.json"
 ENV_FILE = REPO / ".env" if (REPO / ".env").exists() else ROOT / ".env"
-DEFAULT_LLM = "claude-sonnet-5-5"
+# Cheap, fast and reliable with tools: about 5-6x cheaper per minute than Claude Sonnet on ElevenLabs.
+DEFAULT_LLM = "gpt-4.1-mini"
 DEFAULT_VOICE = "cgSgspJ2msm6clMCkdW9"  # "Jessica": warm, conversational stock voice
 
 
@@ -286,8 +287,9 @@ def main():
                                       for lang, t in campaign.translations.items()}}
                 if campaign.translations else {}
             ),
-            "turn": {"turn_timeout": 7, "turn_eagerness": "normal"},
-            "conversation": {"max_duration_seconds": 900},
+            # Credit savers: hang up after 20s of silence, and no call runs past 5 minutes.
+            "turn": {"turn_timeout": 7, "turn_eagerness": "normal", "silence_end_call_timeout": 20},
+            "conversation": {"max_duration_seconds": 300},
         },
         # text_only lets scripts/text_call.py test the real agent + tools without a phone.
         # Per-call overrides: each campaign's prompt/first message ride on the call (one agent, many

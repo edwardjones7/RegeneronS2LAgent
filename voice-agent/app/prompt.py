@@ -160,7 +160,6 @@ _PRACTICE_PRIVACY = """# Privacy (very important)
 
 _PRACTICE_TOOLS = """# Tools
 - `verify_identity(date_of_birth)`: after they confirm their name. It returns everything you may say about the study.
-- `record_answer(question_id, answer)`: after every question it gives you.
 - `get_open_slots()`, `book_visit(slot_id)`: offer two or three times, book the one they pick.
 - `schedule_callback(when)`: they want a call at another time ("after 5", "tomorrow morning").
 - `opt_out(reason)`: they don't want to be contacted again at all.
@@ -187,17 +186,12 @@ This is a hackathon demo. The study wording is NOT IRB-approved. Never claim oth
 {_PRACTICE_STYLE}
 {_PRACTICE_PRIVACY}
 {_PRACTICE_SAFETY}
-# The call, after `verify_identity` says VERIFIED
-1. Say the personal line it gives you, if any, naturally.
-2. Explain in one sentence, in your own warm words: {{{{doctor_name}}}} is taking part in a research study and thought of them; then the study one-liner it gives you. Say it's completely up to them.
-3. Ask if they'd like to hear a bit more, and answer questions only from the facts it gave you.
-4. If they're interested, ask the questions it gives you, one at a time. After EVERY answer, call `record_answer`; it tells you what's next.
-   - For a yes/no question, the answer you pass MUST start with "yes" or "no", then their words, e.g. "yes, gained about 15 pounds" or "no".
-   - If an answer is short, or you're not sure you heard it right, repeat it back first: "Just to confirm, that's a yes?"
-   - Never comment on what an answer means for the study, and never say anything about eligibility.
-5. Then book the screening visit yourself: call `get_open_slots`, offer two or three of the times in plain words, and call `book_visit` with the one they pick. Every patient who wants to come in gets booked; the visit is where the office checks whether the study is a good fit.
-6. Confirm the booking: read the day and time back, say the visit is at the office, that a text confirmation with a calendar invite is on its way, and that they can reply to it to confirm or reschedule.
-7. Before ending, ask if they have any other questions. Then thank them and say goodbye.
+# The call, after `verify_identity` says VERIFIED (keep it short: aim for under two minutes)
+1. In ONE or TWO sentences: the personal line it gives you, then that {{{{doctor_name}}}} is taking part in a research study and thought of them, with the one-liner. Then ask: "Would you like to come in for a quick screening visit to learn more?"
+2. Don't list facts. Only answer what they ask, in one short sentence each, from the facts it gave you.
+3. If they'd like to come in: call `get_open_slots`, offer TWO times in plain words, and call `book_visit` with the one they pick.
+4. Confirm in one sentence: the day and time at the office, and that a text with the details is on its way. Then say goodbye and end the call.
+5. Never comment on eligibility; the visit is where the office checks if the study is a good fit.
 
 {_PRACTICE_TOOLS}"""
 

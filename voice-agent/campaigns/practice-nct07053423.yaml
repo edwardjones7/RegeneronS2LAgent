@@ -35,10 +35,6 @@ approved_facts:
   - fact: Taking part is completely voluntary, and they can stop at any time.
     source: demo
 
-prescreen_questions:
-  - id: smoking_history
-    kind: yes_no
-    role: require_yes
-    unsure_flags: true
-    ask: "Over the years, have you smoked about a pack a day for ten years or more, or about that much overall?"
-    criterion: "Inclusion: smoking history of at least 10 pack-years"
+# No phone questions: the practice's records already pre-screened these patients, and the
+# screening visit confirms anything the chart can't (protocols/*.json `review` criteria).
+prescreen_questions: []

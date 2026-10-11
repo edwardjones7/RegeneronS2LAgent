@@ -32,9 +32,6 @@ approved_facts:
   - fact: Taking part is completely voluntary, and they can stop at any time.
     source: demo
 
-prescreen_questions:
-  - id: current_smoker
-    kind: yes_no
-    role: disqualify_if_yes
-    ask: "Do you smoke right now, or did you quit within the last six months?"
-    criterion: "Exclusion: current smoker, or quit less than 6 months ago"
+# No phone questions: the practice's records already pre-screened these patients, and the
+# screening visit confirms anything the chart can't (protocols/*.json `review` criteria).
+prescreen_questions: []
