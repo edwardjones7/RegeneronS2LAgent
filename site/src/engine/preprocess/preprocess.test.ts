@@ -12,7 +12,7 @@ import { fallbackCriteria } from './fallback.ts';
 import { criteriaVersion, isCurrent, preprocessTrial, type Complete, type PreprocessTrial } from './preprocess.ts';
 import { LLM_JSON_SCHEMA, PROMPT_VERSION, type TrialCriteria } from './schema.ts';
 import { combine, evaluateCodeCheck, filterState, planPatient, structuredQuestion, type PatientFacts } from './toJev.ts';
-import { validateCriteria } from './validate.ts';
+import { unitMatches, validateCriteria } from './validate.ts';
 import { criterionQuestion } from '../questions.ts';
 import { splitEligibility } from '../eligibility.ts';
 
@@ -362,5 +362,52 @@ describe('Gemini client (mocked fetch)', () => {
     assert.equal(gc.responseMimeType, 'application/json');
     assert.deepEqual(gc.responseJsonSchema, LLM_JSON_SCHEMA);
     assert.equal(gc.thinkingConfig.thinkingLevel, 'minimal');
+  });
+});
+
+describe('group logic', () => {
+  const crit = (id: string, kind: 'inclusion' | 'exclusion', group: string | null): TrialCriteria['criteria'][number] => ({
+    id, kind, class: 'record', applies_to: null, question: id, sections: ['conditions'], group, original_text: id, code_check: null,
+  });
+  const tc = (criteria: TrialCriteria['criteria']): TrialCriteria => ({
+    schema_version: 1, nct_id: 'NCT0', source_version: null, prompt_version: 1, model: 'm', status: 'llm',
+    generated_at: '', warnings: [], criteria,
+  });
+
+  it('an exclusion group rejects when any member applies', () => {
+    const t = tc([crit('exc_1', 'exclusion', 'g1'), crit('exc_2', 'exclusion', 'g1')]);
+    assert.equal(combine(t, { exc_1: 'accept', exc_2: 'reject' }).bucket, 'not_a_match');
+    assert.equal(combine(t, { exc_1: 'accept', exc_2: 'accept' }).bucket, 'candidate');
+    assert.equal(combine(t, { exc_1: 'accept', exc_2: 'unknown' }).bucket, 'chart_review');
+  });
+
+  it('an inclusion group passes when any member passes', () => {
+    const t = tc([crit('inc_1', 'inclusion', 'g1'), crit('inc_2', 'inclusion', 'g1')]);
+    assert.equal(combine(t, { inc_1: 'reject', inc_2: 'accept' }).bucket, 'candidate');
+    assert.equal(combine(t, { inc_1: 'reject', inc_2: 'reject' }).bucket, 'not_a_match');
+  });
+
+  it('a member that does not apply to the patient cannot pass the group for them', () => {
+    const t = tc([crit('inc_1', 'inclusion', 'g1'), crit('inc_2', 'inclusion', 'g1')]);
+    // inc_2 is for adolescents; for an adult it is not applicable, so inc_1 alone decides.
+    assert.equal(combine(t, { inc_1: 'reject', inc_2: 'accept' }, [], ['inc_2']).bucket, 'not_a_match');
+    assert.equal(combine(t, { inc_1: 'accept', inc_2: 'accept' }, [], ['inc_2']).bucket, 'candidate');
+  });
+});
+
+describe('lab units', () => {
+  it('drops a lab check whose unit is not the record unit', () => {
+    const items = structuredClone(OUTPUT.NCT07685808.criteria);
+    items[0].code_check = { ...items[0].code_check, field: 'eosinophils', unit: 'cells/uL', gte: 300 };
+    const v = validateCriteria({ criteria: items });
+    assert.ok(v.ok);
+    if (v.ok) assert.equal(v.criteria[0].code_check, null);
+  });
+
+  it('accepts equivalent units', () => {
+    assert.ok(unitMatches('eosinophils', '10^9/L'));
+    assert.ok(unitMatches('bmi', 'kg/m^2'));
+    assert.ok(unitMatches('fev1_fvc', 'ratio'));
+    assert.ok(!unitMatches('hba1c', 'mmol/mol'));
   });
 });

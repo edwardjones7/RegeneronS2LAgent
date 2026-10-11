@@ -110,8 +110,9 @@ async function loadTrials(ids: string[] | undefined): Promise<LoadedTrial[]> {
     const filter = ids ? `&nct_id=in.(${ids.join(',')})` : '';
     try {
       return await supabaseGet<LoadedTrial>(`trials?select=${TRIAL_COLS},criteria_questions${filter}`);
-    } catch {
-      // Before migration 0002 there is no criteria_questions column.
+    } catch (err) {
+      // Before migration 0002 there is no criteria_questions column (Postgres 42703); anything else is real.
+      if (!String(err).includes('42703')) throw err;
       return supabaseGet<LoadedTrial>(`trials?select=${TRIAL_COLS}${filter}`);
     }
   }
@@ -171,27 +172,42 @@ let calls = 0;
 let estTokens = 0;
 const latencies: number[] = [];
 
+let failed = 0;
+
 async function jev(state: unknown, questions: Record<string, unknown>): Promise<JevResponse | null> {
-  estTokens += Math.ceil(JSON.stringify({ state, questions }).length / 2.5); // chars per token, calibrated on a real run
+  const tokens = Math.ceil(JSON.stringify({ state, questions }).length / 2.5); // chars per token, calibrated on a real run
+  const estimate = tokens * JEV_PRICE_PER_TOKEN;
+  estTokens += tokens;
   calls++;
   if (dryRun) return null;
-  if (spent >= maxCost) {
+  // Reserve the estimate before calling, so calls in flight can't overshoot the cap.
+  if (spent + estimate > maxCost) {
     budgetHit = true; // stop calling, keep what we have, still write the report
     calls--;
     return null;
   }
+  spent += estimate;
   const t0 = performance.now();
   const res = await askJev(apiKey, state, questions);
   latencies.push(performance.now() - t0);
-  spent += res.usage?.cost ?? 0;
+  spent += (res.usage?.cost ?? estimate) - estimate;
   return res;
 }
 
+/** Runs fn over items, n at a time. One item failing is logged and counted; the run goes on. */
 async function pool<T>(items: T[], n: number, fn: (item: T) => Promise<void>) {
   let next = 0;
   await Promise.all(
     Array.from({ length: Math.min(n, items.length) }, async () => {
-      while (next < items.length) await fn(items[next++]);
+      while (next < items.length) {
+        const item = items[next++];
+        try {
+          await fn(item);
+        } catch (err) {
+          failed++;
+          console.error(`pair failed, left out of this run: ${String(err).slice(0, 300)}`);
+        }
+      }
     }),
   );
 }
@@ -218,14 +234,7 @@ const structuredFor = (t: LoadedTrial): TrialCriteria | null => {
 };
 const structuredByTrial = new Map(trials.map((t) => [t.nct_id, structuredFor(t)]));
 
-// Cache key per pair: what Jev would see plus how the answers are read. Same hash = same result.
 const sha = (x: string) => createHash('sha256').update(x).digest('hex').slice(0, 32);
-const criteriaKey = new Map(trials.map((t) => {
-  const tc = structuredByTrial.get(t.nct_id);
-  return [t.nct_id, tc ? `${tc.source_version}/p${tc.prompt_version}/${tc.model}` : `naive/${sha(t.eligibility_criteria ?? '')}`];
-}));
-const inputHash = (p: Patient, t: Trial) =>
-  sha(JSON.stringify([buildState(p, codes, asOf), criteriaKey.get(t.nct_id), JEV_MODEL, REJECT_THRESHOLD, CONFIDENT, order]));
 const conditionMap: TrialConditionMap = JSON.parse(readFileSync(resolve(REPO, 'data/conditions/trial_condition_codes.json'), 'utf8'));
 
 // 1. Demographics.
@@ -241,87 +250,116 @@ const matched = pairs.flatMap(({ p, t }) => {
 });
 const afterCondition = matched.length;
 
-// With --write, skip pairs whose stored result was computed from the same inputs.
-const hashes = new Map(matched.map(({ p, t }) => [`${p.id}|${t.nct_id}`, inputHash(p, t)]));
-let todo = matched;
+// 3. Plan each pair in code: what code settles, what goes to Jev, what's for the call.
+type Prepared = {
+  p: Patient; t: Trial; why: string;
+  jevState: unknown | null; jevQuestions: Record<string, unknown> | null;
+  finish: (res: JevResponse | null) => MatchResult | null;
+  hash: string;
+};
+
+function prepare(p: Patient, t: Trial, why: string): Prepared | null {
+  const tc = structuredByTrial.get(t.nct_id);
+  const settings = [JEV_MODEL, REJECT_THRESHOLD, CONFIDENT, order];
+  if (!tc) {
+    const criteria = criteriaByTrial.get(t.nct_id)!;
+    if (!criteria.length) return null;
+    const state = buildState(p, codes, asOf);
+    const questions = criteriaQuestions(criteria, order);
+    return {
+      p, t, why, jevState: state, jevQuestions: questions,
+      // Cache key: everything that decides the result.
+      hash: sha(JSON.stringify([why, state, questions, settings])),
+      finish: (res) => {
+        if (!res) return null;
+        const criteriaResults = criteria.map((c) => ({ ...toResult(c, res.answers[c.id]), decided_by: 'jev' as const }));
+        return {
+          patient_id: p.id, practice_id: p.practice_id, nct_id: t.nct_id, condition_match: why,
+          ...bucketOf(criteriaResults),
+          criteria: criteriaResults,
+          review_items: [],
+          ...confidenceOf(criteriaResults, (id) => criteria.find((c) => c.id === id)!.text),
+        };
+      },
+    };
+  }
+
+  const plan = planPatient(tc, { age: ageOn(p.birth_date, asOf), sex: p.sex, record: p.record, codes, asOf }, order);
+  const byId = new Map(tc.criteria.map((c) => [c.id, c]));
+  const notApplicable = Object.keys(plan.decidedBy).filter((id) => plan.decidedBy[id] === 'not_applicable');
+  // Code already rules the patient out: skip Jev, the bucket can't change.
+  const codeOut = combine(tc, plan.decided, plan.review, notApplicable).bucket === 'not_a_match';
+  const call = codeOut ? undefined : plan.jevCalls[0];
+  const state = call ? filterState(buildState(p, codes, asOf), call.sections) : null;
+  return {
+    p, t, why, jevState: state, jevQuestions: call?.questions ?? null,
+    hash: sha(JSON.stringify([why, plan.decided, plan.review, state, call?.questions ?? null, settings])),
+    finish: (res) => {
+      if (call && !res) return null; // dry run or budget stop
+      const answers: Record<string, Answer> = { ...plan.decided };
+      const criteria: CriterionResult[] = Object.entries(plan.decided).map(([id, answer]) => ({
+        id, kind: byId.get(id)!.kind, answer,
+        probabilities: { accept: 0, reject: 0, unknown: 0, [answer]: 1 },
+        decided_by: plan.decidedBy[id],
+      }));
+      if (call && res) {
+        for (const id of Object.keys(call.questions)) {
+          const c = byId.get(id)!;
+          const r = toResult({ id, kind: c.kind, text: c.question }, res.answers[id]);
+          answers[id] = r.answer;
+          criteria.push({ ...r, decided_by: 'jev' });
+        }
+      }
+      const { bucket, units } = combine(tc, answers, plan.review, notApplicable);
+      const vals = Object.values(units);
+      const record = criteria.filter((c) => c.decided_by !== 'not_applicable');
+      return {
+        patient_id: p.id, practice_id: p.practice_id, nct_id: t.nct_id, condition_match: why,
+        bucket,
+        accepts: vals.filter((v) => v === 'accept').length,
+        rejects: vals.filter((v) => v === 'reject').length,
+        unknowns: vals.filter((v) => v === 'unknown').length,
+        score: record.length ? record.reduce((sum, c) => sum + c.probabilities.accept, 0) / record.length : 0,
+        criteria,
+        review_items: plan.review.map((id) => byId.get(id)!.original_text),
+        ...confidenceOf(criteria, (id) => byId.get(id)!.question),
+      };
+    },
+  };
+}
+
+const prepared = matched.flatMap(({ p, t, why }) => prepare(p, t, why) ?? []);
+const key = (patientId: string, nct: string) => `${patientId}|${nct}`;
+
+// With --write, skip pairs whose stored result came from the same inputs, and find stored
+// rows for pairs that no longer pass the prefilters (stale: they must not stay callable).
+let todo = prepared;
+let stale: { patient_id: string; nct_id: string }[] = [];
 if (args.write) {
   const filter = `nct_id=in.(${trials.map((t) => t.nct_id).join(',')})${args.practice ? `&practice_id=eq.${args.practice}` : ''}`;
+  // Also fails fast, before any paid call, if migration 0003 isn't applied.
   const stored = await supabaseGet<{ patient_id: string; nct_id: string; input_hash: string }>(
     `prescreen_results?select=patient_id,nct_id,input_hash&${filter}`,
   );
-  const same = new Set(stored.filter((r) => hashes.get(`${r.patient_id}|${r.nct_id}`) === r.input_hash).map((r) => `${r.patient_id}|${r.nct_id}`));
-  todo = matched.filter(({ p, t }) => !same.has(`${p.id}|${t.nct_id}`));
+  const storedHash = new Map(stored.map((r) => [key(r.patient_id, r.nct_id), r.input_hash]));
+  todo = prepared.filter((x) => storedHash.get(key(x.p.id, x.t.nct_id)) !== x.hash);
+  const current = new Set(prepared.map((x) => key(x.p.id, x.t.nct_id)));
+  // With --limit only some patients were considered, so absence proves nothing.
+  if (!args.limit) stale = stored.filter((r) => !current.has(key(r.patient_id, r.nct_id)));
 }
-const unchanged = matched.length - todo.length;
+const unchanged = prepared.length - todo.length;
 const tCondition = performance.now();
 
-// 3. Eligibility, one call per (patient, trial) with every criterion.
+// 4. Eligibility: at most one Jev call per pair.
 const results: MatchResult[] = [];
-await pool(todo, concurrency, async ({ p, t, why }) => {
-  const tc = structuredByTrial.get(t.nct_id);
-  if (tc) {
-    results.push(...(await matchStructured(p, t, tc, why)));
-    return;
-  }
-  const criteria = criteriaByTrial.get(t.nct_id)!;
-  if (!criteria.length) return;
-  const res = await jev(buildState(p, codes, asOf), criteriaQuestions(criteria, order));
-  if (!res) return;
-  const criteriaResults = criteria.map((c) => ({ ...toResult(c, res.answers[c.id]), decided_by: 'jev' as const }));
-  results.push({
-    patient_id: p.id,
-    practice_id: p.practice_id,
-    nct_id: t.nct_id,
-    condition_match: why,
-    ...bucketOf(criteriaResults),
-    criteria: criteriaResults,
-    review_items: [],
-    ...confidenceOf(criteriaResults, (id) => criteria.find((c) => c.id === id)!.text),
-  });
+const hashes = new Map<string, string>();
+await pool(todo, concurrency, async (x) => {
+  const res = x.jevQuestions ? await jev(x.jevState, x.jevQuestions) : null;
+  const result = x.finish(res);
+  if (!result) return;
+  results.push(result);
+  hashes.set(key(result.patient_id, result.nct_id), x.hash);
 });
-
-async function matchStructured(p: Patient, t: Trial, tc: TrialCriteria, why: string): Promise<MatchResult[]> {
-  const plan = planPatient(tc, { age: ageOn(p.birth_date, asOf), sex: p.sex, record: p.record, codes, asOf }, order);
-  const byId = new Map(tc.criteria.map((c) => [c.id, c]));
-  const answers: Record<string, Answer> = { ...plan.decided };
-  const criteria: CriterionResult[] = Object.entries(plan.decided).map(([id, answer]) => ({
-    id,
-    kind: byId.get(id)!.kind,
-    answer,
-    probabilities: { accept: 0, reject: 0, unknown: 0, [answer]: 1 },
-    decided_by: plan.decidedBy[id],
-  }));
-  const call = plan.jevCalls[0];
-  if (call) {
-    const res = await jev(filterState(buildState(p, codes, asOf), call.sections), call.questions);
-    if (!res) return []; // dry run
-    for (const id of Object.keys(call.questions)) {
-      const c = byId.get(id)!;
-      const r = toResult({ id, kind: c.kind, text: c.question }, res.answers[id]);
-      answers[id] = r.answer;
-      criteria.push({ ...r, decided_by: 'jev' });
-    }
-  } else if (dryRun) {
-    return [];
-  }
-  const { bucket, units } = combine(tc, answers, plan.review);
-  const vals = Object.values(units);
-  const record = criteria.filter((c) => c.decided_by !== 'not_applicable');
-  return [{
-    patient_id: p.id,
-    practice_id: p.practice_id,
-    nct_id: t.nct_id,
-    condition_match: why,
-    bucket,
-    accepts: vals.filter((v) => v === 'accept').length,
-    rejects: vals.filter((v) => v === 'reject').length,
-    unknowns: vals.filter((v) => v === 'unknown').length,
-    score: record.length ? record.reduce((s, c) => s + c.probabilities.accept, 0) / record.length : 0,
-    criteria,
-    review_items: plan.review.map((id) => byId.get(id)!.original_text),
-    ...confidenceOf(criteria, (id) => byId.get(id)!.question),
-  }];
-}
 const tEnd = performance.now();
 
 // ---------- report ----------
@@ -337,7 +375,7 @@ const meta = {
     const tc = structuredByTrial.get(t.nct_id);
     return { nct_id: t.nct_id, title: t.brief_title, criteria: tc ? `${tc.criteria.length} (gemini)` : `${criteriaByTrial.get(t.nct_id)!.length} (naive split)` };
   }),
-  pairs: { total: patients.length * trials.length, afterDemographics, afterCondition, unchanged },
+  pairs: { total: patients.length * trials.length, afterDemographics, afterCondition, unchanged, stale: stale.length, failed },
   calls,
   estimatedInputTokens: estTokens,
   estimatedCostUsd: +(estTokens * JEV_PRICE_PER_TOKEN).toFixed(4),
@@ -383,9 +421,22 @@ if (args.write && !dryRun) {
     review_items: r.review_items,
     min_confidence: r.min_confidence,
     uncertain_criteria: r.uncertain_criteria,
-    input_hash: hashes.get(`${r.patient_id}|${r.nct_id}`),
+    input_hash: hashes.get(key(r.patient_id, r.nct_id)),
     model: JEV_MODEL,
     evaluated_at: new Date().toISOString(),
   })));
   console.log(`Upserted ${results.length} rows into prescreen_results (${unchanged} unchanged pairs skipped)`);
+  // Remove results for pairs that no longer pass age/sex or the condition prefilter.
+  const key_ = process.env.SUPABASE_SECRET_KEY!;
+  for (const [nct, rows] of Map.groupBy(stale, (r) => r.nct_id)) {
+    const ids = rows.map((r) => r.patient_id);
+    for (let i = 0; i < ids.length; i += 200) {
+      const res = await fetch(
+        `${process.env.SUPABASE_URL}/rest/v1/prescreen_results?nct_id=eq.${nct}&patient_id=in.(${ids.slice(i, i + 200).join(',')})`,
+        { method: 'DELETE', headers: { apikey: key_, Authorization: `Bearer ${key_}` } },
+      );
+      if (!res.ok) throw new Error(`Supabase delete stale: ${res.status} ${await res.text()}`);
+    }
+  }
+  if (stale.length) console.log(`Deleted ${stale.length} stale rows`);
 }

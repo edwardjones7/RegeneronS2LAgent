@@ -1,4 +1,4 @@
-import {
+import { LAB_UNITS,
   CLASSES, LAB_FIELDS, SECTIONS,
   type AppliesTo, type CodeCheck, type CriterionClass, type LabField, type Section, type StructuredCriterion,
 } from './schema.ts';
@@ -31,6 +31,21 @@ export function normalizeText(s: string): string {
     .trim();
 }
 
+const normUnit = (u: string) =>
+  u.toLowerCase().replace(/µ/g, 'u').replace(/\{|\}|\[|\]|\s/g, '').replace(/\*/g, '^').replace(/m\^?2$/, 'm2');
+/** Units that mean the same as the record's unit for a field. Empty means "the record's unit". */
+const UNIT_ALIASES: Partial<Record<LabField, string[]>> = {
+  wbc: ['10^9/l', 'k/ul', 'x10^3/ul', 'x10^9/l'], platelets: ['10^9/l', 'k/ul', 'x10^3/ul', 'x10^9/l'],
+  eosinophils: ['10^9/l', 'k/ul', 'x10^3/ul', 'x10^9/l'], fev1_fvc: ['ratio', 'fraction', ''],
+  egfr: ['ml/min', 'ml/min/1.73m2'], systolic_bp: ['mm[hg]', 'mmhg'], diastolic_bp: ['mm[hg]', 'mmhg'],
+};
+export function unitMatches(field: LabField, unit: string | undefined): boolean {
+  if (!unit) return true;
+  const u = normUnit(unit);
+  const record = normUnit(LAB_UNITS[field].split(' ')[0]);
+  return u === record || (UNIT_ALIASES[field] ?? []).map(normUnit).includes(u);
+}
+
 function parseCodeCheck(v: unknown, where: string, warnings: string[]): CodeCheck | null {
   if (v == null) return null;
   const bad = (why: string) => (warnings.push(`${where}: code_check dropped, ${why}`), null);
@@ -54,7 +69,11 @@ function parseCodeCheck(v: unknown, where: string, warnings: string[]): CodeChec
         unit: str(v.unit) ?? '',
         max_age_months: num(v.max_age_months),
       });
-      return [c.gte, c.gt, c.lte, c.lt].some((b) => b !== undefined) ? c : bad('lab with no bound');
+      if (![c.gte, c.gt, c.lte, c.lt].some((b) => b !== undefined)) return bad('lab with no bound');
+      // A threshold in another unit than the record's (cells/uL vs 10^3/uL, mmol/mol vs %) would
+      // silently misjudge everyone: drop the check and let Jev read the value instead.
+      if (!unitMatches(c.field, c.unit)) return bad(`unit ${c.unit} is not the record's ${LAB_UNITS[c.field]}`);
+      return c;
     }
     default:
       return bad(`unknown type ${String(v.type)}`);

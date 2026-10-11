@@ -26,11 +26,20 @@ export async function askJev(
   { model = JEV_MODEL, retries = 3 }: { model?: string; retries?: number } = {},
 ): Promise<JevResponse> {
   for (let attempt = 0; ; attempt++) {
-    const res = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, state, questions }),
-    });
+    let res: Response;
+    try {
+      res = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, state, questions }),
+        signal: AbortSignal.timeout(30_000),
+      });
+    } catch (err) {
+      // Network error or timeout: retry like a 5xx.
+      if (attempt >= retries) throw err;
+      await new Promise((r) => setTimeout(r, 500 * 2 ** attempt));
+      continue;
+    }
     if (res.ok) return (await res.json()) as JevResponse;
     const retryable = res.status === 429 || res.status >= 500;
     if (!retryable || attempt >= retries) {

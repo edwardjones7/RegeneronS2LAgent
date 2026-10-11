@@ -16,5 +16,3 @@ node_modules/
 /data/matches/
 .claude/worktrees/
 /data/conditions/build/dl_*/
-# Structured criteria written by site/scripts/preprocess-criteria.ts
-/data/criteria/

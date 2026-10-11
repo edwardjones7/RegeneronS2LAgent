@@ -1,0 +1,343 @@
+{
+ "criteria_questions": {
+  "schema_version": 1,
+  "nct_id": "NCT07309614",
+  "source_version": "2026-10-02",
+  "prompt_version": 3,
+  "generated_at": "2026-10-11T07:43:45.677Z",
+  "model": "gemini-3.5-flash-lite",
+  "status": "llm",
+  "warnings": [],
+  "criteria": [
+   {
+    "id": "inc_1",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Is the participant aged 18 to 79 years?",
+    "sections": [],
+    "group": null,
+    "original_text": "Participant must be 18-<80 years of age at the time of signing the informed consent.",
+    "code_check": {
+     "type": "age",
+     "gte": 18,
+     "lte": 79
+    }
+   },
+   {
+    "id": "inc_2",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Is there a physician diagnosis of asthma for at least 6 months?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Physician diagnosis of asthma (according to GINA 2025) for ≥6 months",
+    "code_check": null
+   },
+   {
+    "id": "inc_3",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Does the patient have documented historical airflow variability via reversibility, challenge testing, or peak flow?",
+    "sections": [],
+    "group": null,
+    "original_text": "with documented historical airflow variability by one of the following: Positive reversibility test: ≥12% and 200 ml in FEV1 after SABA administration at any point prior to randomisation; Airflow variability in clinic FEV1 >12% and 200 mL between historical clinical visits; Positive bronchial challenge test: fall in FEV1 of ≥20% with standard doses of methacholine (<16 mg/mL or <400mcg); or ≥10% with standardised hyperventilation, or exercise challenge test; or ≥15% with hypertonic saline or mannitol challenge; Peak flow variability of >20% between two assessments",
+    "code_check": null
+   },
+   {
+    "id": "inc_4",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Is peripheral blood eosinophil count (BEC) >= 0.3 x 10^9/L at screening?",
+    "sections": [],
+    "group": "g1",
+    "original_text": "peripheral BEC ≥ 0.3×109/L at screening visit",
+    "code_check": null
+   },
+   {
+    "id": "inc_5",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Is FeNO >= 35 ppb at screening visit?",
+    "sections": [],
+    "group": "g1",
+    "original_text": "FeNO ≥ 35 ppb at screening visit",
+    "code_check": null
+   },
+   {
+    "id": "inc_6",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Did the patient have at least 1 asthma attack requiring systemic corticosteroids or an emergency/hospital visit in the last 2 years?",
+    "sections": [
+     "medications",
+     "acute_visits"
+    ],
+    "group": null,
+    "original_text": "At least 1 asthma attack in the last 2 years, defined as acute asthma requiring SCS for ≥ 3 days or an emergency/hospital visit requiring SCS.",
+    "code_check": null
+   },
+   {
+    "id": "inc_7",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Has the patient been adherent to stable at least medium-dose ICS (fluticasone propionate >250 mcg/day equivalent) for at least 3 months?",
+    "sections": [
+     "medications"
+    ],
+    "group": null,
+    "original_text": "Treatment and evident adherence to a stable at-least medium-dose ICS (fluticasone propionate equivalent >250 mcg/day) for at least 3 months (including run-in period)",
+    "code_check": null
+   },
+   {
+    "id": "inc_8",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Does the patient have uncontrolled asthma symptoms (ACQ5 >= 1.5), impaired lung function (post-BD FEV1 <= 80%), high-dose ICS, or severe asthma attack in past 1-12 months?",
+    "sections": [],
+    "group": null,
+    "original_text": "Presence of one (or more) of the following additional risk factors for asthma attacks at screening or baseline: (i) uncontrolled asthma symptoms indicated by ACQ5 score of ≥ 1.5; (ii) impaired lung function indicated by post-bronchodilator FEV1 of ≤ 80% predicted; (iii) high-dose maintenance ICS therapy (iv) severe asthma attack in past 1-<12 months.",
+    "code_check": null
+   },
+   {
+    "id": "inc_9",
+    "kind": "inclusion",
+    "class": "subgroup",
+    "applies_to": {
+     "sex": "female",
+     "condition": "Female participants",
+     "description": "Female participants must not be pregnant or breastfeeding and must use highly effective contraception if of childbearing potential."
+    },
+    "question": "Is the female participant not pregnant/breastfeeding and using effective contraception if of childbearing potential?",
+    "sections": [],
+    "group": null,
+    "original_text": "A female participant is eligible to participate if she is not pregnant or breastfeeding, and at least one of the following conditions applies: Is a woman of nonchildbearing potential (WONCBP)... OR Is a WOCBP and agrees to use a contraceptive method that is highly effective",
+    "code_check": null
+   },
+   {
+    "id": "inc_10",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": {
+     "sex": "female",
+     "condition": "Female participants of childbearing potential",
+     "description": "WOCBP must have negative pregnancy tests at screening and prior to dosing."
+    },
+    "question": "Did the WOCBP have negative highly sensitive serum/urine pregnancy tests at screening and prior to first dose?",
+    "sections": [],
+    "group": null,
+    "original_text": "A WOCBP must have a negative highly sensitive serum pregnancy test at V1 (screening visit) and urine or serum pregnancy test on Day 1 before the first dose",
+    "code_check": null
+   },
+   {
+    "id": "inc_11",
+    "kind": "inclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "Is the participant capable of giving signed informed consent and complying with study requirements?",
+    "sections": [],
+    "group": null,
+    "original_text": "Capable of giving signed informed consent which includes compliance with the requirements and restrictions listed in the informed consent form (ICF) and in this protocol.",
+    "code_check": null
+   },
+   {
+    "id": "exc_1",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Has the patient used systemic corticosteroids in the last month or received maintenance systemic corticosteroids?",
+    "sections": [
+     "medications"
+    ],
+    "group": null,
+    "original_text": "Use of SCS < 1 months prior to screening or on maintenance SCS.",
+    "code_check": null
+   },
+   {
+    "id": "exc_2",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Is the participant a current tobacco smoker or recently stopped smoker in the last 6 months?",
+    "sections": [
+     "labs"
+    ],
+    "group": null,
+    "original_text": "Current tobacco smoker or recently stopped smoker (<6 months)",
+    "code_check": null
+   },
+   {
+    "id": "exc_3",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Is the ex-smoker with >10 pack-years exhibiting a post-bronchodilator FEV1/FVC ratio below the lower limit of normal?",
+    "sections": [
+     "labs"
+    ],
+    "group": null,
+    "original_text": "Ex-smoker with greater than 10 pack-years AND post bronchodilator FEV1/FVC ratio below the lower limit of normal according to GLI race-neutral standards.",
+    "code_check": null
+   },
+   {
+    "id": "exc_4",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Is there documented nonadherence to ICS (<75% dispensed over past 12 months based on pharmacy refill records)?",
+    "sections": [
+     "medications"
+    ],
+    "group": null,
+    "original_text": "Documented nonadherence to ICS, defined as dispensing of less than 75% of the prescribed ICS dose over the past 12 months (or annualised if less than 12 months), based on pharmacy refill records checked at screening.",
+    "code_check": null
+   },
+   {
+    "id": "exc_5",
+    "kind": "exclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Does the patient have significant and uncorrectable inhaler technique deficiencies at screening?",
+    "sections": [],
+    "group": null,
+    "original_text": "Presence of significant and uncorrectable inhaler technique deficiencies, as assessed by the research team during inhaler technique evaluation at screening.",
+    "code_check": null
+   },
+   {
+    "id": "exc_6",
+    "kind": "exclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "Is there any contra-indication to the study drug according to the investigator?",
+    "sections": [],
+    "group": null,
+    "original_text": "Contra-indication to study drug",
+    "code_check": null
+   },
+   {
+    "id": "exc_7",
+    "kind": "exclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "Does the patient have an immunological disease or medication that may affect the inflammatory response?",
+    "sections": [],
+    "group": null,
+    "original_text": "Immunological disease, condition or medication that may affect the inflammatory response according to Investigator.",
+    "code_check": null
+   },
+   {
+    "id": "exc_8",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have a history of other significant lung disease (e.g., lung fibrosis, sarcoidosis, COPD, bronchiectasis)?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "History of other significant lung disease e.g. lung fibrosis, sarcoidosis, interstitial lung disease, pulmonary hypertension, clinically significant bronchiectasis, chronic obstructive lung disease, or Churg-Strauss.",
+    "code_check": null
+   },
+   {
+    "id": "exc_9",
+    "kind": "exclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "Does the patient have a severe concomitant illness or suspected immunodeficiency that adversely affects participation?",
+    "sections": [],
+    "group": null,
+    "original_text": "Severe concomitant illness (including known or suspected immunodeficiency) that, in the Investigator's judgement will adversely affect the participant's participation in the study.",
+    "code_check": null
+   },
+   {
+    "id": "exc_10",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Is there an active malignancy or history of malignancy within 5 years (other than basal cell skin cancer or resected cervical dysplasia)?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Active malignancy or history of malignancy within 5 years (except for basal cell carcinoma of the skin or fully resected Cervical Intraepithelial Neoplasia/dysplasia).",
+    "code_check": null
+   },
+   {
+    "id": "exc_11",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Has the patient been exposed to monoclonal antibody therapy for asthma or investigational products within 5 half-lives?",
+    "sections": [
+     "medications"
+    ],
+    "group": null,
+    "original_text": "Exposure to monoclonal antibody therapy for asthma or another investigational medicinal product within 5 half-lives of the drug.",
+    "code_check": null
+   },
+   {
+    "id": "exc_12",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Is the patient eligible for Dupilumab based on other licensed and reimbursed indications in their jurisdiction?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Eligibility to Dupilumab based on licensed and reimbursed indications in the participant's jurisdiction (e.g. nasal polyposis, atopic dermatitis, eosinophilic esophagitis, prurigo nodularis, etc.)",
+    "code_check": null
+   },
+   {
+    "id": "exc_13",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Has the patient received treatment with a live (attenuated) vaccine in the past 4 weeks?",
+    "sections": [
+     "medications",
+     "procedures"
+    ],
+    "group": null,
+    "original_text": "Treatment with live (attenuated) vaccine in the past 4 weeks.",
+    "code_check": null
+   },
+   {
+    "id": "exc_14",
+    "kind": "exclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "Is the patient taking any prohibited medication?",
+    "sections": [],
+    "group": null,
+    "original_text": "Prohibited medication",
+    "code_check": null
+   },
+   {
+    "id": "exc_15",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have a current helminth infection?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Current helminth infection",
+    "code_check": null
+   }
+  ]
+ },
+ "criteria_version": "2026-10-02/p3",
+ "criteria_model": "gemini-3.5-flash-lite",
+ "criteria_generated_at": "2026-10-11T07:43:45.677Z"
+}

@@ -1,0 +1,497 @@
+{
+ "criteria_questions": {
+  "schema_version": 1,
+  "nct_id": "NCT06931717",
+  "source_version": "2026-09-28",
+  "prompt_version": 3,
+  "generated_at": "2026-10-11T07:43:45.675Z",
+  "model": "gemini-3.5-flash-lite",
+  "status": "llm",
+  "warnings": [
+   "item 23: question is 241 characters",
+   "item 25: question is 274 characters"
+  ],
+  "criteria": [
+   {
+    "id": "inc_1",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have a diagnosis of non-small cell lung cancer (NSCLC) stages II to IIIA?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Pathological stage II-IIIA (UICC/ AJCC staging 9th edition) NSCLC",
+    "code_check": null
+   },
+   {
+    "id": "inc_2",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Has brain imaging (CT or MRI) been performed for staging either preoperatively or at screening?",
+    "sections": [],
+    "group": null,
+    "original_text": "Brain imaging should have been performed to complete staging, either preoperatively or postoperatively. If brain imaging has not been performed, a contrast-enhanced CT or MRI of the brain must be performed at screening prior randomisation.",
+    "code_check": null
+   },
+   {
+    "id": "inc_3",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have a history of complete surgical resection with negative surgical margins (R0)?",
+    "sections": [
+     "procedures"
+    ],
+    "group": null,
+    "original_text": "Complete resection with negative surgical margins (R0).",
+    "code_check": null
+   },
+   {
+    "id": "inc_4",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Did the patient undergo a lobectomy, sleeve lobectomy, bilobectomy, or pneumonectomy?",
+    "sections": [
+     "procedures"
+    ],
+    "group": "g1",
+    "original_text": "Lobectomy, sleeve lobectomy, bilobectomy, or pneumectomy.",
+    "code_check": null
+   },
+   {
+    "id": "inc_5",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Did the patient undergo a segmentectomy for a tumor <= 2 cm with poor pulmonary reserve or major comorbidity?",
+    "sections": [
+     "procedures",
+     "conditions"
+    ],
+    "group": "g1",
+    "original_text": "Segmentectomy for tumours <=2 cm is permitted in patients with poor pulmonary reserve or another major comorbidity that contraindicates lobectomy.",
+    "code_check": null
+   },
+   {
+    "id": "inc_6",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have any record of disease recurrence following surgical resection?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "No disease recurrence following surgical resection.",
+    "code_check": null
+   },
+   {
+    "id": "inc_7",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Is tumour PD-L1 expression >=1% determined locally?",
+    "sections": [],
+    "group": null,
+    "original_text": "Tumour PD-L1 expression of >=1%, determined locally using a locally approved immuno-histochemistry test.",
+    "code_check": null
+   },
+   {
+    "id": "inc_8",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Is archival FFPE tumour tissue available for central PD-L1 expression testing?",
+    "sections": [],
+    "group": null,
+    "original_text": "Availability of archival FFPE tumour tissue for central PD-L1 expression testing.",
+    "code_check": null
+   },
+   {
+    "id": "inc_9",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Is there documented patient refusal of adjuvant platinum-based chemotherapy?",
+    "sections": [
+     "medications"
+    ],
+    "group": "g2",
+    "original_text": "Documented patient refusal; or",
+    "code_check": null
+   },
+   {
+    "id": "inc_10",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Is the patient unfit for adjuvant platinum-based chemotherapy due to ECOG PS 2?",
+    "sections": [
+     "conditions"
+    ],
+    "group": "g2",
+    "original_text": "Patient is unfit to receive adjuvant platinum-based chemotherapy (per investigator assessment) due to: ECOG PS2, or ECOG PS 0/1 and aged >=70 years with substantial comorbidities or other contraindication(s) to platinum-based doublet chemotherapy.",
+    "code_check": null
+   },
+   {
+    "id": "inc_11",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Does the patient have an estimated life expectancy of >=3 months?",
+    "sections": [],
+    "group": null,
+    "original_text": "Estimated life expectancy of >=3 months.",
+    "code_check": null
+   },
+   {
+    "id": "inc_12",
+    "kind": "inclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Is the patient at least 18 years old?",
+    "sections": [],
+    "group": null,
+    "original_text": "Age >=18 years.",
+    "code_check": {
+     "type": "age",
+     "gte": 18
+    }
+   },
+   {
+    "id": "inc_13",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Has the patient recovered from surgery-related complications?",
+    "sections": [],
+    "group": null,
+    "original_text": "Patient has recovered from surgery-related complications.",
+    "code_check": null
+   },
+   {
+    "id": "inc_14",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Does the patient have adequate haematological, renal and liver function?",
+    "sections": [],
+    "group": null,
+    "original_text": "Adequate haematological, renal and liver function.",
+    "code_check": null
+   },
+   {
+    "id": "inc_15",
+    "kind": "inclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "Is the patient able to comply with the trial protocol in the investigator's judgment?",
+    "sections": [],
+    "group": null,
+    "original_text": "Patient is able to comply with the trial protocol, in the investigator's judgment.",
+    "code_check": null
+   },
+   {
+    "id": "inc_16",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": {
+     "sex": "female",
+     "condition": "Female participants of childbearing potential",
+     "description": "Female participants of childbearing potential must have a negative serum pregnancy test within 5 weeks before randomisation."
+    },
+    "question": "Does the female participant of childbearing potential have a negative serum pregnancy test within 5 weeks before randomisation?",
+    "sections": [],
+    "group": null,
+    "original_text": "Negative pregnancy test Female participants of childbearing potential (including women who had their last menstruation in the last 2 years), must have a negative serum pregnancy test within 5 weeks before randomisation. Pregnancy test must be repeated within 3 days before the first dose of protocol treatment and at every treatment visit (urine beta HCG test is sufficient).",
+    "code_check": null
+   },
+   {
+    "id": "inc_17",
+    "kind": "inclusion",
+    "class": "screening",
+    "applies_to": {
+     "condition": "Participants of childbearing potential or partners",
+     "description": "Participants must agree to use a highly effective method of contraception."
+    },
+    "question": "Does the participant agree to use a highly effective method of contraception during the trial?",
+    "sections": [],
+    "group": null,
+    "original_text": "Use of highly effective contraceptive methods Female participants of childbearing potential (including women who had their last menstruation in the last 2 years) and male participants with a female partners of childbearing potential must agree to use a highly effective method of contraception for the duration of the protocol treatment and until 4 months after the last dose of cemiplimab.",
+    "code_check": null
+   },
+   {
+    "id": "inc_18",
+    "kind": "inclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "Has written informed consent been signed and dated by the patient prior to trial-related interventions?",
+    "sections": [],
+    "group": null,
+    "original_text": "Written Informed Consent must be signed and dated by the patient and the investigator prior to any trial-related intervention.",
+    "code_check": null
+   },
+   {
+    "id": "exc_1",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have EGFR-mutant or ALK-rearranged NSCLC?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "EGFR-mutant or ALK-rearranged NSCLC.",
+    "code_check": null
+   },
+   {
+    "id": "exc_2",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the NSCLC histology include any small cell component?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Any small cell component",
+    "code_check": null
+   },
+   {
+    "id": "exc_3",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Has the patient received prior neoadjuvant or adjuvant systemic treatment for NSCLC?",
+    "sections": [
+     "medications"
+    ],
+    "group": null,
+    "original_text": "Prior neoadjuvant and/or adjuvant systemic treatment for NSCLC.",
+    "code_check": null
+   },
+   {
+    "id": "exc_4",
+    "kind": "exclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "Is the patient participating in another interventional clinical trial for NSCLC?",
+    "sections": [],
+    "group": null,
+    "original_text": "Participating in another interventional clinical trial for NSCLC.",
+    "code_check": null
+   },
+   {
+    "id": "exc_5",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have a diagnosis of another malignancy other than NSCLC that is progressing or requires active treatment, other than basal cell skin cancer, in situ cervical carcinoma, or definitively treated non-metastatic prostate cancer?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Diagnosis with another malignancy other than NSCLC that is progressing or requires active treatment. Exceptions: Non-melanoma skin cancer that has undergone potentially curative therapy, In situ cervical carcinoma, Any tumour that has been deemed to be definitively treated, such as definitively treated non-metastatic prostate cancer.",
+    "code_check": null
+   },
+   {
+    "id": "exc_6",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Has the patient received ongoing or continuous corticosteroid therapy (>10 mg prednisone/day or equivalent) within 1 week prior to randomisation?",
+    "sections": [
+     "medications"
+    ],
+    "group": null,
+    "original_text": "Has any condition requiring ongoing/continuous corticosteroid therapy (>10 mg prednisone/day or anti-inflammatory equivalent) within 1 week prior to randomisation. Physiologic replacement doses are allowed even if they are >10 mg of prednisone per day or equivalent, as long as they are not being administered for immunosuppressive intent. Inhaled or topical steroids are permitted, provided that they are not for treatment of an autoimmune disorder.",
+    "code_check": null
+   },
+   {
+    "id": "exc_7",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have ongoing or recent (within 5 years) evidence of significant autoimmune disease requiring systemic immunosuppressive treatment, excluding vitiligo, resolved childhood asthma, replacement-only endocrinopathies, or psoriasis not needing systemic treatment?",
+    "sections": [
+     "conditions",
+     "medications"
+    ],
+    "group": null,
+    "original_text": "Ongoing or recent (within 5 years) evidence of significant autoimmune disease that required treatment with systemic immunosuppressive treatments. The following are not exclusions: vitiligo, childhood asthma that has resolved, endocrinopathies (such as hypothyroidism or type 1 diabetes) that require only hormone replacement, or psoriasis that does not require systemic treatment.",
+    "code_check": null
+   },
+   {
+    "id": "exc_8",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have a history of encephalitis, meningitis, organic brain disease, or uncontrolled seizures within 1 year prior to randomisation?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Encephalitis, meningitis, organic brain disease (e.g., Parkinson's disease) or uncontrolled seizures within 1 year prior to randomisation.",
+    "code_check": null
+   },
+   {
+    "id": "exc_9",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Did the patient experience a myocardial infarction within 6 months prior to randomisation?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Myocardial infarction within 6 months prior to randomisation.",
+    "code_check": null
+   },
+   {
+    "id": "exc_10",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have a known history or evidence of interstitial lung disease or active, non-infectious pneumonitis within 5 years prior to randomisation?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Known history of, or any evidence of, interstitial lung disease or active, non-infectious pneumonitis within 5 years prior to randomisation.",
+    "code_check": null
+   },
+   {
+    "id": "exc_11",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Does the patient have an uncontrolled HIV, hepatitis B, or hepatitis C infection, or a diagnosis of immunodeficiency?",
+    "sections": [
+     "conditions"
+    ],
+    "group": null,
+    "original_text": "Uncontrolled infection with HIV, hepatitis B, or hepatitis C infection; or the patient has a diagnosis of immunodeficiency.",
+    "code_check": null
+   },
+   {
+    "id": "exc_12",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Did the patient have any infection requiring hospitalisation or treatment with intravenous anti-infectives within 2 weeks before randomisation?",
+    "sections": [
+     "acute_visits",
+     "medications"
+    ],
+    "group": null,
+    "original_text": "Any infection requiring hospitalisation or treatment with intravenous anti-infectives within 2 weeks before randomisation.",
+    "code_check": null
+   },
+   {
+    "id": "exc_13",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Did the patient receive a live vaccine within 28 days before randomisation?",
+    "sections": [
+     "medications"
+    ],
+    "group": null,
+    "original_text": "Receipt of a live vaccine within 28 days before randomisation.",
+    "code_check": null
+   },
+   {
+    "id": "exc_14",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Did the patient receive a COVID-19 vaccination within 1 week before randomisation?",
+    "sections": [
+     "medications"
+    ],
+    "group": null,
+    "original_text": "Receipt of a COVID-19 vaccination within 1 week before randomisation.",
+    "code_check": null
+   },
+   {
+    "id": "exc_15",
+    "kind": "exclusion",
+    "class": "record",
+    "applies_to": null,
+    "question": "Has the patient received a prior allogeneic stem cell transplant, organ transplant, or autologous stem cell transplant within 12 weeks before randomisation?",
+    "sections": [
+     "procedures"
+    ],
+    "group": null,
+    "original_text": "Prior allogeneic stem cell transplantation or received organ transplants at any time, or autologous stem cell transplantation within 12 weeks before randomisation.",
+    "code_check": null
+   },
+   {
+    "id": "exc_16",
+    "kind": "exclusion",
+    "class": "screening",
+    "applies_to": null,
+    "question": "Does the patient have known or suspected hypersensitivity to cemiplimab or its excipients?",
+    "sections": [],
+    "group": null,
+    "original_text": "Known or suspected hypersensitivity to cemiplimab or its excipients.",
+    "code_check": null
+   },
+   {
+    "id": "exc_17",
+    "kind": "exclusion",
+    "class": "subgroup",
+    "applies_to": {
+     "sex": "female",
+     "condition": "Pregnant or lactating women",
+     "description": "Female participants who are pregnant, planning to become pregnant, or lactating."
+    },
+    "question": "Is the female patient pregnant, planning to become pregnant, or in the period of lactation?",
+    "sections": [],
+    "group": null,
+    "original_text": "Women who are pregnant, planning to become pregnant or are in the period of lactation.",
+    "code_check": null
+   },
+   {
+    "id": "exc_18",
+    "kind": "exclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "Are sexually active men and women of childbearing potential unwilling to use an effective contraceptive method during the study?",
+    "sections": [],
+    "group": null,
+    "original_text": "Sexually active men and women of childbearing potential who are not willing to use an effective contraceptive method during the study.",
+    "code_check": null
+   },
+   {
+    "id": "exc_19",
+    "kind": "exclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "Is the patient or an immediate family member a member of the clinical study team?",
+    "sections": [],
+    "group": null,
+    "original_text": "Patients who are, or have an immediate family member who is, a member of the clinical study team, unless prior approval has been obtained from the sponsor (ETOP IBCSG Partners Foundation).",
+    "code_check": null
+   },
+   {
+    "id": "exc_20",
+    "kind": "exclusion",
+    "class": "administrative",
+    "applies_to": null,
+    "question": "In the investigator's judgment, is the patient unlikely to comply with study procedures, restrictions, and requirements?",
+    "sections": [],
+    "group": null,
+    "original_text": "Judgement by the investigator that the patient is unlikely to comply with study procedures, restrictions and requirements.",
+    "code_check": null
+   }
+  ]
+ },
+ "criteria_version": "2026-09-28/p3",
+ "criteria_model": "gemini-3.5-flash-lite",
+ "criteria_generated_at": "2026-10-11T07:43:45.675Z"
+}

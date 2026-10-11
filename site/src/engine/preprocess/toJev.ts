@@ -149,30 +149,40 @@ export type GroupedResult = {
 };
 
 /**
- * Combines code and Jev answers. OR groups pass if any member accepts, fail only
- * if every member rejects, else unknown; a review member inside a group counts
- * as unknown, because the screening visit could still pass it. Review items
- * outside groups never count. A missing answer counts as unknown, never as a pass.
+ * Combines code and Jev answers into one result per criterion or group.
+ * Inclusion groups are alternatives ("any of the following"): accept if any member
+ * accepts, reject only if every member rejects, else unknown. Exclusion groups list
+ * things that each exclude ("any of the following"): reject if any member rejects,
+ * accept only if every member accepts, else unknown. A review member inside a group
+ * counts as unknown, because the screening visit could still settle it. Members that
+ * don't apply to this patient are left out of their group; a group with no member
+ * left passes. Review items outside groups never count. A missing answer counts as
+ * unknown, never as a pass.
  */
-export function combine(tc: TrialCriteria, answers: Record<string, Answer>, review: string[] = []): GroupedResult {
+export function combine(
+  tc: TrialCriteria,
+  answers: Record<string, Answer>,
+  review: string[] = [],
+  notApplicable: string[] = [],
+): GroupedResult {
   const units: Record<string, Answer> = {};
+  const members = new Map<string, Answer[]>();
+  const groupKind = new Map<string, StructuredCriterion['kind']>();
   for (const c of tc.criteria) {
     const isReview = review.includes(c.id);
     if (!c.group && (isReview || (c.class !== 'record' && !answers[c.id]))) continue;
-    const a = isReview ? 'unknown' : (answers[c.id] ?? 'unknown');
     if (!c.group) {
-      units[c.id] = a;
+      units[c.id] = answers[c.id] ?? 'unknown';
       continue;
     }
-    const prev = units[c.group];
-    units[c.group] =
-      prev === undefined
-        ? a
-        : prev === 'accept' || a === 'accept'
-          ? 'accept'
-          : prev === 'reject' && a === 'reject'
-            ? 'reject'
-            : 'unknown';
+    groupKind.set(c.group, c.kind);
+    if (!members.has(c.group)) members.set(c.group, []);
+    if (notApplicable.includes(c.id)) continue;
+    members.get(c.group)!.push(isReview ? 'unknown' : (answers[c.id] ?? 'unknown'));
+  }
+  for (const [g, as] of members) {
+    const [win, lose] = groupKind.get(g) === 'inclusion' ? (['accept', 'reject'] as const) : (['reject', 'accept'] as const);
+    units[g] = !as.length ? 'accept' : as.includes(win) ? win : as.every((a) => a === lose) ? lose : 'unknown';
   }
   const vals = Object.values(units);
   const bucket: Bucket = vals.includes('reject') ? 'not_a_match' : vals.includes('unknown') ? 'chart_review' : 'candidate';
