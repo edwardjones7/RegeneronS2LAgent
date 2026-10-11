@@ -159,6 +159,11 @@ def screen_practice(practice_id: str, nct_id: str, as_of: date | None = None) ->
 
 
 def counts(practice_id: str, nct_id: str) -> dict[str, int]:
+    """Bucket counts for one practice and trial (aggregate only). The engine's stored counts
+    (view prescreen_trial_counts) when it has run for this pair, else screened here."""
+    stored = (ehr.prescreen_trial_counts(practice_id, nct_id) or {}).get(nct_id)
+    if stored:
+        return dict(stored)
     out = {"candidate": 0, "chart_review": 0, "not_a_match": 0}
     for r in screen_practice(practice_id, nct_id):
         out[r.bucket] += 1

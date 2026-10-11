@@ -14,7 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import ehr, outreach, prescreen, service
-from app.campaigns import get_campaign
+from app.campaigns import get_campaign, phase_label
 from app.db import get_session
 from app.models import Call, InboxMessage, Lead, LeadStatus, TrialAcceptance
 from app.routes.read_api import _iso, lead_summary, require_api_key
@@ -76,21 +76,30 @@ def put_profile(practice_id: str, body: ProfileIn, s: Session = Depends(get_sess
 
 @router.get("/practices/{practice_id}/trials")
 def trials(practice_id: str, s: Session = Depends(get_session)):
-    """The trials this practice could run, with its pre-screen counts, and whether it accepted them."""
+    """The trials this practice could run, with its pre-screen counts, and whether it accepted them.
+
+    Trials the matching engine has results for at this practice (view prescreen_trial_counts),
+    plus the hand-authored protocols (the offline fallback). Emits aggregate counts only."""
     _practice(practice_id)
     accepted = {a.nct_id: a for a in s.scalars(select(TrialAcceptance).where(TrialAcceptance.practice_id == practice_id))}
+    stored = ehr.prescreen_trial_counts(practice_id) or {}
+    protos = prescreen.protocols()
+    ids = list(dict.fromkeys([*stored, *protos]))
+    registry = ehr.trials(ids)
     out = []
-    for nct_id, proto in prescreen.protocols().items():
-        c = prescreen.counts(practice_id, nct_id)
+    for nct_id in ids:
+        proto, row = protos.get(nct_id) or {}, registry.get(nct_id) or {}
+        c = stored.get(nct_id) or prescreen.counts(practice_id, nct_id)
         a = accepted.get(nct_id)
         out.append({
             "nct_id": nct_id,
-            "title": proto["shortTitle"],
-            "official_title": proto["title"],
-            "sponsor": proto["sponsor"],
-            "phase": proto["phase"],
-            "url": proto["url"],
-            "callable": get_campaign(outreach.campaign_id_for(nct_id)) is not None,
+            "title": row.get("brief_title") or proto.get("shortTitle") or nct_id,
+            "official_title": row.get("official_title") or proto.get("title") or row.get("brief_title"),
+            "sponsor": row.get("lead_sponsor") or proto.get("sponsor"),
+            "phase": phase_label(row.get("phases")) or proto.get("phase"),
+            "url": proto.get("url") or f"https://clinicaltrials.gov/study/{nct_id}",
+            # A call script exists, or the registry row is there to build one on accept.
+            "callable": get_campaign(outreach.campaign_id_for(nct_id)) is not None or bool(row),
             "candidates": c["candidate"],
             "chart_review": c["chart_review"],
             "accepted": a is not None,
