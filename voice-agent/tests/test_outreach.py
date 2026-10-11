@@ -382,3 +382,16 @@ def test_one_calendar_per_practice_shared_by_trials(client):
     cal = client.get(f"/practices/{PRACTICE}/calendar?days=14", headers=READ).json()
     booked = [x for x in cal["slots"] if x["booked"]]
     assert [b["booked"]["name"] for b in booked] == [name] and booked[0]["booked"]["booked_by"] == "Ava"
+
+
+def test_activity_feed_speaks_plain_english(client):
+    client.post(f"/practices/{PRACTICE}/trials/{TRIAL}/accept", json={"doctor_name": "Rivera"}, headers=READ)
+    with db.session_scope() as s:
+        lead = first_candidate(s)
+        service.tool_verify_identity(s, lead, lead.birth_date)
+        slot_id = int(service.tool_get_open_slots(s, lead).split("slot_id ")[1].split(":")[0])
+        service.tool_book_visit(s, lead, slot_id)
+        name = f"{lead.first_name} {lead.last_name}"
+    feed = client.get(f"/practices/{PRACTICE}/activity", headers=READ).json()
+    assert feed["recent"][0]["text"].startswith(f"Booked {name} for ")
+    assert client.get(f"/practices/bergen/activity", headers=READ).json()["recent"] == []

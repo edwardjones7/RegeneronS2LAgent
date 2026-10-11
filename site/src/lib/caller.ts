@@ -267,13 +267,45 @@ export async function getPatientOutreach(patientId: string): Promise<PatientOutr
   }
 }
 
-const STAFF_ACTIONS = ['restart', 'contacted', 'drop', 'clear'] as const;
+const STAFF_ACTIONS = ['restart', 'contacted', 'drop', 'clear', 'cancel-visit', 'reschedule'] as const;
 export type StaffAction = (typeof STAFF_ACTIONS)[number];
 export const isStaffAction = (a: string): a is StaffAction => (STAFF_ACTIONS as readonly string[]).includes(a);
 
 /** Office staff act on a patient Ava handed over (or a chart they checked). */
-export async function staffAction(leadId: number, action: StaffAction): Promise<void> {
-  await call(`/leads/${leadId}/${action}`, { method: 'POST', body: {} });
+export async function staffAction(leadId: number, action: StaffAction, body: Record<string, unknown> = {}): Promise<void> {
+  await call(`/leads/${leadId}/${action}`, { method: 'POST', body });
+}
+
+/** Audio of one call, for "Listen to the call". Only for this practice's patients (checked by the caller route). */
+export async function fetchRecording(leadId: number, callId: number): Promise<Response | null> {
+  const c = config();
+  if (!c) return null;
+  const res = await fetch(`${c.url}/leads/${leadId}/calls/${callId}/recording`, { headers: { 'X-API-Key': c.key } });
+  return res.ok ? res : null;
+}
+
+/* ————————— Live activity ————————— */
+
+export interface Activity {
+  onCall: { leadId: number; name: string; direction: 'outbound' | 'inbound'; simulated: boolean }[];
+  recent: { at: string; type: string; text: string; leadId: number; patientId: string | null }[];
+}
+
+/** What Ava is doing at this practice right now, and the latest things that happened. */
+export async function getActivity(limit = 8): Promise<Activity> {
+  if (!config()) return { onCall: [], recent: [] };
+  try {
+    const r = await call<{
+      on_call: { lead_id: number; name: string; direction: 'outbound' | 'inbound'; simulated: boolean }[];
+      recent: { at: string; type: string; text: string; lead_id: number; patient_id: string | null }[];
+    }>(`/practices/${practice}/activity?limit=${limit}`);
+    return {
+      onCall: r.on_call.map((x) => ({ leadId: x.lead_id, name: x.name, direction: x.direction, simulated: x.simulated })),
+      recent: r.recent.map((x) => ({ at: x.at, type: x.type, text: x.text, leadId: x.lead_id, patientId: x.patient_id })),
+    };
+  } catch {
+    return { onCall: [], recent: [] };
+  }
 }
 
 /* ————————— The practice's visit calendar ————————— */
@@ -283,7 +315,18 @@ export interface CalendarSlot {
   /** Local time at the practice, no zone: "2026-10-14T09:30:00". */
   startsAt: string;
   minutes: number;
-  booked: { leadId: number; patientId: string | null; name: string; trial: string | null; bookedBy: 'Ava' | 'text' } | null;
+  booked: {
+    leadId: number;
+    patientId: string | null;
+    name: string;
+    trial: string | null;
+    nctId: string | null;
+    bookedBy: 'Ava' | 'text';
+    bookedAt: string | null;
+    /** A call with a recording, if any (simulated patients have none). */
+    recordingCallId: number | null;
+    simulated: boolean;
+  } | null;
 }
 
 export interface PracticeCalendar {
@@ -304,7 +347,10 @@ export async function getCalendar(start: string, days = 7): Promise<PracticeCale
         slot_id: number;
         starts_at_local: string;
         minutes: number;
-        booked: { lead_id: number; patient_id: string | null; name: string; trial: string | null; booked_by: 'Ava' | 'text' } | null;
+        booked: {
+          lead_id: number; patient_id: string | null; name: string; trial: string | null; nct_id: string | null;
+          booked_by: 'Ava' | 'text'; booked_at: string | null; recording_call_id: number | null; simulated: boolean;
+        } | null;
       }[];
     }>(`/practices/${practice}/calendar?start=${encodeURIComponent(start)}&days=${days}`);
     return {
@@ -320,7 +366,11 @@ export async function getCalendar(start: string, days = 7): Promise<PracticeCale
           patientId: x.booked.patient_id,
           name: x.booked.name,
           trial: x.booked.trial,
+          nctId: x.booked.nct_id,
           bookedBy: x.booked.booked_by,
+          bookedAt: x.booked.booked_at,
+          recordingCallId: x.booked.recording_call_id,
+          simulated: x.booked.simulated,
         },
       })),
     };

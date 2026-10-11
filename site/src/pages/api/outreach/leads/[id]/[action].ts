@@ -2,7 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { getOutreachOverview, isStaffAction, staffAction } from '@/lib/caller';
 
 /**
- * POST: office staff act on a patient in the outreach (restart | contacted | drop | clear).
+ * POST: office staff act on a patient in the outreach
+ * (restart | contacted | drop | clear | cancel-visit | reschedule with {slotId}).
  * Only patients in this practice's own outreach can be acted on.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -17,7 +18,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(404).json({ success: false, error: 'Not one of this practice’s patients' });
   }
   try {
-    await staffAction(id, action);
+    const slotId = Number(req.body?.slotId);
+    if (action === 'reschedule' && !Number.isInteger(slotId)) {
+      return res.status(400).json({ success: false, error: 'Pick a new time' });
+    }
+    await staffAction(id, action, action === 'reschedule' ? { slot_id: slotId } : {});
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error('[api/outreach] action failed:', error);

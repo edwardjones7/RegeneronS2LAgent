@@ -6,6 +6,8 @@ queries across practices.
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -298,6 +300,7 @@ def calendar(practice_id: str, start: str | None = None, days: int = 7, s: Sessi
             continue  # an older per-trial slot at the same time: show one open cell
         seen.add(sl.starts_at)
         campaign = get_campaign(lead.campaign_id) if lead else None
+        recorded = next((c for c in reversed(lead.calls) if c.recording_url), None) if lead else None
         out.append({
             "slot_id": sl.id,
             "starts_at_local": sl.starts_at.isoformat(),
@@ -309,6 +312,71 @@ def calendar(practice_id: str, start: str | None = None, days: int = 7, s: Sessi
                 "trial": campaign.study_short_name if campaign else None,
                 "status": lead.status,
                 "booked_by": "text" if any(e.type == "visit_booked" and e.detail.get("via") == "sms" for e in lead.events) else "Ava",
+                "nct_id": campaign.nct_id if campaign else None,
+                "booked_at": next((_iso(e.at) for e in reversed(lead.events) if e.type in ("visit_booked", "visit_rescheduled")), None),
+                "recording_call_id": recorded.id if recorded else None,
+                "simulated": bool(lead.simulated),
             } if lead else None,
         })
     return {"start": first.isoformat(), "days": days, "timezone": prof.timezone, "slots": out}
+
+
+
+ACTIVITY_TYPES = ("visit_booked", "visit_rescheduled", "visit_cancelled", "callback_requested", "inbound_call",
+                  "call_window_set", "staff_contacted", "sms_received", "status")
+
+
+def _activity_text(e, name: str) -> str | None:
+    from app.slots import short
+
+    first = name.split(" ")[0]
+    d = e.detail or {}
+    if e.type in ("visit_booked", "visit_rescheduled"):
+        when = d.get("starts_at")
+        when_txt = short(datetime.fromisoformat(when)) if when else "a visit"
+        verb = "Rescheduled" if e.type == "visit_rescheduled" else "Booked"
+        via = " from a text" if d.get("via") == "sms" else ""
+        return f"{verb} {name} for {when_txt}{via}"
+    if e.type == "visit_cancelled":
+        return f"{name} cancelled their visit"
+    if e.type == "callback_requested":
+        return f"Missed {first}, texted them to call back"
+    if e.type == "inbound_call":
+        return f"{name} called the office back"
+    if e.type == "call_window_set":
+        return f"{first} asked to be called {d.get('window', 'later')}"
+    if e.type == "staff_contacted":
+        return f"Staff reached {name}"
+    if e.type == "sms_received":
+        return f"{first} texted the office"
+    if e.type == "status" and d.get("status") == "needs_human":
+        return f"Handed {name} to the office: {d.get('reason', '')}".rstrip(": ")
+    return None
+
+
+@router.get("/practices/{practice_id}/activity")
+def activity(practice_id: str, limit: int = 12, s: Session = Depends(get_session)):
+    """What Ava is doing right now at this practice, and the latest things that happened, in plain words."""
+    from app.models import Event
+
+    _practice(practice_id)
+    on_call = s.scalars(
+        select(Call).join(Lead).where(Lead.practice_id == practice_id, Call.ended_at.is_(None)).order_by(Call.id.desc())
+    ).all()
+    events = s.execute(
+        select(Event, Lead).join(Lead, Lead.id == Event.lead_id)
+        .where(Lead.practice_id == practice_id, Event.type.in_(ACTIVITY_TYPES))
+        .order_by(Event.id.desc()).limit(limit * 4)
+    ).all()
+    recent = []
+    for e, lead in events:
+        text = _activity_text(e, f"{lead.first_name} {lead.last_name}".strip())
+        if text:
+            recent.append({"at": _iso(e.at), "type": e.type, "text": text, "lead_id": lead.id, "patient_id": lead.patient_id})
+        if len(recent) >= limit:
+            break
+    return {
+        "on_call": [{"lead_id": c.lead_id, "name": f"{c.lead.first_name} {c.lead.last_name}".strip(),
+                     "direction": c.direction or "outbound", "simulated": bool(c.lead.simulated)} for c in on_call],
+        "recent": recent,
+    }

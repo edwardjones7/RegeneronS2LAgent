@@ -102,7 +102,9 @@ def reschedule(lead_id: int, body: RescheduleIn, s: Session = Depends(get_sessio
     lead = _lead(s, lead_id)
     old = service.booked_slot(s, lead)
     new = s.get(Slot, body.slot_id)
-    if new is None or new.campaign_id != lead.campaign_id:
+    # Practice outreach: one calendar per practice, shared by its trials.
+    wrong = new is None or (new.practice_id != lead.practice_id if lead.practice_id else new.campaign_id != lead.campaign_id)
+    if wrong:
         raise HTTPException(404, "unknown slot")
     if not slots.book(s, new.id, lead.id):
         raise HTTPException(409, "That time was just taken.")
