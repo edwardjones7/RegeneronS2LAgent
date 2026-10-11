@@ -1,9 +1,10 @@
-.superpowers/
+.DS_Store
 .env
-__pycache__/
-*.db
-.venv/
-.elevenlabs.json
-web/out/
-web/.next/
-web/node_modules/
+.env.*
+!.env.example
+node_modules/
+
+# CDISC pilot data: educational license, fetched at setup, never committed.
+# See .claude/context/sample-ehr-data.md.
+/data/cdisc/
+/supabase/

@@ -1,0 +1,9 @@
+.superpowers/
+.env
+__pycache__/
+*.db
+.venv/
+.elevenlabs.json
+web/out/
+web/.next/
+web/node_modules/
