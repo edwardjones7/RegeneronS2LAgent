@@ -140,3 +140,4 @@ export async function syncTrials(scope: TrialScopeId, opts: { mode?: SyncMode } 
 }
 
 export { countOpenTrials, getTrialDetail, listOpenTrials, type TrialDetail, type TrialListItem, type TrialLocation } from './queries';
+export { AREA_LABELS, AREA_ORDER, isTherapeuticArea, type TherapeuticArea } from './areas';

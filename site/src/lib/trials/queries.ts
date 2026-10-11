@@ -1,5 +1,6 @@
 import supabase from '@/lib/utils/db/client';
 import { listProtocolIds } from '@/lib/protocols';
+import { classifyTrial, type TherapeuticArea } from './areas';
 
 /** Statuses a practice can still join or refer into. */
 const OPEN_STATUSES = ['RECRUITING', 'NOT_YET_RECRUITING'];
@@ -10,6 +11,9 @@ const HOME_STATE = 'New Jersey';
 export interface TrialListItem {
   nctId: string;
   title: string;
+  /** Short display name: the first listed condition. */
+  indication: string;
+  area: TherapeuticArea;
   conditions: string[];
   drug: string | null;
   phases: string[];
@@ -48,6 +52,8 @@ interface TrialRowSubset {
   nct_id: string;
   brief_title: string;
   conditions: string[];
+  condition_meshes: { term: string }[] | null;
+  condition_mesh_ancestors: { term: string }[] | null;
   interventions: { type: string | null; name: string | null }[];
   phases: string[];
   lead_sponsor: string | null;
@@ -57,14 +63,30 @@ interface TrialRowSubset {
 }
 
 const LIST_COLUMNS =
-  'nct_id, brief_title, conditions, interventions, phases, lead_sponsor, enrollment_count, overall_status, primary_completion_date';
+  'nct_id, brief_title, conditions, condition_meshes, condition_mesh_ancestors, interventions, phases, lead_sponsor, enrollment_count, overall_status, primary_completion_date';
+
+/** Regeneron study drugs: antibodies (-mab), traps (-cept), siRNAs (-siran), peptides (-tide), or a REGN code. */
+const STUDY_DRUG = /REGN|mab\b|cept\b|siran\b|tide\b/i;
+
+/** The study drug rather than a comparator, background therapy, or procedure. */
+function pickDrug(interventions: { type: string | null; name: string | null }[]): string | null {
+  const drugs = interventions.filter((i) => i.name && ['DRUG', 'BIOLOGICAL', 'GENETIC', 'COMBINATION_PRODUCT'].includes(i.type ?? ''));
+  const name = (drugs.find((i) => STUDY_DRUG.test(i.name!)) ?? drugs[0] ?? interventions[0])?.name ?? null;
+  return name ? name.charAt(0).toUpperCase() + name.slice(1) : null;
+}
+
+/** "Asthma (Moderate-to-Severe)" → "Asthma" */
+const stripParenthetical = (s: string) => s.replace(/\s*\([^)]*\)\s*$/, '').trim();
 
 function toListItem(row: TrialRowSubset, nj: { total: number; recruiting: number }, protocolIds: Set<string>): TrialListItem {
+  const meshTerms = [...(row.condition_meshes ?? []), ...(row.condition_mesh_ancestors ?? [])].map((m) => m.term);
   return {
     nctId: row.nct_id,
     title: row.brief_title,
+    indication: row.conditions[0] ? stripParenthetical(row.conditions[0]) : row.brief_title,
+    area: classifyTrial(row.conditions, meshTerms),
     conditions: row.conditions,
-    drug: row.interventions.find((i) => i.type !== 'OTHER')?.name ?? row.interventions[0]?.name ?? null,
+    drug: pickDrug(row.interventions),
     phases: row.phases,
     sponsor: row.lead_sponsor,
     enrollment: row.enrollment_count,
