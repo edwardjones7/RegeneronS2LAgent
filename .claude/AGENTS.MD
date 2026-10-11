@@ -230,11 +230,14 @@ If we pitch "AI calls patients," we are pitching their product with less infrast
 
 Judges trust teams that state their own limits. It reads as competence.
 
-- Runs on the CDISC pilot dataset, not a live EHR. Real deployment needs FHIR or a direct EHR integration and that is not built.
-- Only the criterion types in section 6 are computable. Free-text and judgment criteria are surfaced for human review, not evaluated.
-- Protocols are hand-authored JSON. No protocol parser.
+- Runs on synthetic patients from Synthea (2,000 in New Jersey, seed 42), not a live EHR. Real deployment needs FHIR or a direct EHR integration and that is not built.
+- "Practices" are the county groups Synthea placed patients in, not real practices. No practice or doctor names are invented.
+- Synthea leaves gaps that show up as chart review, not as failures: no LAMA inhalers, no FeNO, eosinophils and lung function on few patients, weight recorded about once a year, no family history.
+- Structured criteria are checked by code. Judgment criteria go to the Jev evaluation model as de-identified summaries. Jev's answers have not been checked against a clinician's.
+- Protocols are hand-authored JSON covering each trial's key criteria only, simplified from the real protocols. No protocol parser.
+- For exclusions, a missing record counts as a pass: no diabetes diagnosis on file is read as not diabetic.
 - Not validated against a site's actual pre-screening output. Next step is benchmarking candidate lists against a real coordinator's manual review.
-- No HIPAA or 21 CFR Part 11 compliance work has been done. The architecture is designed to make it reachable, not to claim it.
+- No HIPAA or 21 CFR Part 11 compliance work has been done. The Jev summaries follow the Safe Harbor de-identification approach, but there's been no expert determination and no BAA with Vercel or TypeSafe AI. The architecture is designed to make compliance reachable, not to claim it.
 
 ---
 
