@@ -194,11 +194,18 @@ export default function OutreachPage({ nct, initial }: OutreachPageProps) {
   return (
     <AppShell title="Campaigns" active="campaigns">
       <PageIntro
-        title="Campaigns"
+        title={
+          data.trials.length > 0
+            ? `Here’s how Ava is doing, ${DEMO_PRACTICE.doctor}.`
+            : `Nothing running yet, ${DEMO_PRACTICE.doctor}.`
+        }
+        meta={
+          data.trials.length > 0 ? `${data.trials.length} ${data.trials.length === 1 ? 'trial' : 'trials'} accepted` : undefined
+        }
         description={
           data.trials.length > 0
-            ? `Ava is calling your pre-screened patients from ${DEMO_PRACTICE.doctor}’s office and booking screening visits.`
-            : `Each trial you accept becomes a campaign: Ava calls its candidates from ${DEMO_PRACTICE.doctor}’s office.`
+            ? 'She calls your pre-screened patients and books their screening visits.'
+            : 'Each trial you accept becomes a campaign. Ava calls its candidates from your office.'
         }
         tabs={
           data.trials.length > 0 ? (
