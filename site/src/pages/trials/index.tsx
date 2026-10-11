@@ -94,7 +94,7 @@ export default function TrialsPage({ counts, filters, trials, areaCounts, total 
       {trials.length === 0 ? (
         <p className="mt-10 text-center text-sm text-ink-3">No trials here.</p>
       ) : (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
           {trials.map((t) => (
             <TrialCard key={t.nctId} trial={t} />
           ))}
