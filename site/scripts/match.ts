@@ -101,9 +101,9 @@ async function supabaseUpsert(table: string, rows: object[]) {
 const useSupabase = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY);
 if (args.write && !useSupabase) throw new Error('--write needs SUPABASE_URL and SUPABASE_SECRET_KEY');
 const TRIAL_COLS =
-  'nct_id,brief_title,conditions,condition_meshes,eligibility_criteria,sex,minimum_age_years,maximum_age_years,healthy_volunteers';
+  'nct_id,brief_title,conditions,condition_meshes,eligibility_criteria,sex,minimum_age_years,maximum_age_years,healthy_volunteers,last_update_post_date';
 
-type LoadedTrial = Trial & { criteria_questions?: TrialCriteria | null };
+type LoadedTrial = Trial & { criteria_questions?: TrialCriteria | null; last_update_post_date?: string | null };
 
 async function loadTrials(ids: string[] | undefined): Promise<LoadedTrial[]> {
   if (useSupabase) {
@@ -234,6 +234,14 @@ const structuredFor = (t: LoadedTrial): TrialCriteria | null => {
 };
 const structuredByTrial = new Map(trials.map((t) => [t.nct_id, structuredFor(t)]));
 
+// Criteria built from an older registry version would judge patients against outdated
+// rules while the hash stays the same. Skip those trials until preprocess-criteria reruns.
+const outdated = new Set(trials.filter((t) => {
+  const v = structuredByTrial.get(t.nct_id)?.source_version;
+  return v && t.last_update_post_date && v !== t.last_update_post_date;
+}).map((t) => t.nct_id));
+if (outdated.size) console.warn(`Criteria older than the registry, so skipped (run npm run criteria): ${[...outdated].join(', ')}`);
+
 const sha = (x: string) => createHash('sha256').update(x).digest('hex').slice(0, 32);
 const conditionMap: TrialConditionMap = JSON.parse(readFileSync(resolve(REPO, 'data/conditions/trial_conditions.json'), 'utf8'));
 
@@ -259,6 +267,7 @@ type Prepared = {
 };
 
 function prepare(p: Patient, t: Trial, why: string): Prepared | null {
+  if (outdated.has(t.nct_id)) return null;
   const tc = structuredByTrial.get(t.nct_id);
   const settings = [JEV_MODEL, REJECT_THRESHOLD, CONFIDENT, order];
   if (!tc) {
@@ -345,8 +354,13 @@ if (args.write) {
   const storedHash = new Map(stored.map((r) => [key(r.patient_id, r.nct_id), r.input_hash]));
   todo = prepared.filter((x) => storedHash.get(key(x.p.id, x.t.nct_id)) !== x.hash);
   const current = new Set(prepared.map((x) => key(x.p.id, x.t.nct_id)));
+  // Only trials this run actually evaluated: rows for skipped trials (unmapped, outdated
+  // criteria, no criteria) are left alone rather than wiped.
+  const evaluated = new Set(trials.filter((t) =>
+    conditionMap[t.nct_id] && !outdated.has(t.nct_id) && (structuredByTrial.get(t.nct_id) || criteriaByTrial.get(t.nct_id)!.length),
+  ).map((t) => t.nct_id));
   // With --limit only some patients were considered, so absence proves nothing.
-  if (!args.limit) stale = stored.filter((r) => !current.has(key(r.patient_id, r.nct_id)));
+  if (!args.limit) stale = stored.filter((r) => evaluated.has(r.nct_id) && !current.has(key(r.patient_id, r.nct_id)));
 }
 const unchanged = prepared.length - todo.length;
 const tCondition = performance.now();
