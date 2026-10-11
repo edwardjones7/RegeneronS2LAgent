@@ -102,7 +102,7 @@ const LANES: Record<CriterionCheck, { label: string; className: string }> = {
 function TrialRow({ trial }: { trial: WalkthroughTrial }) {
   const style = AREA_STYLES[trial.area];
   return (
-    <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-line-2 bg-surface p-3 shadow-[0_1px_2px_rgba(30,36,48,0.05)]">
+    <div className="flex h-[72px] items-center gap-3 overflow-hidden rounded-2xl border border-line-2 bg-surface p-3 shadow-[0_1px_2px_rgba(30,36,48,0.05)]">
       <span className={cn('flex size-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br', style.gradient)}>
         <AreaIcon area={trial.area} className="size-5 text-white" />
       </span>
@@ -116,29 +116,43 @@ function TrialRow({ trial }: { trial: WalkthroughTrial }) {
   );
 }
 
+/** Visible slots in the found-trials stack; one extra slot fades out at the bottom. */
+const STACK = 6;
+
+/** Vertical position per slot (72px row + 12px gap), as full class names for Tailwind. */
+const SLOT_Y = ['translate-y-0', 'translate-y-[84px]', 'translate-y-[168px]', 'translate-y-[252px]', 'translate-y-[336px]', 'translate-y-[420px]', 'translate-y-[504px]'];
+
 function FetchScene({ data, t }: { data: WalkthroughData; t: number }) {
-  const count = Math.round(easeOut(t / 4200) * data.trialCount);
-  // Rendered twice so the upward marquee loops without a seam.
-  const rows = [...data.trials, ...data.trials];
+  const progress = easeOut(t / 4200);
+  const count = Math.round(progress * data.trialCount);
+  // Trials turn up in step with the counter: quickly at first, then slowing.
+  const found = Math.round(progress * data.trials.length);
+  // Newest first; the oldest of these sits in the extra slot, fading out.
+  const shown = data.trials.slice(Math.max(0, found - STACK - 1), found).reverse();
 
   return (
     <div className="mx-auto grid w-full max-w-5xl animate-modal-in grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-16">
-      {/* Trials streaming in. */}
-      <div className="relative h-[560px] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_18%,black_82%,transparent)]">
-        <div className="flex animate-marquee-up flex-col gap-3">
-          {rows.map((trial, i) => (
-            <TrialRow key={`${trial.nctId}-${i}`} trial={trial} />
-          ))}
-        </div>
+      {/* Trials as they're found: each new one lands on top and pushes the rest down. */}
+      <div className="relative h-[504px]">
+        {shown.map((trial, slot) => (
+          <div
+            key={trial.nctId}
+            className={cn(
+              'absolute inset-x-0 top-0 transition-[transform,opacity] duration-500 ease-out',
+              SLOT_Y[slot],
+              slot >= STACK ? 'opacity-0' : 'opacity-100'
+            )}
+          >
+            <div className={cn(slot === 0 && 'animate-modal-in')}>
+              <TrialRow trial={trial} />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* The count. */}
       <div>
-        <div className="flex items-center gap-2 text-[12.5px] font-semibold uppercase tracking-[0.08em] text-ink-3">
-          <span className="size-2 animate-pulse rounded-full bg-accent" />
-          ClinicalTrials.gov
-        </div>
-        <h2 className="mt-3 text-[34px] font-semibold leading-tight tracking-[-0.03em]">Fetching open trials</h2>
+        <h2 className="text-[34px] font-semibold leading-tight tracking-[-0.03em]">Fetching open trials</h2>
         <div className="mt-6 flex items-baseline gap-3">
           <span className="text-[112px] font-semibold leading-none tabular-nums tracking-[-0.05em]">{count}</span>
           <span className="text-[17px] text-ink-3">open trials</span>
