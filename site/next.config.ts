@@ -1,7 +1,14 @@
-import type { NextConfig } from "next";
+import path from 'node:path';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // The engine reads ../protocols and ../data (shared with voice-agent/) at runtime, by a path
+  // the bundler can't trace, so ship them with every server function.
+  outputFileTracingRoot: path.join(__dirname, '..'),
+  outputFileTracingIncludes: {
+    '/**': ['../protocols/*.json', '../data/synthea-nj.json'],
+  },
 };
 
 export default nextConfig;
