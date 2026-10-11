@@ -307,9 +307,25 @@ function renderScene(key: SceneKey, data: WalkthroughData, t: number, onFinish: 
 
 /* ————————— Overlay ————————— */
 
+// The walkthrough's data, loaded once and shared, so the landing page can start loading it before
+// Sign in is clicked and the walkthrough opens with no spinner. Kept for a few minutes.
+const KEEP_MS = 5 * 60_000;
+let cached: { at: number; promise: Promise<WalkthroughData>; data: WalkthroughData | null } | null = null;
+
+export function prefetchWalkthrough(): Promise<WalkthroughData> {
+  if (cached && Date.now() - cached.at < KEEP_MS) return cached.promise;
+  const entry: NonNullable<typeof cached> = { at: Date.now(), promise: fetchJson<WalkthroughData>('/api/walkthrough'), data: null };
+  entry.promise.then(
+    (d) => (entry.data = d),
+    () => cached === entry && (cached = null)
+  );
+  cached = entry;
+  return entry.promise;
+}
+
 export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
   const router = useRouter();
-  const [data, setData] = useState<WalkthroughData | null>(null);
+  const [data, setData] = useState<WalkthroughData | null>(() => (cached && Date.now() - cached.at < KEEP_MS ? cached.data : null));
   const [error, setError] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [leaving, setLeaving] = useState(false);
@@ -317,7 +333,7 @@ export function PipelineWalkthrough({ onClose }: { onClose: () => void }) {
 
   // There are no buttons to leave by, so a failed load closes itself.
   useEffect(() => {
-    fetchJson<WalkthroughData>('/api/walkthrough').then(setData, () => {
+    prefetchWalkthrough().then(setData, () => {
       setError(true);
       setTimeout(onClose, 1500);
     });

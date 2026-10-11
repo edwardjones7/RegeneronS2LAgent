@@ -1,9 +1,10 @@
 import type { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { TrialCard } from '@/components/trials/TrialCard';
 import { TrialistLogo } from '@/components/ui/TrialistLogo';
+import { prefetchWalkthrough } from '@/components/walkthrough/PipelineWalkthrough';
 import { DEMO_PRACTICE } from '@/lib/practice';
 import { canFill, listOpenTrials, type TrialListItem } from '@/lib/trials';
 import { cn } from '@/lib/utils/cn';
@@ -110,6 +111,11 @@ const FAN = ['left-1/2 top-0 z-30 -translate-x-1/2', 'left-0 top-16 z-10 -rotate
 export default function Landing({ showcase, openTrials, fitting }: LandingProps) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+
+  // Load the walkthrough's data now, so it plays the moment Sign in is clicked.
+  useEffect(() => {
+    prefetchWalkthrough().catch(() => {});
+  }, []);
 
   // No accounts in the demo: signing in means signing in as the demo practice's doctor.
   // ?welcome plays the pipeline walkthrough over the dashboard, which then dissolves into it.
