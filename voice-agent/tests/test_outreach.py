@@ -294,7 +294,7 @@ def test_trials_accept_and_overview_api(client):
     assert over["practice"]["office_display"] == "Dr. Rivera's office"
 
 
-def test_on_vercel_accept_dials_right_away_and_polling_keeps_calls_moving(client):
+def test_on_vercel_accept_dials_right_away(client):
     from app.routes import practices as routes
 
     with patch.object(routes, "get_settings") as gs, patch("app.main.worker_tick", return_value=3) as tick:
@@ -303,10 +303,18 @@ def test_on_vercel_accept_dials_right_away_and_polling_keeps_calls_moving(client
         r = client.post(f"/practices/{PRACTICE}/trials/{TRIAL}/accept", json={"doctor_name": "Rivera"}, headers=READ)
         assert r.status_code == 200 and tick.call_count == 1  # first batch dialed on accept
         client.get(f"/practices/{PRACTICE}/outreach", headers=READ)
-        assert tick.call_count == 1  # throttled: the accept just ticked
-        routes._last_tick -= routes.TICK_EVERY_SECS
-        client.get(f"/practices/{PRACTICE}/outreach", headers=READ)
-        assert tick.call_count == 2  # a dashboard poll advances the queue
+        assert tick.call_count == 1  # polling doesn't tick; the external cron does
+
+
+def test_dial_twice_places_one_call(s):
+    accept(s)
+    lead = first_candidate(s)
+    lead_id = lead.id
+    s.commit()
+    service.dial(lead_id)
+    service.dial(lead_id)  # a second, overlapping tick
+    s.expire_all()
+    assert s.get(Lead, lead_id).attempts == 1
 
 
 def test_off_vercel_accept_leaves_dialing_to_the_worker(client):

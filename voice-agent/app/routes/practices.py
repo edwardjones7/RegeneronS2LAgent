@@ -139,7 +139,8 @@ TICK_EVERY_SECS = 15
 
 def _tick(force: bool = False) -> None:
     """On Vercel, advance the call queue (dial due leads, settle calls, resolve simulations).
-    Runs on accept and, at most every TICK_EVERY_SECS, while a dashboard polls."""
+    Runs on accept so the first calls go out immediately; after that an external scheduler
+    hitting /cron/tick (deploy/pi-cron) keeps the queue moving."""
     global _last_tick
     if not force and time.monotonic() - _last_tick < TICK_EVERY_SECS:
         return
@@ -165,8 +166,6 @@ STAGES = {
 def outreach_overview(practice_id: str, nct_id: str | None = None, s: Session = Depends(get_session)):
     """Everything the staff dashboard shows for one practice (optionally one trial)."""
     _practice(practice_id)
-    if get_settings().vercel:
-        _tick()  # dashboards poll this every few seconds; it keeps calls moving without a worker
     q = select(Lead).where(Lead.practice_id == practice_id)
     if nct_id:
         q = q.where(Lead.campaign_id == outreach.campaign_id_for(nct_id))

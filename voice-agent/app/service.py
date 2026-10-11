@@ -164,7 +164,9 @@ def dial(lead_id: int) -> None:
     """Place a call now. Safe to call from a background task or the worker."""
     voice = get_voice()
     with session_scope() as s:
-        lead = s.get(Lead, lead_id)
+        # Row lock: two overlapping ticks (Pi cron, accept, serverless instances) can't both
+        # claim the same lead. The second waits, then sees CALLING and returns. No-op on SQLite.
+        lead = s.get(Lead, lead_id, with_for_update=True)
         if lead is None:
             return
         campaign = campaign_for(lead)
