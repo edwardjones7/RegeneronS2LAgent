@@ -87,6 +87,24 @@ function isClinical(name: string, kind: string | null): boolean {
   return !NON_CLINICAL.test(name);
 }
 
+/** Friendlier names for the SNOMED terms a doctor sees most. */
+const SHORT_NAMES: Record<string, string> = {
+  'Body mass index 30+ - obesity': 'Obesity',
+  'Body mass index 40+ - severely obese': 'Severe obesity',
+  'Essential hypertension': 'Hypertension',
+  'Diabetes mellitus type 2': 'Type 2 diabetes',
+  'Metabolic syndrome X': 'Metabolic syndrome',
+  'Abnormal findings diagnostic imaging heart+coronary circulat': 'Abnormal cardiac imaging',
+  'Chronic obstructive bronchitis': 'COPD (chronic bronchitis)',
+  'Pulmonary emphysema': 'COPD (emphysema)',
+};
+
+/** SNOMED code → display name, with the short form where there is one. */
+function conditionName(code: string): { name: string; kind: string | null } {
+  const { name, kind } = snomedName(code);
+  return { name: SHORT_NAMES[name] ?? name, kind };
+}
+
 function rxnormName(code: string): string {
   return getBundle().codes.rxnorm[code] ?? `RxNorm ${code}`;
 }
@@ -174,7 +192,7 @@ export interface PatientStats {
 function toSummary(p: RawPatient, asOf: string): PatientSummary {
   const active = p.conditions
     .filter(([, , end]) => end === null)
-    .map(([code, start]) => ({ ...snomedName(code), start }))
+    .map(([code, start]) => ({ ...conditionName(code), start }))
     .filter((c) => isClinical(c.name, c.kind))
     .sort((a, b) => b.start.localeCompare(a.start));
   const num = (key: string) => {
@@ -215,13 +233,38 @@ export function getPatientStats(county?: string): PatientStats {
   };
 }
 
-export function listPatients(opts: { county?: string; query?: string; page?: number }): PatientListResult {
-  const { patients, asOf, source } = getBundle();
+function getSummaries(): PatientSummary[] {
+  const { patients, asOf } = getBundle();
+  summaries ??= patients.map((p) => toSummary(p, asOf));
+  return summaries;
+}
+
+/** Most common active clinical conditions in a county (one practice's panel), most common first. */
+export function getConditionCounts(county: string, limit = 12): { name: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const p of getSummaries()) {
+    if (p.county !== county) continue;
+    for (const d of p.activeDiagnoses) counts.set(d, (counts.get(d) ?? 0) + 1);
+  }
+  return [...counts]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+    .slice(0, limit);
+}
+
+export function listPatients(opts: {
+  county?: string;
+  /** Patient must have every one of these active conditions. */
+  conditions?: string[];
+  query?: string;
+  page?: number;
+}): PatientListResult {
+  const { asOf, source } = getBundle();
   const query = opts.query?.trim().toLowerCase();
 
-  summaries ??= patients.map((p) => toSummary(p, asOf));
-  let rows = summaries;
+  let rows = getSummaries();
   if (opts.county) rows = rows.filter((r) => r.county === opts.county);
+  if (opts.conditions?.length) rows = rows.filter((r) => opts.conditions!.every((c) => r.activeDiagnoses.includes(c)));
   if (query) {
     rows = rows.filter(
       (r) => r.name.toLowerCase().includes(query) || r.activeDiagnoses.some((d) => d.toLowerCase().includes(query))
@@ -262,14 +305,14 @@ export function getPatient(id: string, county: string): PatientDetail | null {
     activeConditions: p.conditions
       .filter(([, , end]) => end === null)
       .map(([code, start]) => {
-        const { name, kind } = snomedName(code);
+        const { name, kind } = conditionName(code);
         return { name, clinical: isClinical(name, kind), since: start };
       })
       .sort((a, b) => Number(b.clinical) - Number(a.clinical) || b.since.localeCompare(a.since)),
     pastConditions: p.conditions
       .filter((c): c is [string, string, string] => c[2] !== null)
       .map(([code, start, end]) => {
-        const { name, kind } = snomedName(code);
+        const { name, kind } = conditionName(code);
         return { name, clinical: isClinical(name, kind), start, end };
       })
       .sort((a, b) => b.end.localeCompare(a.end)),

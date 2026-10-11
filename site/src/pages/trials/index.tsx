@@ -2,13 +2,14 @@ import type { GetServerSideProps } from 'next';
 import { AreaFilter } from '@/components/trials/AreaFilter';
 import { FilterMenu } from '@/components/trials/FilterMenu';
 import { TrialCard } from '@/components/trials/TrialCard';
+import { TrialModal } from '@/components/trials/TrialModal';
 import { AppShell } from '@/components/ui';
 import { getAcceptedTrials } from '@/lib/caller';
 import { getPatientStats } from '@/lib/patients';
 import { DEMO_PRACTICE, greeting } from '@/lib/practice';
 import { listOpenTrials, type TrialListItem } from '@/lib/trials';
 import { AREA_ORDER, type TherapeuticArea } from '@/lib/trials/areas';
-import { matchesMenuFilters, parseFilters, type TrialFilters } from '@/lib/trials/filters';
+import { filtersToQuery, matchesMenuFilters, parseFilters, type TrialFilters } from '@/lib/trials/filters';
 
 interface TrialsPageProps {
   filters: TrialFilters;
@@ -39,8 +40,8 @@ export const getServerSideProps: GetServerSideProps<TrialsPageProps> = async ({ 
       areaCounts,
       total: inScope.length,
       greeting: greeting(),
-      practicePatients: getPatientStats().counties.find((c) => c.name === DEMO_PRACTICE.county)?.count ?? 0,
       outreach,
+      practicePatients: getPatientStats().counties.find((c) => c.name === DEMO_PRACTICE.county)?.count ?? 0,
     },
   };
 };
@@ -71,10 +72,17 @@ export default function TrialsPage({ filters, trials, areaCounts, total, greetin
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-5 lg:grid-cols-3">
           {trials.map((t) => (
-            <TrialCard key={t.nctId} trial={t} outreach={outreach[t.nctId]} />
+            <TrialCard
+              key={t.nctId}
+              trial={t}
+              href={{ pathname: '/trials', query: { ...filtersToQuery(filters), trial: t.nctId } }}
+              outreach={outreach[t.nctId]}
+            />
           ))}
         </div>
       )}
+
+      <TrialModal order={trials.map((t) => t.nctId)} />
     </AppShell>
   );
 }

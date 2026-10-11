@@ -39,7 +39,7 @@ export function AcceptCard({ nctId, initial }: { nctId: string; initial: TrialOu
 
   if (!state.available || !state.callable) {
     return (
-      <div className="rounded-[10px] border border-line p-4 text-[12.5px] text-ink-3">
+      <div className="rounded-2xl border border-line p-4 text-[12.5px] text-ink-3">
         {state.available
           ? 'Outreach isn’t set up for this trial yet.'
           : 'The outreach caller isn’t running, so this trial can’t be accepted from here right now.'}
@@ -66,7 +66,7 @@ export function AcceptCard({ nctId, initial }: { nctId: string; initial: TrialOu
   if (state.accepted) {
     const t = state.totals;
     return (
-      <div className="rounded-[10px] border border-pass/35 bg-pass-bg/40 p-4">
+      <div className="rounded-2xl border border-pass/35 bg-pass-bg/40 p-4">
         <div className="flex items-center justify-between gap-2">
           <Badge tone="pass">Accepted</Badge>
           <span className="text-[11.5px] text-ink-3">by {state.acceptedBy}</span>
@@ -89,7 +89,7 @@ export function AcceptCard({ nctId, initial }: { nctId: string; initial: TrialOu
   }
 
   return (
-    <div className="rounded-[10px] border border-accent-line bg-accent-weak/50 p-4">
+    <div className="rounded-2xl border border-accent-line bg-accent-weak/50 p-4">
       <div className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-accent">Your patients</div>
       <div className="mt-2 grid grid-cols-2 gap-2">
         <Num value={state.candidates} label="pre-screen candidates" />
