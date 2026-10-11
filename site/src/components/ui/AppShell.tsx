@@ -104,21 +104,24 @@ export function AppShell({ title, active, children }: AppShellProps) {
             ))}
           </nav>
 
-          {/* Demo: an animated walkthrough of the pipeline (fetch → Jev → dashboard). Visual only. */}
+
+          {/* Re-runs the pipeline as an animated walkthrough (fetch → match → dashboard). Visual only. */}
           <button
             type="button"
             onClick={() => setWalkthrough(true)}
-            className="group mt-4 flex h-10 items-center gap-2.5 rounded-xl border border-white/80 bg-white/60 px-2.5 text-[13px] font-semibold text-ink shadow-[0_1px_2px_rgba(30,36,48,0.05)] backdrop-blur-sm transition-colors hover:bg-white"
+            className="group mt-auto flex h-10 items-center gap-2.5 rounded-xl px-2.5 text-[13px] font-medium text-ink-2 transition-colors hover:bg-ink/[0.04] hover:text-ink"
           >
-            <span className="flex size-6 items-center justify-center rounded-full bg-linear-to-br from-[#FF9F80] via-[#F7B6CF] to-[#78B4F4] text-white">
-              <svg className="ml-px size-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                <path d="M8 5.5v13a1 1 0 001.5.86l10.5-6.5a1 1 0 000-1.72L9.5 4.64A1 1 0 008 5.5z" />
-              </svg>
-            </span>
-            Run pre-screen
+            <svg
+              {...ICON_PROPS}
+              className={cn('size-[18px] shrink-0 transition-transform duration-500 group-hover:rotate-180', walkthrough && 'animate-spin')}
+            >
+              <path d="M20 11a8 8 0 00-14.9-3.9M4 4v4h4" />
+              <path d="M4 13a8 8 0 0014.9 3.9M20 20v-4h-4" />
+            </svg>
+            Refetch trials
           </button>
 
-          <div className="mt-auto flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/60 p-2.5 backdrop-blur-sm">
+          <div className="mt-2 flex items-center gap-2.5 rounded-2xl border border-white/80 bg-white/60 p-2.5 backdrop-blur-sm">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#A3CEF6] to-[#E0F2D3] text-[12px] font-semibold text-ink">
               {initials(DEMO_PRACTICE.doctor)}
             </span>
