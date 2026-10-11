@@ -5,9 +5,9 @@
 // Steps:
 //   1. Code prefilter on age and sex (free).
 //   2. Condition prefilter (free): does the patient have the trial's disease? A lookup in
-//      data/conditions/trial_condition_codes.json. No model involved.
+//      data/conditions/trial_conditions.json. No model involved.
 //   3. Eligibility: one Jev call per surviving (patient, trial). Trials preprocessed by
-//      Gemini (data/criteria/<nct>.json, from scripts/preprocess-criteria.ts) send only
+//      Gemini (trials.criteria_questions, from scripts/preprocess-criteria.ts) send only
 //      their record criteria; code settles age/sex/lab checks and subgroups, and
 //      screening/consent items are listed for the call. Other trials fall back to the
 //      naive splitter with every criterion as a question.
@@ -235,7 +235,7 @@ const structuredFor = (t: LoadedTrial): TrialCriteria | null => {
 const structuredByTrial = new Map(trials.map((t) => [t.nct_id, structuredFor(t)]));
 
 const sha = (x: string) => createHash('sha256').update(x).digest('hex').slice(0, 32);
-const conditionMap: TrialConditionMap = JSON.parse(readFileSync(resolve(REPO, 'data/conditions/trial_condition_codes.json'), 'utf8'));
+const conditionMap: TrialConditionMap = JSON.parse(readFileSync(resolve(REPO, 'data/conditions/trial_conditions.json'), 'utf8'));
 
 // 1. Demographics.
 const pairs = patients.flatMap((p) => trials.filter((t) => passesDemographics(p, t, asOf)).map((t) => ({ p, t })));
@@ -245,7 +245,7 @@ const afterDemographics = pairs.length;
 const unmapped = trials.filter((t) => !conditionMap[t.nct_id]).map((t) => t.nct_id);
 if (unmapped.length) console.warn(`Not in the condition map, so skipped (rebuild data/conditions): ${unmapped.join(', ')}`);
 const matched = pairs.flatMap(({ p, t }) => {
-  const why = conditionMatch(p, conditionMap[t.nct_id]);
+  const why = conditionMatch(p, conditionMap[t.nct_id], (code) => codes.snomed[code] ?? code);
   return why ? [{ p, t, why }] : [];
 });
 const afterCondition = matched.length;

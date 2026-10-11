@@ -1,7 +1,7 @@
 import { LAB_FIELDS, LAB_UNITS } from './schema.ts';
 
 // The prompt that turns registry eligibility text into structured criteria.
-// Each rule below fixes a failure seen in docs/jev-accuracy-poc.md.
+// Each rule below fixes a failure seen in the accuracy tests on the 4 demo trials.
 
 export type PromptTrial = {
   nct_id: string;

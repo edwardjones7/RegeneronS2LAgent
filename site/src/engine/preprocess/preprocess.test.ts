@@ -129,7 +129,7 @@ describe('validation of the hand-written model output', () => {
 
 // ---------- the problems the preprocessing must fix ----------
 
-describe('fixes from docs/jev-accuracy-poc.md', async () => {
+describe('fixes for failures seen in the accuracy tests', async () => {
   const asthma = await structured(ASTHMA);
   const obesity = await structured(OBESITY);
   const byId = (tc: TrialCriteria, id: string) => tc.criteria.find((c) => c.id === id)!;

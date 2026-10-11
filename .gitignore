@@ -16,3 +16,5 @@ node_modules/
 /data/matches/
 .claude/worktrees/
 /data/conditions/build/dl_*/
+# Structured criteria written locally by site/scripts/preprocess-criteria.ts (stored in Supabase trials)
+/data/criteria/
