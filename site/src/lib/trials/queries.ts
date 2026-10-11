@@ -14,6 +14,8 @@ export interface TrialListItem {
   /** Short display name: the first listed condition. */
   indication: string;
   area: TherapeuticArea;
+  /** Start of the registry's brief summary, for the card. */
+  blurb: string | null;
   conditions: string[];
   drug: string | null;
   phases: string[];
@@ -52,6 +54,7 @@ interface TrialRowSubset {
   nct_id: string;
   brief_title: string;
   conditions: string[];
+  brief_summary: string | null;
   condition_meshes: { term: string }[] | null;
   condition_mesh_ancestors: { term: string }[] | null;
   interventions: { type: string | null; name: string | null }[];
@@ -65,7 +68,7 @@ interface TrialRowSubset {
 }
 
 const LIST_COLUMNS =
-  'nct_id, brief_title, conditions, condition_meshes, condition_mesh_ancestors, interventions, phases, lead_sponsor, enrollment_count, minimum_age_years, maximum_age_years, overall_status, primary_completion_date';
+  'nct_id, brief_title, brief_summary, conditions, condition_meshes, condition_mesh_ancestors, interventions, phases, lead_sponsor, enrollment_count, minimum_age_years, maximum_age_years, overall_status, primary_completion_date';
 
 /** Regeneron study drugs: antibodies (-mab), traps (-cept), siRNAs (-siran), peptides (-tide), or a REGN code. */
 const STUDY_DRUG = /REGN|mab\b|cept\b|siran\b|tide\b/i;
@@ -75,6 +78,13 @@ function pickDrug(interventions: { type: string | null; name: string | null }[])
   const drugs = interventions.filter((i) => i.name && ['DRUG', 'BIOLOGICAL', 'GENETIC', 'COMBINATION_PRODUCT'].includes(i.type ?? ''));
   const name = (drugs.find((i) => STUDY_DRUG.test(i.name!)) ?? drugs[0] ?? interventions[0])?.name ?? null;
   return name ? name.charAt(0).toUpperCase() + name.slice(1) : null;
+}
+
+/** Collapses whitespace and cuts to a card-sized excerpt; the card clamps it further. */
+function toBlurb(summary: string | null): string | null {
+  if (!summary) return null;
+  const text = summary.replace(/\s+/g, ' ').trim();
+  return text.length > 320 ? `${text.slice(0, 320).replace(/\s\S*$/, '')}…` : text;
 }
 
 /** "Asthma (Moderate-to-Severe)" → "Asthma" */
@@ -87,6 +97,7 @@ function toListItem(row: TrialRowSubset, nj: { total: number; recruiting: number
     title: row.brief_title,
     indication: row.conditions[0] ? stripParenthetical(row.conditions[0]) : row.brief_title,
     area: classifyTrial(row.conditions, meshTerms),
+    blurb: toBlurb(row.brief_summary),
     conditions: row.conditions,
     drug: pickDrug(row.interventions),
     phases: row.phases,
@@ -149,7 +160,7 @@ export async function getTrialDetail(nctId: string): Promise<TrialDetail | null>
     supabase
       .from('trials')
       .select(
-        `${LIST_COLUMNS}, official_title, brief_summary, eligibility_criteria, sex, healthy_volunteers, start_date, last_update_post_date`
+        `${LIST_COLUMNS}, official_title, eligibility_criteria, sex, healthy_volunteers, start_date, last_update_post_date`
       )
       .eq('nct_id', nctId)
       .maybeSingle(),

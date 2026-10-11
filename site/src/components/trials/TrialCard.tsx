@@ -33,10 +33,10 @@ export function TrialCard({ trial }: { trial: TrialListItem }) {
       </div>
 
       {/*
-        Title block rests at the bottom with the details hidden below the card edge (h-28 / translate-y-28).
+        Title block rests at the bottom with the details hidden below the card edge (h-16 / translate-y-16).
         On hover the whole block slides up, so the details rise out of the card's own edge.
       */}
-      <div className="absolute inset-x-4 bottom-4 translate-y-28 transition-transform duration-300 ease-out group-hover:translate-y-0 group-focus-visible:translate-y-0">
+      <div className="absolute inset-x-4 bottom-4 translate-y-16 transition-transform duration-300 ease-out group-hover:translate-y-0 group-focus-visible:translate-y-0">
         {trial.hasProtocol && (
           <span className="mb-2 flex items-center gap-1 text-xs font-semibold text-pass">
             <span className="size-1.5 rounded-full bg-pass" />
@@ -45,12 +45,12 @@ export function TrialCard({ trial }: { trial: TrialListItem }) {
         )}
         <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug tracking-[-0.015em]">{trial.indication}</h3>
         <p className="mt-0.5 truncate text-[13px] text-ink-3">{trial.drug ?? 'Intervention not listed'}</p>
+        {trial.blurb && <p className="mt-2.5 line-clamp-3 text-[13px] leading-relaxed text-ink-2">{trial.blurb}</p>}
 
-        <div className="h-28 pt-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
-          <dl className="grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line-2 pt-3">
+        <div className="h-16 pt-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+          <dl className="grid grid-cols-3 gap-x-3 border-t border-line-2 pt-3">
             <Fact label="Ages">{formatAgeRange(trial.minimumAge, trial.maximumAge)}</Fact>
             <Fact label="Enrolling">{trial.enrollment?.toLocaleString() ?? '—'}</Fact>
-            <Fact label="NJ sites">{trial.njRecruiting || 'None'}</Fact>
             <Fact label="Ends">{trial.primaryCompletion ? formatDate(trial.primaryCompletion.slice(0, 7)) : '—'}</Fact>
           </dl>
         </div>
