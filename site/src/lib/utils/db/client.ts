@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { getEnv } from '@/lib/utils/envManager';
 
 /**
@@ -12,16 +12,28 @@ import { getEnv } from '@/lib/utils/envManager';
  * (`.eq('practice_id', ...)`), never across practices. Anything that leaves a
  * practice, such as a sponsor view, uses de-identified counts only
  * (`practice_patient_counts()`, small counts suppressed).
+ *
+ * Created on first use, not at import, so `next build` works without the env set.
  */
-const supabase = createClient(
-  getEnv('SUPABASE_URL'),
-  getEnv('SUPABASE_SECRET_KEY'),
-  {
+let client: SupabaseClient | null = null;
+
+export function getSupabase(): SupabaseClient {
+  client ??= createClient(getEnv('SUPABASE_URL'), getEnv('SUPABASE_SECRET_KEY'), {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
-);
+  });
+  return client;
+}
+
+/** The same client, created on first property access. */
+const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    const real = getSupabase();
+    const value = Reflect.get(real, prop, real);
+    return typeof value === 'function' ? value.bind(real) : value;
+  },
+});
 
 export default supabase;
