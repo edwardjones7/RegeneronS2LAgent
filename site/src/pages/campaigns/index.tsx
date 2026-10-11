@@ -1,5 +1,6 @@
 import type { GetServerSideProps } from 'next';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { type ReactNode, useEffect, useState, useSyncExternalStore } from 'react';
 import { PatientAvatar } from '@/components/patients/PatientAvatar';
 import { PatientDrawer, prefetchPatient, useOpenPatient } from '@/components/patients/PatientDrawer';
@@ -302,6 +303,51 @@ function PatientRow({ p, href, selected }: { p: OutreachPatient; href: string; s
   );
 }
 
+/** Wipes the campaigns (or just the one in view) so the demo can start over. Asks once before it does. */
+function ResetButton({ nct, onDone }: { nct: string | null; onDone: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const reset = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/outreach/reset${nct ? `?nct=${nct}` : ''}`, { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'That didn’t work');
+      setConfirming(false);
+      onDone();
+    } catch (err) {
+      setError(getErrorMessage(err, 'That didn’t work'));
+    } finally {
+      setBusy(false);
+    }
+  };
+  if (!confirming) {
+    return (
+      <button type="button" className={PILL_SOFT} onClick={() => setConfirming(true)}>
+        {nct ? 'Reset this campaign' : 'Reset campaigns'}
+      </button>
+    );
+  }
+  return (
+    <div className="flex flex-col items-end gap-1.5">
+      <div className="flex items-center gap-2">
+        <span className="text-[12.5px] text-ink-2">
+          {nct ? 'Wipe this campaign’s calls, texts and visits?' : 'Wipe every campaign’s calls, texts and visits?'}
+        </span>
+        <button type="button" className={cn(PILL, 'bg-fail text-white hover:bg-fail/85')} disabled={busy} onClick={reset}>
+          {busy ? 'Wiping…' : 'Yes, wipe'}
+        </button>
+        <button type="button" className={PILL_SOFT} disabled={busy} onClick={() => setConfirming(false)}>
+          Cancel
+        </button>
+      </div>
+      {error && <span className="text-[12px] text-fail">{error}</span>}
+    </div>
+  );
+}
+
 function QueueItem({ p, href, onDone }: { p: OutreachPatient; href: string; onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -486,6 +532,14 @@ export default function OutreachPage({ nct, initial, areas, selected, selectedOu
   const hrefFor = (p: OutreachPatient) => campaignHref(nct, p.patientId);
   const openId = useOpenPatient();
   const openName = data.patients.find((p) => p.patientId === openId)?.name;
+  const router = useRouter();
+  const afterReset = () => {
+    // A wiped trial has nothing left to filter to, so go back to all campaigns.
+    if (nct) void router.replace('/campaigns');
+    fetchJson<OutreachOverview>('/api/outreach')
+      .then(setData)
+      .catch(() => {});
+  };
 
   return (
     <AppShell title="Campaigns" active="campaigns">
@@ -497,6 +551,7 @@ export default function OutreachPage({ nct, initial, areas, selected, selectedOu
             ? 'She calls your pre-screened patients and books their screening visits.'
             : 'Each trial you accept becomes a campaign. Ava calls its candidates from your office.'
         }
+        actions={running ? <ResetButton nct={nct} onDone={afterReset} /> : undefined}
       />
 
       {!data.available ? (

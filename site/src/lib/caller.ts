@@ -143,6 +143,15 @@ export async function acceptTrial(nctId: string): Promise<void> {
   });
 }
 
+/**
+ * Wipe this practice's campaigns (one trial, or all): Ava's calls, texts, booked visits and the
+ * acceptances, so trials can be accepted again from scratch. The do-not-call list is kept.
+ */
+export async function resetOutreach(nctId?: string): Promise<{ patients: number; trials: number }> {
+  const q = nctId ? `?nct_id=${encodeURIComponent(nctId)}` : '';
+  return call(`/practices/${practice}/reset${q}`, { method: 'POST', body: {} });
+}
+
 /* ————————— The Outreach tab ————————— */
 
 export type OutreachStatus =

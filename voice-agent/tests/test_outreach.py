@@ -482,3 +482,35 @@ def test_call_list_comes_from_the_engine_when_it_has_run(s):
     assert [x.patient_id for x in queued] == [b, a]  # best match is called first
     review = leads(s, LeadStatus.CHART_REVIEW)
     assert len(review) == 1 and "BMI?" in review[0].flags[0]["detail"]
+
+
+def test_reset_wipes_the_practice_outreach_and_frees_booked_times(client):
+    client.post(f"/practices/{PRACTICE}/trials/{TRIAL}/accept", json={"doctor_name": "Rivera"}, headers=READ)
+    with db.session_scope() as s:
+        lead = first_candidate(s)
+        service.tool_verify_identity(s, lead, lead.birth_date)
+        offer = service.tool_get_open_slots(s, lead)
+        slot_id = int(offer.split("slot_id ")[1].split(":")[0])
+        service.tool_book_visit(s, lead, slot_id)
+    r = client.post(f"/practices/{PRACTICE}/reset", headers=READ)
+    assert r.status_code == 200 and r.json()["trials"] == 1 and r.json()["patients"] > 0
+    with db.session_scope() as s:
+        assert leads(s) == []
+        assert s.get(outreach_slots.Slot, slot_id).booked_lead_id is None
+    trials = client.get(f"/practices/{PRACTICE}/trials", headers=READ).json()
+    assert not next(t for t in trials if t["nct_id"] == TRIAL)["accepted"]
+    # And the trial can be accepted again from scratch.
+    assert client.post(f"/practices/{PRACTICE}/trials/{TRIAL}/accept", json={"doctor_name": "Rivera"}, headers=READ).status_code == 200
+
+
+def test_reset_one_trial_keeps_the_others(client):
+    other = "NCT07309614"
+    for nct in (TRIAL, other):
+        client.post(f"/practices/{PRACTICE}/trials/{nct}/accept", json={"doctor_name": "Rivera"}, headers=READ)
+    client.post(f"/practices/{PRACTICE}/reset?nct_id={TRIAL}", headers=READ)
+    accepted = {t["nct_id"] for t in client.get(f"/practices/{PRACTICE}/trials", headers=READ).json() if t["accepted"]}
+    assert accepted == {other}
+
+
+def test_reset_needs_the_api_key(client):
+    assert client.post(f"/practices/{PRACTICE}/reset").status_code in (401, 403)
