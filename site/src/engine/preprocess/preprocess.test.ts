@@ -11,7 +11,7 @@ import { geminiComplete } from '../../lib/gemini.ts';
 import { fallbackCriteria } from './fallback.ts';
 import { criteriaVersion, isCurrent, preprocessTrial, type Complete, type PreprocessTrial } from './preprocess.ts';
 import { LLM_JSON_SCHEMA, PROMPT_VERSION, type TrialCriteria } from './schema.ts';
-import { combine, filterState, planPatient, structuredQuestion, type PatientFacts } from './toJev.ts';
+import { combine, evaluateCodeCheck, filterState, planPatient, structuredQuestion, type PatientFacts } from './toJev.ts';
 import { validateCriteria } from './validate.ts';
 import { criterionQuestion } from '../questions.ts';
 import { splitEligibility } from '../eligibility.ts';
@@ -170,7 +170,7 @@ describe('fixes from docs/jev-accuracy-poc.md', async () => {
     const answers = mockJev(plan, (id) => (id === 'inc_9' || id === 'inc_10' ? 'reject' : 'accept'));
     const r = combine(asthma, answers, plan.review);
     assert.equal(r.units.g1, 'unknown');
-    assert.equal(r.bucket, 'review');
+    assert.equal(r.bucket, 'chart_review');
   });
 
   it('"Exceptions" narrow the item instead of becoming exclusions', () => {
@@ -180,10 +180,10 @@ describe('fixes from docs/jev-accuracy-poc.md', async () => {
     assert.match(byId(asthma, 'exc_10').question, /other than basal cell/);
   });
 
-  it('the main diagnosis is its own item with a code check', () => {
-    assert.deepEqual(byId(asthma, 'inc_2').code_check, {
-      type: 'date_window', event: 'condition', terms: ['asthma'], min_duration_months: 6, active: true,
-    });
+  it('the main diagnosis is its own record item, left to Jev rather than text matching', () => {
+    const dx = byId(asthma, 'inc_2');
+    assert.equal(dx.class, 'record');
+    assert.equal(dx.code_check, null);
   });
 
   it('record facts and screening tests packed together are split', () => {
@@ -207,22 +207,30 @@ describe('planPatient and combine', async () => {
   const asthma = await structured(ASTHMA);
   const obesity = await structured(OBESITY);
 
-  it('decides age, labs and date windows in code', () => {
+  it('decides age in code and sends diagnoses and drugs to Jev', () => {
     const f = facts(85, 'F', {
       conditions: [['195967001', '2025-01-01', null]],
       medications: [['312617', '2026-09-25', null]],
     });
     const p = planPatient(asthma, f);
     assert.equal(p.decided.inc_1, 'reject'); // 85 is over the age limit
-    assert.equal(p.decided.inc_2, 'accept'); // asthma for 21 months
-    assert.equal(p.decided.exc_1, 'reject'); // prednisone this month
-    assert.equal(p.decidedBy.exc_1, 'code');
+    assert.equal(p.decidedBy.inc_1, 'code');
+    for (const id of ['inc_2', 'exc_1']) assert.ok(id in p.jevCalls[0].questions, id); // asthma dx, steroid use
   });
 
-  it('a date window with no matching name goes to Jev rather than counting as absent', () => {
-    const p = planPatient(obesity, facts(50, 'M', {}));
-    assert.ok(p.jevCalls.some((c) => 'exc_1' in c.questions));
-    assert.ok(!('exc_1' in p.decided));
+  it('a ratio threshold is compared against a value stored in percent', () => {
+    const f = facts(60, 'M', { observations: { fev1_fvc: { value: 65, unit: '%', date: '2026-06-01' } } });
+    assert.equal(evaluateCodeCheck({ type: 'lab', field: 'fev1_fvc', lt: 0.7, unit: 'ratio' }, f), true);
+    assert.equal(evaluateCodeCheck({ type: 'lab', field: 'fev1_fvc', lt: 70, unit: '%' }, f), true);
+    assert.equal(evaluateCodeCheck({ type: 'lab', field: 'fev1_fvc', lt: 0.6, unit: 'ratio' }, f), false);
+  });
+
+  it('an applies_to with no subgroup in it means everyone', () => {
+    const items = structuredClone(OUTPUT.NCT07685808.criteria);
+    items[2].applies_to = { sex: null, min_age: null, max_age: null, condition: null, description: '' };
+    const v = validateCriteria({ criteria: items });
+    assert.ok(v.ok);
+    if (v.ok) assert.equal(v.criteria[2].applies_to, null);
   });
 
   it('a missing lab is unknown, never a pass', () => {
@@ -249,19 +257,20 @@ describe('planPatient and combine', async () => {
     assert.deepEqual(r.review, ['exc_6', 'exc_7']);
   });
 
-  it('a diabetes diagnosis rejects in code', () => {
+  it('a Jev reject on the diabetes exclusion rules the patient out', () => {
     const f = facts(40, 'F', {
       conditions: [['44054006', '2019-01-01', null]],
       observations: { bmi: { value: 33, unit: 'kg/m2', date: '2026-05-01' } },
     });
     const plan = planPatient(obesity, f);
-    assert.equal(plan.decided.exc_1, 'reject');
-    assert.equal(combine(obesity, mockJev(plan), plan.review).bucket, 'not_match');
+    assert.ok('exc_1' in plan.jevCalls[0].questions);
+    const answers = { ...mockJev(plan), exc_1: 'reject' as const };
+    assert.equal(combine(obesity, answers, plan.review).bucket, 'not_a_match');
   });
 
   it('a missing Jev answer counts as unknown', () => {
     const plan = planPatient(obesity, facts(40, 'F', { observations: { bmi: { value: 33, unit: 'kg/m2', date: '2026-05-01' } } }));
-    assert.equal(combine(obesity, plan.decided, plan.review).bucket, 'review');
+    assert.equal(combine(obesity, plan.decided, plan.review).bucket, 'chart_review');
   });
 
   it('exclusion questions keep the absent-means-absent rule and the accept/reject/unknown keys', () => {

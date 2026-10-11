@@ -1,194 +1,131 @@
 {
-  "criteria": [
-    {
-      "id": "inc_1",
-      "kind": "inclusion",
-      "class": "record",
-      "applies_to": null,
-      "question": "Is the latest BMI 30 to under 45?",
-      "sections": [
-        "labs"
-      ],
-      "group": "g1",
-      "original_text": "Body Mass Index (BMI) ≥30.0 kg/m^2 to <45.0 kg/m^2 at screening",
-      "code_check": {
-        "type": "lab",
-        "gte": 30,
-        "gt": null,
-        "lte": null,
-        "lt": 45,
-        "sex": null,
-        "field": "bmi",
-        "unit": "kg/m2",
-        "max_age_months": 24,
-        "event": null,
-        "terms": null,
-        "within_months": null,
-        "min_duration_months": null,
-        "active": null
-      }
-    },
-    {
-      "id": "inc_2",
-      "kind": "inclusion",
-      "class": "record",
-      "applies_to": null,
-      "question": "Is the latest BMI 27 or higher with hypertension, dyslipidemia, prediabetes, sleep apnea, coronary artery disease, heart failure or cerebrovascular disease?",
-      "sections": [
-        "labs",
-        "conditions"
-      ],
-      "group": "g1",
-      "original_text": "BMI ≥27.0 kg/m^2 at screening with at least 1 of the following weight-related co-morbidities: Hypertension, Dyslipidemia, Prediabetes, established Obstructive Sleep Apnea (OSA), established Coronary Artery Disease (CAD), Heart failure, established cerebrovascular disease",
-      "code_check": null
-    },
-    {
-      "id": "exc_1",
-      "kind": "exclusion",
-      "class": "record",
-      "applies_to": null,
-      "question": "Has the patient ever been diagnosed with type 1 or type 2 diabetes?",
-      "sections": [
-        "conditions",
-        "medications"
-      ],
-      "group": null,
-      "original_text": "Previous or current diagnosis of Type 1 or Type 2 diabetes at screening",
-      "code_check": {
-        "type": "date_window",
-        "gte": null,
-        "gt": null,
-        "lte": null,
-        "lt": null,
-        "sex": null,
-        "field": null,
-        "unit": null,
-        "max_age_months": null,
-        "event": "condition",
-        "terms": [
-          "diabetes mellitus"
-        ],
-        "within_months": null,
-        "min_duration_months": null,
-        "active": null
-      }
-    },
-    {
-      "id": "exc_2",
-      "kind": "exclusion",
-      "class": "record",
-      "applies_to": null,
-      "question": "Did body weight change by more than 5 kg in about the last 3 months?",
-      "sections": [
-        "weights"
-      ],
-      "group": null,
-      "original_text": "Change in body weight >5 kg within approximately 3 months before screening",
-      "code_check": null
-    },
-    {
-      "id": "exc_3",
-      "kind": "exclusion",
-      "class": "record",
-      "applies_to": null,
-      "question": "Has the patient had bariatric surgery, or a revision, reversal or removal of one?",
-      "sections": [
-        "procedures",
-        "conditions"
-      ],
-      "group": null,
-      "original_text": "Bariatric surgery, including any procedures to revise, reverse, or remove any previous bariatric surgery interventions",
-      "code_check": {
-        "type": "date_window",
-        "gte": null,
-        "gt": null,
-        "lte": null,
-        "lt": null,
-        "sex": null,
-        "field": null,
-        "unit": null,
-        "max_age_months": null,
-        "event": "procedure",
-        "terms": [
-          "bariatric",
-          "gastric bypass",
-          "sleeve gastrectomy",
-          "gastric band",
-          "gastroplasty"
-        ],
-        "within_months": null,
-        "min_duration_months": null,
-        "active": null
-      }
-    },
-    {
-      "id": "exc_4",
-      "kind": "exclusion",
-      "class": "record",
-      "applies_to": null,
-      "question": "Has the patient had acute or chronic pancreatitis, cholecystitis or symptomatic gallstones?",
-      "sections": [
-        "conditions",
-        "procedures"
-      ],
-      "group": null,
-      "original_text": "History of acute or chronic pancreatitis, cholecystitis, or symptomatic gallbladder stones",
-      "code_check": {
-        "type": "date_window",
-        "gte": null,
-        "gt": null,
-        "lte": null,
-        "lt": null,
-        "sex": null,
-        "field": null,
-        "unit": null,
-        "max_age_months": null,
-        "event": "condition",
-        "terms": [
-          "pancreatitis",
-          "cholecystitis",
-          "gallstone",
-          "cholelithiasis"
-        ],
-        "within_months": null,
-        "min_duration_months": null,
-        "active": null
-      }
-    },
-    {
-      "id": "exc_5",
-      "kind": "exclusion",
-      "class": "record",
-      "applies_to": null,
-      "question": "Has the patient had medullary thyroid carcinoma or multiple endocrine neoplasia type 2?",
-      "sections": [
-        "conditions"
-      ],
-      "group": null,
-      "original_text": "History of medullary thyroid carcinoma or multiple endocrine neoplasia type 2",
-      "code_check": null
-    },
-    {
-      "id": "exc_6",
-      "kind": "exclusion",
-      "class": "screening",
-      "applies_to": null,
-      "question": "Is there a family history of medullary thyroid carcinoma or multiple endocrine neoplasia type 2?",
-      "sections": [],
-      "group": null,
-      "original_text": "family history of medullary thyroid carcinoma or multiple endocrine neoplasia type 2",
-      "code_check": null
-    },
-    {
-      "id": "exc_7",
-      "kind": "exclusion",
-      "class": "administrative",
-      "applies_to": null,
-      "question": "Does the patient meet the other protocol-defined criteria?",
-      "sections": [],
-      "group": null,
-      "original_text": "Other Protocol Defined Inclusion/ Exclusion Criteria Apply",
-      "code_check": null
-    }
-  ]
+ "criteria": [
+  {
+   "id": "inc_1",
+   "kind": "inclusion",
+   "class": "record",
+   "applies_to": null,
+   "question": "Is the latest BMI 30 to under 45?",
+   "sections": [
+    "labs"
+   ],
+   "group": "g1",
+   "original_text": "Body Mass Index (BMI) \u226530.0 kg/m^2 to <45.0 kg/m^2 at screening",
+   "code_check": {
+    "type": "lab",
+    "gte": 30,
+    "gt": null,
+    "lte": null,
+    "lt": 45,
+    "sex": null,
+    "field": "bmi",
+    "unit": "kg/m2",
+    "max_age_months": 24
+   }
+  },
+  {
+   "id": "inc_2",
+   "kind": "inclusion",
+   "class": "record",
+   "applies_to": null,
+   "question": "Is the latest BMI 27 or higher with hypertension, dyslipidemia, prediabetes, sleep apnea, coronary artery disease, heart failure or cerebrovascular disease?",
+   "sections": [
+    "labs",
+    "conditions"
+   ],
+   "group": "g1",
+   "original_text": "BMI \u226527.0 kg/m^2 at screening with at least 1 of the following weight-related co-morbidities: Hypertension, Dyslipidemia, Prediabetes, established Obstructive Sleep Apnea (OSA), established Coronary Artery Disease (CAD), Heart failure, established cerebrovascular disease",
+   "code_check": null
+  },
+  {
+   "id": "exc_1",
+   "kind": "exclusion",
+   "class": "record",
+   "applies_to": null,
+   "question": "Has the patient ever been diagnosed with type 1 or type 2 diabetes?",
+   "sections": [
+    "conditions",
+    "medications"
+   ],
+   "group": null,
+   "original_text": "Previous or current diagnosis of Type 1 or Type 2 diabetes at screening",
+   "code_check": null
+  },
+  {
+   "id": "exc_2",
+   "kind": "exclusion",
+   "class": "record",
+   "applies_to": null,
+   "question": "Did body weight change by more than 5 kg in about the last 3 months?",
+   "sections": [
+    "weights"
+   ],
+   "group": null,
+   "original_text": "Change in body weight >5 kg within approximately 3 months before screening",
+   "code_check": null
+  },
+  {
+   "id": "exc_3",
+   "kind": "exclusion",
+   "class": "record",
+   "applies_to": null,
+   "question": "Has the patient had bariatric surgery, or a revision, reversal or removal of one?",
+   "sections": [
+    "procedures",
+    "conditions"
+   ],
+   "group": null,
+   "original_text": "Bariatric surgery, including any procedures to revise, reverse, or remove any previous bariatric surgery interventions",
+   "code_check": null
+  },
+  {
+   "id": "exc_4",
+   "kind": "exclusion",
+   "class": "record",
+   "applies_to": null,
+   "question": "Has the patient had acute or chronic pancreatitis, cholecystitis or symptomatic gallstones?",
+   "sections": [
+    "conditions",
+    "procedures"
+   ],
+   "group": null,
+   "original_text": "History of acute or chronic pancreatitis, cholecystitis, or symptomatic gallbladder stones",
+   "code_check": null
+  },
+  {
+   "id": "exc_5",
+   "kind": "exclusion",
+   "class": "record",
+   "applies_to": null,
+   "question": "Has the patient had medullary thyroid carcinoma or multiple endocrine neoplasia type 2?",
+   "sections": [
+    "conditions"
+   ],
+   "group": null,
+   "original_text": "History of medullary thyroid carcinoma or multiple endocrine neoplasia type 2",
+   "code_check": null
+  },
+  {
+   "id": "exc_6",
+   "kind": "exclusion",
+   "class": "screening",
+   "applies_to": null,
+   "question": "Is there a family history of medullary thyroid carcinoma or multiple endocrine neoplasia type 2?",
+   "sections": [],
+   "group": null,
+   "original_text": "family history of medullary thyroid carcinoma or multiple endocrine neoplasia type 2",
+   "code_check": null
+  },
+  {
+   "id": "exc_7",
+   "kind": "exclusion",
+   "class": "administrative",
+   "applies_to": null,
+   "question": "Does the patient meet the other protocol-defined criteria?",
+   "sections": [],
+   "group": null,
+   "original_text": "Other Protocol Defined Inclusion/ Exclusion Criteria Apply",
+   "code_check": null
+  }
+ ]
 }

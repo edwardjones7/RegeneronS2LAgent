@@ -34,6 +34,21 @@ export function bucketOf(results: CriterionResult[]): {
   const score = results.length
     ? results.reduce((s, r) => s + r.probabilities.accept, 0) / results.length
     : 0;
-  const bucket: Bucket = rejects > 0 ? 'not_match' : unknowns > 0 ? 'review' : 'candidate';
+  const bucket: Bucket = rejects > 0 ? 'not_a_match' : unknowns > 0 ? 'chart_review' : 'candidate';
   return { bucket, accepts: count('accept'), rejects, unknowns, score };
+}
+
+/** Below this, a Jev answer is flagged as uncertain for the doctor. Jev isn't calibrated, so show it as a band. */
+export const CONFIDENT = 0.75;
+
+/** Jev's weakest answer and the answers it was unsure about. Code-decided criteria are certain and skipped. */
+export function confidenceOf(results: CriterionResult[], questionText: (id: string) => string) {
+  const jev = results.filter((r) => r.decided_by === 'jev');
+  const top = (r: CriterionResult) => Math.max(r.probabilities.accept, r.probabilities.reject, r.probabilities.unknown);
+  return {
+    min_confidence: jev.length ? +Math.min(...jev.map(top)).toFixed(3) : null,
+    uncertain_criteria: jev
+      .filter((r) => top(r) < CONFIDENT)
+      .map((r) => `${r.id} ${r.answer} ${r.probabilities[r.answer].toFixed(2)}: ${questionText(r.id)}`),
+  };
 }

@@ -64,7 +64,8 @@ export type CriterionResult = {
   decided_by?: 'jev' | 'code' | 'not_applicable';
 };
 
-export type Bucket = 'candidate' | 'review' | 'not_match';
+/** Same names as the outreach caller (voice-agent/app/prescreen.py). */
+export type Bucket = 'candidate' | 'chart_review' | 'not_a_match';
 
 export type MatchResult = {
   patient_id: string;
@@ -81,4 +82,8 @@ export type MatchResult = {
   criteria: CriterionResult[];
   /** Criteria no record can settle (screening tests, consent, subgroup items): confirm on the call or at screening. */
   review_items: string[];
+  /** Jev's probability on its weakest answer for this patient; null when code decided everything. */
+  min_confidence: number | null;
+  /** Jev answers below CONFIDENT, e.g. "inc_6 accept 0.62: Did the patient have at least 1 asthma attack…". */
+  uncertain_criteria: string[];
 };

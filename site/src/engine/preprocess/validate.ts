@@ -56,21 +56,6 @@ function parseCodeCheck(v: unknown, where: string, warnings: string[]): CodeChec
       });
       return [c.gte, c.gt, c.lte, c.lt].some((b) => b !== undefined) ? c : bad('lab with no bound');
     }
-    case 'date_window': {
-      if (!['condition', 'medication', 'procedure'].includes(v.event as string)) return bad('event missing');
-      const terms = Array.isArray(v.terms)
-        ? v.terms.filter((t): t is string => typeof t === 'string' && t.trim().length > 1).map((t) => t.trim().toLowerCase())
-        : [];
-      if (!terms.length) return bad('no terms');
-      return compact({
-        type: 'date_window' as const,
-        event: v.event as 'condition' | 'medication' | 'procedure',
-        terms,
-        within_months: num(v.within_months),
-        min_duration_months: num(v.min_duration_months),
-        active: typeof v.active === 'boolean' ? v.active : undefined,
-      });
-    }
     default:
       return bad(`unknown type ${String(v.type)}`);
   }
@@ -86,10 +71,8 @@ function parseAppliesTo(v: unknown, where: string, errors: string[]): AppliesTo 
     condition: str(v.condition),
     description: str(v.description) ?? '',
   });
-  if (a.sex === undefined && a.min_age === undefined && a.max_age === undefined && a.condition === undefined) {
-    errors.push(`${where}: applies_to names no subgroup`);
-    return null;
-  }
+  // An applies_to with nothing in it means the criterion applies to everyone.
+  if (a.sex === undefined && a.min_age === undefined && a.max_age === undefined && a.condition === undefined) return null;
   return a;
 }
 

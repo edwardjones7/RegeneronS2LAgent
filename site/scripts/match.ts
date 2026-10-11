@@ -24,7 +24,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { bucketOf, toResult } from '../src/engine/decide.ts';
+import { bucketOf, confidenceOf, toResult } from '../src/engine/decide.ts';
 import { combine, filterState, planPatient } from '../src/engine/preprocess/toJev.ts';
 import type { TrialCriteria } from '../src/engine/preprocess/schema.ts';
 import { ageOn } from '../src/engine/state.ts';
@@ -223,6 +223,7 @@ await pool(matched, concurrency, async ({ p, t, why }) => {
     ...bucketOf(criteriaResults),
     criteria: criteriaResults,
     review_items: [],
+    ...confidenceOf(criteriaResults, (id) => criteria.find((c) => c.id === id)!.text),
   });
 });
 
@@ -265,6 +266,7 @@ async function matchStructured(p: Patient, t: Trial, tc: TrialCriteria, why: str
     score: record.length ? record.reduce((s, c) => s + c.probabilities.accept, 0) / record.length : 0,
     criteria,
     review_items: plan.review.map((id) => byId.get(id)!.original_text),
+    ...confidenceOf(criteria, (id) => byId.get(id)!.question),
   }];
 }
 const tEnd = performance.now();
@@ -301,7 +303,7 @@ const meta = {
 const summary = trials.map((t) => {
   const rs = results.filter((r) => r.nct_id === t.nct_id);
   const n = (b: string) => rs.filter((r) => r.bucket === b).length;
-  return { nct_id: t.nct_id, evaluated: rs.length, candidate: n('candidate'), review: n('review'), not_match: n('not_match') };
+  return { nct_id: t.nct_id, evaluated: rs.length, candidate: n('candidate'), chart_review: n('chart_review'), not_a_match: n('not_a_match') };
 });
 
 console.log(JSON.stringify(meta, null, 2));

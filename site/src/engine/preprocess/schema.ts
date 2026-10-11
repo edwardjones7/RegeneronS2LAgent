@@ -5,7 +5,7 @@
 // constants, no runtime side effects.
 
 /** Bump when the prompt or the schema changes. Part of the skip-if-unchanged key. */
-export const PROMPT_VERSION = 1;
+export const PROMPT_VERSION = 3;
 /** Version of the stored document shape. */
 export const SCHEMA_VERSION = 1;
 
@@ -46,24 +46,25 @@ export const LAB_FIELDS = [
 ] as const;
 export type LabField = (typeof LAB_FIELDS)[number];
 
+/** Units the record stores each lab in (data/synthea-nj.json). Code checks are written in these units. */
+export const LAB_UNITS: Record<LabField, string> = {
+  bmi: 'kg/m2', weight_kg: 'kg', height_cm: 'cm', systolic_bp: 'mmHg', diastolic_bp: 'mmHg', hba1c: '%',
+  glucose: 'mg/dL', creatinine: 'mg/dL', egfr: 'mL/min/1.73m2', alt: 'U/L', ast: 'U/L', bilirubin: 'mg/dL',
+  wbc: '10^3/uL', hemoglobin: 'g/dL', platelets: '10^3/uL', eosinophils: '10^3/uL', cholesterol: 'mg/dL',
+  ldl: 'mg/dL', hdl: 'mg/dL', triglycerides: 'mg/dL', fev1_fvc: '% (FEV1/FVC 0.70 is stored as 70)',
+};
+
 /**
- * A check code can run without Jev. Each returns true, false or unknown about the
- * criterion's *condition* ("age is 18 to under 80", "BMI is 30 or more", "had a
- * diagnosis of X in the last N months"); the criterion kind turns that into a result.
+ * A check code can run without Jev: numbers only. Each returns true, false or unknown
+ * about the criterion's *condition* ("age is 18 to under 80", "BMI is 30 or more"); the
+ * criterion kind turns that into a result. Whether a record names a diagnosis, drug or
+ * procedure is left to Jev, which knows synonyms and subtypes (emphysema is COPD,
+ * non-small cell is not small cell); text matching in code got both wrong.
  */
 export type CodeCheck =
   | { type: 'age'; gte?: number; gt?: number; lte?: number; lt?: number }
   | { type: 'sex'; sex: 'female' | 'male' }
-  | { type: 'lab'; field: LabField; gte?: number; gt?: number; lte?: number; lt?: number; unit: string; max_age_months?: number }
-  | {
-      type: 'date_window';
-      event: 'condition' | 'medication' | 'procedure';
-      /** Lowercase name fragments matched against record display names. */
-      terms: string[];
-      within_months?: number;
-      min_duration_months?: number;
-      active?: boolean;
-    };
+  | { type: 'lab'; field: LabField; gte?: number; gt?: number; lte?: number; lt?: number; unit: string; max_age_months?: number };
 
 export type AppliesTo = {
   sex?: 'female' | 'male';
@@ -151,10 +152,9 @@ export const LLM_JSON_SCHEMA = {
             additionalProperties: false,
             required: [
               'type', 'gte', 'gt', 'lte', 'lt', 'sex', 'field', 'unit', 'max_age_months',
-              'event', 'terms', 'within_months', 'min_duration_months', 'active',
             ],
             properties: {
-              type: { type: 'string', enum: ['age', 'sex', 'lab', 'date_window'] },
+              type: { type: 'string', enum: ['age', 'sex', 'lab'] },
               gte: nullable('number'),
               gt: nullable('number'),
               lte: nullable('number'),
@@ -163,11 +163,6 @@ export const LLM_JSON_SCHEMA = {
               field: nullable('string', { enum: [...LAB_FIELDS, null] }),
               unit: nullable('string'),
               max_age_months: nullable('number'),
-              event: nullable('string', { enum: ['condition', 'medication', 'procedure', null] }),
-              terms: { type: ['array', 'null'], items: { type: 'string' } },
-              within_months: nullable('number'),
-              min_duration_months: nullable('number'),
-              active: nullable('boolean'),
             },
           },
         },

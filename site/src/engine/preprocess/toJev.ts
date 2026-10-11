@@ -3,7 +3,7 @@ import type { Answer, Bucket, CodeBook, PatientRecord } from '../types.ts';
 import { SECTION_STATE_KEYS, SECTIONS, type CodeCheck, type Section, type StructuredCriterion, type TrialCriteria } from './schema.ts';
 
 // Turns stored structured criteria into work for one patient:
-//   - criteria code can settle (subgroup gates, age, sex, labs, date windows),
+//   - criteria code can settle (subgroup gates, age, sex, lab thresholds),
 //   - short Jev questions, all in one call whose state holds only the sections they need,
 //   - review items ("confirm at screening") that never affect the bucket.
 // Then combines the answers, OR groups included, into a bucket. Pure.
@@ -18,12 +18,13 @@ export type PatientFacts = {
   asOf: Date;
 };
 
-/** true/false: the criterion's condition holds or not. 'unknown': the record lacks it. 'defer': ask Jev. */
-export type CheckResult = boolean | 'unknown' | 'defer';
+/** true/false: the criterion's condition holds or not. 'unknown': the record lacks the value. */
+export type CheckResult = boolean | 'unknown';
 
 const monthsAgo = (date: string, asOf: Date) => (asOf.getTime() - new Date(date).getTime()) / MS_PER_MONTH;
 
 type Bounds = { gte?: number; gt?: number; lte?: number; lt?: number };
+const mul = (x: number | undefined, k: number) => (x == null ? x : x * k);
 const inBounds = (v: number, b: Bounds) =>
   (b.gte == null || v >= b.gte) && (b.gt == null || v > b.gt) && (b.lte == null || v <= b.lte) && (b.lt == null || v < b.lt);
 
@@ -37,31 +38,11 @@ export function evaluateCodeCheck(check: CodeCheck, f: PatientFacts): CheckResul
       const o = f.record.observations[check.field];
       if (!o || typeof o.value !== 'number') return 'unknown';
       if (check.max_age_months != null && monthsAgo(o.date, f.asOf) > check.max_age_months) return 'unknown';
-      return inBounds(o.value, check);
-    }
-    case 'date_window': {
-      const book = check.event === 'medication' ? f.codes.rxnorm : f.codes.snomed;
-      const rows: [code: string, start: string, stop: string | null][] =
-        check.event === 'condition'
-          ? f.record.conditions
-          : check.event === 'medication'
-            ? f.record.medications
-            : f.record.procedures.map(([code, last]) => [code, last, last]);
-      const hits = rows.filter(([code]) => {
-        const name = (book[code] ?? '').toLowerCase();
-        return check.terms.some((t) => name.includes(t));
-      });
-      // Names are matched by fragment, so a miss may be a synonym: let Jev look.
-      if (!hits.length) return 'defer';
-      return hits.some(([, start, stop]) => {
-        if (check.active && stop) return false;
-        if (check.min_duration_months != null && monthsAgo(start, f.asOf) < check.min_duration_months) return false;
-        if (check.within_months != null) {
-          const end = stop ? monthsAgo(stop, f.asOf) : 0;
-          if (end > check.within_months) return false;
-        }
-        return true;
-      });
+      // Guard: a ratio threshold (0.70) against a value stored in % (70).
+      const bounds = [check.gte, check.gt, check.lte, check.lt].filter((b) => b != null) as number[];
+      const scale = o.unit === '%' && bounds.every((b) => b <= 1.5) && o.value > 1.5 ? 100 : 1;
+      const b = { gte: mul(check.gte, scale), gt: mul(check.gt, scale), lte: mul(check.lte, scale), lt: mul(check.lt, scale) };
+      return inBounds(o.value, b);
     }
   }
 }
@@ -142,12 +123,9 @@ export function planPatient(tc: TrialCriteria, f: PatientFacts, order: Answer[] 
     }
     if (c.code_check && ap === true) {
       const r = evaluateCodeCheck(c.code_check, f);
-      if (r !== 'defer') {
-        plan.decided[c.id] =
-          r === 'unknown' ? 'unknown' : r === (c.kind === 'inclusion') ? 'accept' : 'reject';
-        plan.decidedBy[c.id] = 'code';
-        continue;
-      }
+      plan.decided[c.id] = r === 'unknown' ? 'unknown' : r === (c.kind === 'inclusion') ? 'accept' : 'reject';
+      plan.decidedBy[c.id] = 'code';
+      continue;
     }
     toJev.push(c);
   }
@@ -197,6 +175,6 @@ export function combine(tc: TrialCriteria, answers: Record<string, Answer>, revi
             : 'unknown';
   }
   const vals = Object.values(units);
-  const bucket: Bucket = vals.includes('reject') ? 'not_match' : vals.includes('unknown') ? 'review' : 'candidate';
+  const bucket: Bucket = vals.includes('reject') ? 'not_a_match' : vals.includes('unknown') ? 'chart_review' : 'candidate';
   return { bucket, units, review };
 }
